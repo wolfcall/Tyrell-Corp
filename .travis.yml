@@ -1,0 +1,20 @@
+language: php
+
+php:
+  - '7.0'
+
+services:
+  - mysql
+
+before_script:
+  - phpenv config-rm xdebug.ini || true
+  - composer self-update --quiet
+  - composer global require hirak/prestissimo --no-interaction --prefer-dist
+
+script: true
+
+deploy:
+  provider: script
+  script: .travis/deploy.sh
+  on:
+    branch: develop
