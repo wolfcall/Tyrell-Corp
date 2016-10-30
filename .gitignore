@@ -5,3 +5,7 @@
 Homestead.json
 Homestead.yaml
 .env
+/.travis/deploy_key
+/public/docs
+sami.phar
+/.sami

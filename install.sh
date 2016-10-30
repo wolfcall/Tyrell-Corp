@@ -34,3 +34,15 @@ php artisan cache:clear
 # and bring the application back up
 rm -f storage/framework/down
 echo "Application is now live."
+
+###
+# Documentation
+###
+
+# download sami
+if [ ! -f sami.phar ]; then
+    curl -O http://get.sensiolabs.org/sami.phar
+fi
+
+# update documentation
+php sami.phar update --force --no-interaction -- sami.php
