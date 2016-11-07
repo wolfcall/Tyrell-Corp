@@ -34,6 +34,12 @@
                     {{ config('app.name', 'Laravel') }}
                 </a>
 
+                <!-- Left side of navbar -->
+                <ul class="nav navbar-nav">
+                    @if (Auth::check())
+                        <li class="nav-item {{ active('calendar') }}"><a class="nav-link" href="{{ route('calendar') }}">Calendar</a></li>
+                    @endif
+                </ul>
 
                 <!-- Right side of navbar -->
                 <ul class="nav navbar-nav float-xs-right">

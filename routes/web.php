@@ -37,3 +37,8 @@ Route::post('/login', 'LoginController@login');
 
 Route::post('/logout', 'LoginController@logout')
     ->name('logout');
+
+// calendar
+Route::get('/calendar', 'CalendarController@viewCalendar')
+    ->name('calendar');
+

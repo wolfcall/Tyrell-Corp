@@ -2,3 +2,19 @@ body {
     padding-top: 5rem;
 }
 
+.calendar-room-row {
+    height: 80px;
+}
+
+.calendar-timeslot-selectable {
+}
+
+.calendar-timeslot-selectable:hover {
+    background-color: rgba(0,0,0,.05);
+    cursor: pointer;
+}
+
+.calendar {
+    table-layout: fixed;
+}
+
