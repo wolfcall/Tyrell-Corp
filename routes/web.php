@@ -42,3 +42,7 @@ Route::post('/logout', 'LoginController@logout')
 Route::get('/calendar', 'CalendarController@viewCalendar')
     ->name('calendar');
 
+// reservations
+Route::get('/reservation/list', 'ReservationController@listReservations')
+    ->name('reservationList');
+

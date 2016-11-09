@@ -38,6 +38,7 @@
                 <ul class="nav navbar-nav">
                     @if (Auth::check())
                         <li class="nav-item {{ active('calendar') }}"><a class="nav-link" href="{{ route('calendar') }}">Calendar</a></li>
+                        <li class="nav-item {{ active('reservationList') }}"><a class="nav-link" href="{{ route('reservationList') }}">My reservations</a></li>
                     @endif
                 </ul>
 
