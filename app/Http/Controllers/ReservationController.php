@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Data\Mappers\ReservationMapper;
 use App\Data\Mappers\RoomMapper;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -98,4 +99,59 @@ class ReservationController extends Controller
             ->with('success', 'Successfully modified reservation!');
     }
 
+    /**
+     * @param Request $request
+     * @param string $roomName
+     * @param string $timeslot
+     * @return \Illuminate\Http\Response
+     */
+    public function showRequestForm(Request $request, $roomName, $timeslot)
+    {
+        $timeslot = Carbon::createFromFormat('Y-m-d\TH', $timeslot);
+
+        $roomMapper = RoomMapper::getInstance();
+        $room = $roomMapper->find($roomName);
+
+        if ($room === null) {
+            return abort(404);
+        }
+
+        return view('reservation.request', [
+            'room' => $room,
+            'timeslot' => $timeslot
+        ]);
+    }
+
+    /**
+     * @param Request $request
+     * @param string $roomName
+     * @param string $timeslot
+     * @return \Illuminate\Http\Response
+     */
+    public function requestReservation(Request $request, $roomName, $timeslot)
+    {
+        $timeslot = Carbon::createFromFormat('Y-m-d\TH', $timeslot);
+
+        $roomMapper = RoomMapper::getInstance();
+        $room = $roomMapper->find($roomName);
+
+        if ($room === null) {
+            return abort(404);
+        }
+
+        $reservationMapper = ReservationMapper::getInstance();
+        $reservation = $reservationMapper->create(intval(Auth::id()), $room->getName(), $timeslot, $request->input('description', ""));
+        $reservationMapper->done();
+
+        $position = $reservationMapper->findPosition($reservation);
+
+        $response = redirect()
+            ->route('calendar', ['date' => $timeslot->toDateString()]);
+
+        if ($position === 0) {
+            return $response->with('success', 'Successfully requested reservation! Your reservation is now active.');
+        }
+
+        return $response->with('warning', sprintf("You've been placed on a waiting list for your reservation. Your position is #%d.", $position));
+    }
 }
