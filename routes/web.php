@@ -46,3 +46,12 @@ Route::get('/calendar', 'CalendarController@viewCalendar')
 Route::get('/reservation/list', 'ReservationController@listReservations')
     ->name('reservationList');
 
+Route::get('/reservation/{id}', 'ReservationController@showReservation')
+    ->name('reservation');
+
+Route::get('/reservation/modify/{id}', 'ReservationController@showModifyForm')
+    ->name('reservationModify');
+
+Route::post('/reservation/modify/{id}', 'ReservationController@modifyReservation')
+    ->name('reservationModifyPost');
+

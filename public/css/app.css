@@ -18,3 +18,9 @@ body {
     table-layout: fixed;
 }
 
+.pre {
+    word-wrap: break-word;
+    white-space: pre;
+    white-space: -moz-pre-wrap;
+    white-space: pre-wrap;
+}

@@ -21,6 +21,7 @@
                 <th>Date</th>
                 <th>Room</th>
                 <th>Description</th>
+                <th></th>
             </tr>
             </thead>
             <tbody>
@@ -36,6 +37,7 @@
                     <td>{{ $r[0]->getTimeslot()->format('l, F jS, Y') }}</td>
                     <td>{{ $r[0]->getRoomName() }}</td>
                     <td class="pre">{{ $r[0]->getDescription() }}</td>
+                    <td><a href="{{ route('reservation', ['id' => $r[0]->getId(), 'back' => 'list']) }}" class="btn btn-primary">View</a></td>
                 </tr>
             @endforeach
             </tbody>
