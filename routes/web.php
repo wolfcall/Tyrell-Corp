@@ -55,3 +55,5 @@ Route::get('/reservation/modify/{id}', 'ReservationController@showModifyForm')
 Route::post('/reservation/modify/{id}', 'ReservationController@modifyReservation')
     ->name('reservationModifyPost');
 
+Route::get('/reservation/cancel/{id}', 'ReservationController@cancelReservation')
+    ->name('reservationCancel');

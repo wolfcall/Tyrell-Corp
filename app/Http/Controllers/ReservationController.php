@@ -154,4 +154,31 @@ class ReservationController extends Controller
 
         return $response->with('warning', sprintf("You've been placed on a waiting list for your reservation. Your position is #%d.", $position));
     }
+
+    /**
+     * @param Request $request
+     * @param string $id
+     * @return \Illuminate\Http\Response
+     */
+    public function cancelReservation(Request $request, $id)
+    {
+        $reservationMapper = ReservationMapper::getInstance();
+        $reservation = $reservationMapper->find($id);
+
+        if ($reservation === null || $reservation->getUserId() !== Auth::id()) {
+            return abort(404);
+        }
+
+        $reservationMapper->delete($reservation->getId());
+        $reservationMapper->done();
+
+        $response = redirect();
+
+        if ($request->input('back') === 'list') {
+            $response = $response->route('reservationList');
+        }
+
+        return $response->route('calendar', ['date' => $reservation->getTimeslot()->toDateString()])
+            ->with('success', 'Successfully cancelled reservation!');
+    }
 }
