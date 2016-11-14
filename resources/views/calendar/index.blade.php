@@ -43,6 +43,9 @@
                     @foreach($rooms as $room)
                         <tr class="calendar-room-row">
                             <th class="align-middle text-xs-center">{{ $room->getName() }}</th>
+                            @for ($timeslot = $date->copy()->addHours(7); $timeslot->hour < 23; $timeslot->addHour())
+                                @include('calendar.timeslot')
+                            @endfor
                         </tr>
                     @endforeach
                     </tbody>
@@ -52,3 +55,12 @@
     </div>
 @endsection
 
+@push('scripts')
+<script type="text/javascript">
+    jQuery(document).ready(function ($) {
+        $(".calendar-timeslot-selectable").click(function () {
+            window.document.location = $(this).data("href");
+        });
+    });
+</script>
+@endpush

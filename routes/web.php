@@ -49,6 +49,14 @@ Route::get('/reservation/list', 'ReservationController@listReservations')
 Route::get('/reservation/{id}', 'ReservationController@showReservation')
     ->name('reservation');
 
+Route::get('/reservation/request/{room}/{timeslot}', 'ReservationController@showRequestForm')
+    ->where(['timeslot' => '2[0-9]{3}-[0-9]{2}-[0-9]{2}T[0-9]{2}'])
+    ->name('request');
+
+Route::post('/reservation/request/{room}/{timeslot}', 'ReservationController@requestReservation')
+    ->where(['timeslot' => '2[0-9]{3}-[0-9]{2}-[0-9]{2}T[0-9]{2}'])
+    ->name('requestPost');
+
 Route::get('/reservation/modify/{id}', 'ReservationController@showModifyForm')
     ->name('reservationModify');
 
