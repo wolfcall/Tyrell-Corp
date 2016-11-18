@@ -11,6 +11,10 @@ $iterator = Finder::create()
     ->name('*.php')
     ->exclude('resources')
     ->exclude('tests')
+    ->exclude('app/Console')
+    ->exclude('app/Exceptions')
+    ->exclude('app/Providers')
+    ->exclude('app/Http/Middleware')
     ->in($dir = __DIR__.'/app');
 
 $version = new Version('develop', 'develop branch');
