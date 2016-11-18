@@ -9,7 +9,7 @@
 
         <div class="row pb-1">
             <div class="col-md-4 col-sm-12">
-                <p>Choose from one of the timeslots below to request a reservation.</p>
+                <p>Choose from one of the time slots below to request a reservation.</p>
             </div>
             <div class="col-md-8 col-sm-12 text-xs-right">
                 <form class="form-inline">

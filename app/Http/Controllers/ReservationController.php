@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Auth;
 
 class ReservationController extends Controller
 {
+    const MAX_PER_TIMESLOT = 4;
+    const MAX_PER_USER = 10;
+
     /**
      * Create a new controller instance.
      */
@@ -116,6 +119,24 @@ class ReservationController extends Controller
             return abort(404);
         }
 
+        $reservationMapper = ReservationMapper::getInstance();
+
+        // check if user exceeded maximum amount of reservations
+        $reservations = $reservationMapper->findPositionsForUser(Auth::id());
+
+        if (count($reservations) >= static::MAX_PER_USER) {
+            return redirect()->route('calendar', ['date' => $timeslot->toDateString()])
+                ->with('error', sprintf('You cannot have more than %d reservation requests at a time.', static::MAX_PER_USER));
+        }
+
+        // check if waiting list for timeslot is full
+        $reservations = $reservationMapper->findForTimeslot($roomName, $timeslot);
+
+        if (count($reservations) >= static::MAX_PER_TIMESLOT) {
+            return redirect()->route('calendar', ['date' => $timeslot->toDateString()])
+                ->with('error', 'The waiting list for that time slot is full.');
+        }
+
         return view('reservation.request', [
             'room' => $room,
             'timeslot' => $timeslot
@@ -140,19 +161,57 @@ class ReservationController extends Controller
         }
 
         $reservationMapper = ReservationMapper::getInstance();
+
+        /*
+         * Pre-insert checks
+         */
+
+        // check if user exceeded maximum amount of reservations
+        $reservations = $reservationMapper->findPositionsForUser(Auth::id());
+
+        if (count($reservations) >= static::MAX_PER_USER) {
+            return redirect()->route('calendar', ['date' => $timeslot->toDateString()])
+                ->with('error', sprintf('You cannot have more than %d reservation requests at a time.', static::MAX_PER_USER));
+        }
+
+        // check if waiting list for timeslot is full
+        $reservations = $reservationMapper->findForTimeslot($roomName, $timeslot);
+
+        if (count($reservations) >= static::MAX_PER_TIMESLOT) {
+            return redirect()->route('calendar', ['date' => $timeslot->toDateString()])
+                ->with('error', 'The waiting list for that time slot is full.');
+        }
+
+        /*
+         * Insert
+         */
+
         $reservation = $reservationMapper->create(intval(Auth::id()), $room->getName(), $timeslot, $request->input('description', ""));
         $reservationMapper->done();
 
+        /*
+         * Post-insert checks
+         */
+
+        // find the new reservation's position #
         $position = $reservationMapper->findPosition($reservation);
 
         $response = redirect()
             ->route('calendar', ['date' => $timeslot->toDateString()]);
 
-        if ($position === 0) {
-            return $response->with('success', 'Successfully requested reservation! Your reservation is now active.');
-        }
+        if ($position >= static::MAX_PER_TIMESLOT) {
+            // ensure this request hasn't exceeded the limit
+            $reservationMapper->delete($reservation->getId());
+            $reservationMapper->done();
 
-        return $response->with('warning', sprintf("You've been placed on a waiting list for your reservation. Your position is #%d.", $position));
+            return $response->with('error', 'The waiting list for this room and time slot has exceeded the maximum allowable amount.');
+        } else if ($position === 0) {
+            // not waitlisted
+            return $response->with('success', 'Successfully requested reservation! Your reservation is now active.');
+        } else {
+            // waitlisted
+            return $response->with('warning', sprintf("You've been placed on a waiting list for your reservation. Your position is #%d.", $position));
+        }
     }
 
     /**
