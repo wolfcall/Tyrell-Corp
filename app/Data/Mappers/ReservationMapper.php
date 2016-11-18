@@ -66,7 +66,7 @@ class ReservationMapper extends Singleton
      */
     public function find(int $id)
     {
-        $reservation = $this->identityMap->find($id);
+        $reservation = $this->identityMap->get($id);
         $result = null;
 
         // If Identity Map doesn't have it then use TDG.
@@ -95,7 +95,7 @@ class ReservationMapper extends Singleton
         $reservations = [];
 
         foreach ($results as $result) {
-            if ($reservation = $this->identityMap->find($result->id)) {
+            if ($reservation = $this->identityMap->get($result->id)) {
                 $reservations[] = $reservation;
             } else {
                 $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, intval($result->id));
@@ -138,7 +138,7 @@ class ReservationMapper extends Singleton
         $reservations = [];
 
         foreach ($results as $result) {
-            if ($reservation = $this->identityMap->find($result->id)) {
+            if ($reservation = $this->identityMap->get($result->id)) {
                 $reservations[] = $reservation;
             } else {
                 $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, intval($result->id));
@@ -160,7 +160,7 @@ class ReservationMapper extends Singleton
         $reservations = [];
 
         foreach ($results as $result) {
-            if ($reservation = $this->identityMap->find($result->id)) {
+            if ($reservation = $this->identityMap->get($result->id)) {
                 $reservations[] = [$reservation, $result->position];
             } else {
                 $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, intval($result->id));
@@ -196,7 +196,7 @@ class ReservationMapper extends Singleton
 
         // If the identity map returned the object, then remove it from the IdentityMap
         if ($reservation !== null) {
-            $this->identityMap->remove($reservation);
+            $this->identityMap->delete($reservation);
 
             // We want to delete this object from out DB, so we simply register it as Deleted in the UoW
             ReservationUnitOfWork::getInstance()->registerDeleted($reservation);

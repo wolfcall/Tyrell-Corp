@@ -22,7 +22,7 @@ class ReservationController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function listReservations(Request $request)
+    public function viewReservationList(Request $request)
     {
         $reservationMapper = ReservationMapper::getInstance();
         $reservations = $reservationMapper->findPositionsForUser(Auth::id());
@@ -37,7 +37,7 @@ class ReservationController extends Controller
      * @param $id
      * @return \Illuminate\Http\Response
      */
-    public function showReservation(Request $request, $id)
+    public function viewReservation(Request $request, $id)
     {
         $reservationMapper = ReservationMapper::getInstance();
         $reservation = $reservationMapper->find($id);
@@ -61,7 +61,7 @@ class ReservationController extends Controller
      * @param string $id
      * @return \Illuminate\Http\Response
      */
-    public function showModifyForm(Request $request, $id)
+    public function requestModificationForm(Request $request, $id)
     {
         $reservationMapper = ReservationMapper::getInstance();
         $reservation = $reservationMapper->find($id);

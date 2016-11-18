@@ -16,7 +16,7 @@ class UserIdentityMap extends Singleton
      * @param int $id
      * @return User|null
      */
-    public function find(int $id)
+    public function get(int $id)
     {
         if (isset($this->memory[$id])) {
             return $this->memory[$id];
@@ -36,7 +36,7 @@ class UserIdentityMap extends Singleton
     /**
      * @param User $user
      */
-    public function remove(User $user)
+    public function delete(User $user)
     {
         $id = $user->getId();
 

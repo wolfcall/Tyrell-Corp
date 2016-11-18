@@ -64,7 +64,7 @@ class UserMapper extends Singleton
      */
     public function find(int $id): User
     {
-        $user = $this->identityMap->find($id);
+        $user = $this->identityMap->get($id);
         $result = null;
 
         // If Identity Map doesn't have it then use TDG.
@@ -105,11 +105,11 @@ class UserMapper extends Singleton
     public function delete(int $id)
     {
         //Fire we fetch the client by checking the identity map
-        $user = $this->identityMap->find($id);
+        $user = $this->identityMap->get($id);
 
         // If the identity map returned the object, then remove it from the IdentityMap
         if ($user !== null) {
-            $this->identityMap->remove($user);
+            $this->identityMap->delete($user);
         }
 
         // We want to delete this object from out DB, so we simply register it as Deleted in the UoW

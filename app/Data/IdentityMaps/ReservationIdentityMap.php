@@ -19,7 +19,7 @@ class ReservationIdentityMap extends Singleton
      * @param int $id
      * @return Reservation|null
      */
-    public function find(int $id)
+    public function get(int $id)
     {
         foreach ($this->memory as $r) {
             if ($r->getId() === $id) {
@@ -41,7 +41,7 @@ class ReservationIdentityMap extends Singleton
     /**
      * @param Reservation $reservation
      */
-    public function remove(Reservation $reservation)
+    public function delete(Reservation $reservation)
     {
         $key = spl_object_hash($reservation);
 

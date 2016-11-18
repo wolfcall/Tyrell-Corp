@@ -16,7 +16,7 @@ class RoomIdentityMap extends Singleton
      * @param string $name
      * @return Room|null
      */
-    public function find(string $name)
+    public function get(string $name)
     {
         if (isset($this->memory[$name])) {
             return $this->memory[$name];
@@ -36,7 +36,7 @@ class RoomIdentityMap extends Singleton
     /**
      * @param Room $room
      */
-    public function remove(Room $room)
+    public function delete(Room $room)
     {
         $id = $room->getName();
 

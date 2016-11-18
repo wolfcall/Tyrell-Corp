@@ -43,7 +43,7 @@ class RoomMapper extends Singleton
      */
     public function find(string $name): Room
     {
-        $room = $this->identityMap->find($name);
+        $room = $this->identityMap->get($name);
         $result = null;
 
         // If Identity Map doesn't have it then use TDG.
@@ -70,7 +70,7 @@ class RoomMapper extends Singleton
         $rooms = [];
 
         foreach ($results as $result) {
-            if ($room = $this->identityMap->find($result->name)) {
+            if ($room = $this->identityMap->get($result->name)) {
                 $rooms[] = $room;
             } else {
                 $room = new Room((string)$result->name);
