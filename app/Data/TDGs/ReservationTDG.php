@@ -126,17 +126,18 @@ class ReservationTDG extends Singleton
     /**
      * Returns a list of all active (eg. not waitlisted) reservations for a user
      *
+     * @param \DateTime $date
      * @return array
      */
-    public function findAllActive()
+    public function findAllActive(\DateTime $date)
     {
         return DB::select('SELECT r1.*
             FROM reservations r1
             JOIN (SELECT min(id) AS id
 	            FROM reservations
 	            GROUP BY room_name, timeslot) r2 ON r1.id = r2.id
-	        WHERE timeslot >= CURDATE()
-            ORDER BY timeslot;');
+	        WHERE DATE(timeslot) = DATE(?)
+            ORDER BY timeslot;', [$date]);
     }
 
     /**

@@ -42,7 +42,7 @@ class CalendarController extends Controller
         $rooms = $roomMapper->findAll();
 
         $reservationMapper = ReservationMapper::getInstance();
-        $activeReservations = $reservationMapper->findAllActive();
+        $activeReservations = $reservationMapper->findAllActive($date);
         $userReservations = $reservationMapper->findPositionsForUser(Auth::id());
 
         return view('calendar.index', [

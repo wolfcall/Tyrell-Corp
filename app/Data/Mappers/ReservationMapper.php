@@ -130,11 +130,12 @@ class ReservationMapper extends Singleton
     }
 
     /**
-     * @return Reservation[]
+     * @param \DateTime $date
+     * @return Reservation[]|array
      */
-    public function findAllActive(): array
+    public function findAllActive(\DateTime $date): array
     {
-        $results = $this->tdg->findAllActive();
+        $results = $this->tdg->findAllActive($date);
         $reservations = [];
 
         foreach ($results as $result) {
