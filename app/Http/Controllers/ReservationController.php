@@ -42,6 +42,7 @@ class ReservationController extends Controller
      */
     public function viewReservation(Request $request, $id)
     {
+        // validate reservation exists and is owned by user
         $reservationMapper = ReservationMapper::getInstance();
         $reservation = $reservationMapper->find($id);
 
@@ -66,6 +67,7 @@ class ReservationController extends Controller
      */
     public function requestModificationForm(Request $request, $id)
     {
+        // validate reservation exists and is owned by user
         $reservationMapper = ReservationMapper::getInstance();
         $reservation = $reservationMapper->find($id);
 
@@ -86,6 +88,7 @@ class ReservationController extends Controller
      */
     public function modifyReservation(Request $request, $id)
     {
+        // validate reservation exists and is owned by user
         $reservationMapper = ReservationMapper::getInstance();
         $reservation = $reservationMapper->find($id);
 
@@ -112,6 +115,7 @@ class ReservationController extends Controller
     {
         $timeslot = Carbon::createFromFormat('Y-m-d\TH', $timeslot);
 
+        // validate room exists
         $roomMapper = RoomMapper::getInstance();
         $room = $roomMapper->find($roomName);
 
@@ -151,8 +155,14 @@ class ReservationController extends Controller
      */
     public function requestReservation(Request $request, $roomName, $timeslot)
     {
+        $this->validate($request, [
+            'description' => 'required',
+            'recur' => 'required|integer|min:1|max:10'
+        ]);
+
         $timeslot = Carbon::createFromFormat('Y-m-d\TH', $timeslot);
 
+        // validate room exists
         $roomMapper = RoomMapper::getInstance();
         $room = $roomMapper->find($roomName);
 
@@ -161,57 +171,76 @@ class ReservationController extends Controller
         }
 
         $reservationMapper = ReservationMapper::getInstance();
+        $recur = intval($request->input('recur', 1));
+        $status = [];
 
-        /*
-         * Pre-insert checks
-         */
+        // loop over every recurring week and independently request the reservation
+        for ($t = $timeslot->copy(), $i = 0; $i < $recur; $t->addWeek(), ++$i) {
 
-        // check if user exceeded maximum amount of reservations
-        $reservations = $reservationMapper->findPositionsForUser(Auth::id());
+            /*
+             * Pre-insert checks
+             */
 
-        if (count($reservations) >= static::MAX_PER_USER) {
-            return redirect()->route('calendar', ['date' => $timeslot->toDateString()])
-                ->with('error', sprintf('You cannot have more than %d reservation requests at a time.', static::MAX_PER_USER));
-        }
+            // check if user exceeded maximum amount of reservations
+            $reservations = $reservationMapper->findPositionsForUser(Auth::id());
 
-        // check if waiting list for timeslot is full
-        $reservations = $reservationMapper->findForTimeslot($roomName, $timeslot);
+            if (count($reservations) >= static::MAX_PER_USER) {
+                $status[] = sprintf('<strong>%s</strong>: %s', $t->format('l, F jS, Y'), "You've exceeded your reservation request limit.");
+                continue;
+            }
 
-        if (count($reservations) >= static::MAX_PER_TIMESLOT) {
-            return redirect()->route('calendar', ['date' => $timeslot->toDateString()])
-                ->with('error', 'The waiting list for that time slot is full.');
-        }
+            // check if waiting list for timeslot is full
+            $reservations = $reservationMapper->findForTimeslot($roomName, $t);
 
-        /*
-         * Insert
-         */
+            if (count($reservations) >= static::MAX_PER_TIMESLOT) {
+                $status[] = sprintf('<strong>%s</strong>: %s', $t->format('l, F jS, Y'), "The waiting list is full.");
+                continue;
+            }
 
-        $reservation = $reservationMapper->create(intval(Auth::id()), $room->getName(), $timeslot, $request->input('description', ""));
-        $reservationMapper->done();
+            /*
+             * Insert
+             */
 
-        /*
-         * Post-insert checks
-         */
-
-        // find the new reservation's position #
-        $position = $reservationMapper->findPosition($reservation);
-
-        $response = redirect()
-            ->route('calendar', ['date' => $timeslot->toDateString()]);
-
-        if ($position >= static::MAX_PER_TIMESLOT) {
-            // ensure this request hasn't exceeded the limit
-            $reservationMapper->delete($reservation->getId());
+            $reservation = $reservationMapper->create(intval(Auth::id()), $room->getName(), $t, $request->input('description', ""));
             $reservationMapper->done();
 
-            return $response->with('error', 'The waiting list for this room and time slot has exceeded the maximum allowable amount.');
-        } else if ($position === 0) {
-            // not waitlisted
-            return $response->with('success', 'Successfully requested reservation! Your reservation is now active.');
-        } else {
-            // waitlisted
-            return $response->with('warning', sprintf("You've been placed on a waiting list for your reservation. Your position is #%d.", $position));
+            /*
+             * Post-insert checks
+             */
+
+            if ($reservation->getId() === null) {
+                // error inserting the reservation
+                $status[] = sprintf('<strong>%s</strong>: %s', $t->format('l, F jS, Y'), "You already have a reservation for this time slot.");
+                continue;
+            }
+
+            // find the new reservation's position #
+            $position = $reservationMapper->findPosition($reservation);
+
+            if ($position >= static::MAX_PER_TIMESLOT) {
+                // ensure this request hasn't exceeded the limit
+                $reservationMapper->delete($reservation->getId());
+                $reservationMapper->done();
+
+                $status[] = sprintf('<strong>%s</strong>: %s', $t->format('l, F jS, Y'), "The waiting list is full.");
+            } else if ($position === 0) {
+                // not waitlisted
+                $status[] = sprintf('<strong>%s</strong>: %s', $t->format('l, F jS, Y'), "Your reservation is now active.");
+            } else {
+                // waitlisted
+                $status[] = sprintf('<strong>%s</strong>: %s', $t->format('l, F jS, Y'), "You've been placed on a waiting list for your reservation. Your position is #$position.");
+            }
+
         }
+
+        // format the status message
+        $status = sprintf('The following reservations have been attempted for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('ga'), implode("\n", array_map(function ($m) {
+            return '<li>'.$m.'</li>';
+        }, $status)));
+
+        return redirect()
+            ->route('calendar', ['date' => $timeslot->toDateString()])
+            ->with('status', $status);
     }
 
     /**

@@ -5,6 +5,7 @@ namespace App\Data\TDGs;
 use App\Data\Reservation;
 use App\Singleton;
 use DB;
+use Illuminate\Database\QueryException;
 
 /**
  * @method static ReservationTDG getInstance()
@@ -19,8 +20,9 @@ class ReservationTDG extends Singleton
     public function addMany(array $newList)
     {
         foreach ($newList as $reservation) {
-            $id = $this->create($reservation);
-            $reservation->setId($id);
+            if (($id = $this->create($reservation)) !== null) {
+                $reservation->setId($id);
+            }
         }
     }
     
@@ -56,12 +58,18 @@ class ReservationTDG extends Singleton
      */
     public function create(Reservation $reservation)
     {
-        $id = DB::table('reservations')->insertGetId([
-            'user_id' => $reservation->getUserId(),
-            'room_name' => $reservation->getRoomName(),
-            'timeslot' => $reservation->getTimeslot(),
-            'description' => $reservation->getDescription()
-        ]);
+        $id = null;
+
+        try {
+            $id = DB::table('reservations')->insertGetId([
+                'user_id' => $reservation->getUserId(),
+                'room_name' => $reservation->getRoomName(),
+                'timeslot' => $reservation->getTimeslot(),
+                'description' => $reservation->getDescription()
+            ]);
+        } catch (QueryException $e) {
+            // error inserting, duplicate row
+        }
 
         return $id;
     }

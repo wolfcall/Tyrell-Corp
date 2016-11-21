@@ -71,25 +71,25 @@
     <div class="container">
         @if (Session::has('status'))
             <div class="alert alert-info" role="alert">
-                {{ Session::get('status') }}
+                <i class="fa fa-info-circle" aria-hidden="true"></i> {!! Session::get('status') !!}
             </div>
         @endif
 
         @if (Session::has('success'))
             <div class="alert alert-success" role="alert">
-                {{ Session::get('success') }}
+                <i class="fa fa-check-circle" aria-hidden="true"></i> {!! Session::get('success') !!}
             </div>
         @endif
 
         @if (Session::has('warning'))
             <div class="alert alert-warning" role="alert">
-                {{ Session::get('warning') }}
+                <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {!! Session::get('warning') !!}
             </div>
         @endif
 
         @if (Session::has('error'))
             <div class="alert alert-danger" role="alert">
-                {{ Session::get('error') }}
+                <i class="fa fa-times-circle" aria-hidden="true"></i> {!! Session::get('error') !!}
             </div>
         @endif
     </div>
