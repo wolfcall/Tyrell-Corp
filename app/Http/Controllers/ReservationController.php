@@ -157,7 +157,7 @@ class ReservationController extends Controller
     {
         $this->validate($request, [
             'description' => 'required',
-            'recur' => 'required|integer|min:1|max:10'
+            'recur' => 'required|integer|min:1|max:'.static::MAX_PER_USER
         ]);
 
         $timeslot = Carbon::createFromFormat('Y-m-d\TH', $timeslot);
@@ -250,6 +250,7 @@ class ReservationController extends Controller
      */
     public function cancelReservation(Request $request, $id)
     {
+        // valiadte reservation exists and is owned by user
         $reservationMapper = ReservationMapper::getInstance();
         $reservation = $reservationMapper->find($id);
 
@@ -257,16 +258,20 @@ class ReservationController extends Controller
             return abort(404);
         }
 
+        // delete the reservation
         $reservationMapper->delete($reservation->getId());
         $reservationMapper->done();
 
         $response = redirect();
 
+        // redirect to appropriate back page
         if ($request->input('back') === 'list') {
             $response = $response->route('reservationList');
+        } else {
+            $response = $response->route('calendar', ['date' => $reservation->getTimeslot()->toDateString()]);
+
         }
 
-        return $response->route('calendar', ['date' => $reservation->getTimeslot()->toDateString()])
-            ->with('success', 'Successfully cancelled reservation!');
+        return $response->with('success', 'Successfully cancelled reservation!');
     }
 }
