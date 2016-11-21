@@ -115,6 +115,11 @@ class ReservationController extends Controller
     {
         $timeslot = Carbon::createFromFormat('Y-m-d\TH', $timeslot);
 
+        // don't allow reserving in the past
+        if ($timeslot->copy()->addDay()->isPast()) {
+            return abort(404);
+        }
+
         // validate room exists
         $roomMapper = RoomMapper::getInstance();
         $room = $roomMapper->find($roomName);
@@ -161,6 +166,11 @@ class ReservationController extends Controller
         ]);
 
         $timeslot = Carbon::createFromFormat('Y-m-d\TH', $timeslot);
+
+        // don't allow reserving in the past
+        if ($timeslot->copy()->addDay()->isPast()) {
+            return abort(404);
+        }
 
         // validate room exists
         $roomMapper = RoomMapper::getInstance();

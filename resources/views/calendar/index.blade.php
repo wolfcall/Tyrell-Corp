@@ -16,10 +16,12 @@
                     @if (\Carbon\Carbon::today()->ne($date))
                         <a href="{{ route('calendar') }}" class="btn btn-secondary">Return to today</a>
                     @endif
-                    <a href="{{ route('calendar', ['date' => $date->copy()->subDay()->toDateString() ]) }}" class="btn btn-secondary"><i class="fa fa-step-backward" aria-hidden="true"></i></a>
+                    @if ($date->isFuture())
+                        <a href="{{ route('calendar', ['date' => $date->copy()->subDay()->toDateString() ]) }}" class="btn btn-secondary"><i class="fa fa-step-backward" aria-hidden="true"></i></a>
+                    @endif
                     <a href="{{ route('calendar', ['date' => $date->copy()->addDay()->toDateString() ]) }}" class="btn btn-secondary"><i class="fa fa-step-forward" aria-hidden="true"></i></a>
                     <div class="form-group">
-                        <input class="form-control" type="date" name="date" value="{{ $date->toDateString() }}" id="example-date-input">
+                        <input class="form-control" type="date" name="date" min="{{ \Carbon\Carbon::today()->toDateString() }}" value="{{ $date->toDateString() }}" id="example-date-input">
                     </div>
                     <button type="submit" class="btn btn-primary">Jump to date</button>
                 </form>
