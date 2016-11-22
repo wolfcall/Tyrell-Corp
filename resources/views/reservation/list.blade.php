@@ -26,7 +26,7 @@
             </thead>
             <tbody>
             @foreach ($reservations as $r)
-                <tr>
+                <tr class="{{ $r[1] > 0 ? 'table-warning' : '' }}">
                     <th scope="row">
                         @if ($r[1] === 0)
                             Active

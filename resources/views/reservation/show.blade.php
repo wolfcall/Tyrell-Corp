@@ -31,12 +31,22 @@
             </dd>
         </dl>
 
-        @if ($back === 'list')
-            <a href="{{ route('reservationList') }}" class="btn btn-secondary"><i class="fa fa-chevron-left" aria-hidden="true"></i> Go back</a>
-        @else
-            <a href="{{ route('calendar', ['date' => $reservation->getTimeslot()->toDateString()]) }}" class="btn btn-secondary"><i class="fa fa-chevron-left" aria-hidden="true"></i> Go back</a>
-        @endif
-        <a href="{{ route('reservationModify', ['id' => $reservation->getId(), 'back' => $back]) }}" class="btn btn-primary">Modify</a>
-        <a href="{{ route('reservationCancel', ['id' => $reservation->getId(), 'back' => $back]) }}" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel this reservation and all recurring ones?');">Cancel this and all recurring</a>
+        <div class="row">
+            <div class="col-md-10 offset-sm-2">
+                @if ($back === 'list')
+                    <a href="{{ route('reservationList') }}" class="btn btn-secondary"><i class="fa fa-chevron-left" aria-hidden="true"></i> Go back</a>
+                @else
+                    <a href="{{ route('calendar', ['date' => $reservation->getTimeslot()->toDateString()]) }}" class="btn btn-secondary"><i class="fa fa-chevron-left" aria-hidden="true"></i> Go back</a>
+                @endif
+                <a href="{{ route('reservationModify', ['id' => $reservation->getId(), 'back' => $back]) }}" class="btn btn-primary">
+                    <i class="fa fa-pencil" aria-hidden="true"></i>
+                    Modify
+                </a>
+                <a href="{{ route('reservationCancel', ['id' => $reservation->getId(), 'back' => $back]) }}" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel this reservation and all recurring ones?');">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                    Cancel this and all recurring
+                </a>
+            </div>
+        </div>
     </div>
 @endsection
