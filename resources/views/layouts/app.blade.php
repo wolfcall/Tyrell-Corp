@@ -5,6 +5,31 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" sizes="57x57" href="/favicons/apple-touch-icon-57x57.png?v=PYY5xnPp8v">
+    <link rel="apple-touch-icon" sizes="60x60" href="/favicons/apple-touch-icon-60x60.png?v=PYY5xnPp8v">
+    <link rel="apple-touch-icon" sizes="72x72" href="/favicons/apple-touch-icon-72x72.png?v=PYY5xnPp8v">
+    <link rel="apple-touch-icon" sizes="76x76" href="/favicons/apple-touch-icon-76x76.png?v=PYY5xnPp8v">
+    <link rel="apple-touch-icon" sizes="114x114" href="/favicons/apple-touch-icon-114x114.png?v=PYY5xnPp8v">
+    <link rel="apple-touch-icon" sizes="120x120" href="/favicons/apple-touch-icon-120x120.png?v=PYY5xnPp8v">
+    <link rel="apple-touch-icon" sizes="144x144" href="/favicons/apple-touch-icon-144x144.png?v=PYY5xnPp8v">
+    <link rel="apple-touch-icon" sizes="152x152" href="/favicons/apple-touch-icon-152x152.png?v=PYY5xnPp8v">
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon-180x180.png?v=PYY5xnPp8v">
+    <link rel="icon" type="image/png" href="/favicons/favicon-32x32.png?v=PYY5xnPp8v" sizes="32x32">
+    <link rel="icon" type="image/png" href="/favicons/favicon-194x194.png?v=PYY5xnPp8v" sizes="194x194">
+    <link rel="icon" type="image/png" href="/favicons/favicon-96x96.png?v=PYY5xnPp8v" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicons/android-chrome-192x192.png?v=PYY5xnPp8v" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicons/favicon-16x16.png?v=PYY5xnPp8v" sizes="16x16">
+    <link rel="manifest" href="/favicons/manifest.json?v=PYY5xnPp8v">
+    <link rel="mask-icon" href="/favicons/safari-pinned-tab.svg?v=PYY5xnPp8v" color="#8c001a">
+    <link rel="shortcut icon" href="/favicons/favicon.ico?v=PYY5xnPp8v">
+    <meta name="apple-mobile-web-app-title" content="Chronos">
+    <meta name="application-name" content="Chronos">
+    <meta name="msapplication-TileColor" content="#b91d47">
+    <meta name="msapplication-TileImage" content="/favicons/mstile-144x144.png?v=PYY5xnPp8v">
+    <meta name="msapplication-config" content="/favicons/browserconfig.xml?v=PYY5xnPp8v">
+    <meta name="theme-color" content="#8c001a">
+
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -30,9 +55,9 @@
             <button class="navbar-toggler hidden-lg-up" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation"></button>
             <div class="collapse navbar-toggleable-md" id="navbarResponsive">
                 <!-- Branding Image -->
-                <a class="navbar-brand" href="{{ url('/') }}">
-                    {{ config('app.name', 'Laravel') }}
-                </a>
+                <div class="navbar-brand">
+                    <img class="mr-1" src="/img/chronos.png" height="26" alt="Chronos">
+                </div>
 
                 <!-- Left side of navbar -->
                 <ul class="nav navbar-nav">
