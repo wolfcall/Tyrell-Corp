@@ -131,7 +131,7 @@ class ReservationController extends Controller
         $reservationMapper = ReservationMapper::getInstance();
 
         // check if user exceeded maximum amount of reservations
-        $reservationCount = $reservationMapper->countInRange(Auth::id(), $timeslot, $timeslot->copy()->addWeek());
+        $reservationCount = $reservationMapper->countInRange(Auth::id(), $timeslot->copy()->startOfWeek(), $timeslot->copy()->startOfWeek()->addWeek());
 
         if ($reservationCount >= static::MAX_PER_USER) {
             return redirect()->route('calendar', ['date' => $timeslot->toDateString()])
@@ -193,7 +193,7 @@ class ReservationController extends Controller
              */
 
             // check if user exceeded maximum amount of reservations
-            $reservationCount = $reservationMapper->countInRange(Auth::id(), $timeslot, $timeslot->copy()->addWeek());
+            $reservationCount = $reservationMapper->countInRange(Auth::id(), $timeslot->copy()->startOfWeek(), $timeslot->copy()->startOfWeek()->addWeek());
 
             if ($reservationCount >= static::MAX_PER_USER) {
                 $status[] = sprintf('<strong>%s</strong>: %s', $t->format('l, F jS, Y'), sprintf("You've exceeded your reservation request limit (%d).", static::MAX_PER_USER));
