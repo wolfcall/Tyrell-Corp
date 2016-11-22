@@ -64,7 +64,7 @@ Route::post('/reservation/request/{room}/{timeslot}', 'ReservationController@req
     ->where(['timeslot' => '2[0-9]{3}-[0-9]{2}-[0-9]{2}T[0-9]{2}'])
     ->name('requestPost');
 
-Route::get('/reservation/modify/{id}', 'ReservationController@requestModificationForm')
+Route::get('/reservation/modify/{id}', 'ReservationController@showModifyForm')
     ->name('reservationModify');
 
 Route::post('/reservation/modify/{id}', 'ReservationController@modifyReservation')

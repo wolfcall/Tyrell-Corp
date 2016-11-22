@@ -65,7 +65,7 @@ class ReservationController extends Controller
      * @param string $id
      * @return \Illuminate\Http\Response
      */
-    public function requestModificationForm(Request $request, $id)
+    public function showModifyForm(Request $request, $id)
     {
         // validate reservation exists and is owned by user
         $reservationMapper = ReservationMapper::getInstance();
