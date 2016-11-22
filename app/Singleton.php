@@ -5,6 +5,8 @@ namespace App;
 abstract class Singleton
 {
     /**
+     * @ignore Internal
+     *
      * @var Singleton[] The reference to *Singleton* instances of any child class.
      */
     private static $instances = array();
@@ -35,6 +37,8 @@ abstract class Singleton
      * Private clone method to prevent cloning of the instance of the
      * *Singleton* instance.
      *
+     * @ignore Internal
+     *
      * @return void
      */
     private function __clone()
@@ -44,6 +48,8 @@ abstract class Singleton
     /**
      * Private unserialize method to prevent unserializing of the *Singleton*
      * instance.
+     *
+     * @ignore Internal
      *
      * @return void
      */

@@ -27,6 +27,8 @@ class Room
     }
 
     /**
+     * @ignore Unused
+     *
      * @param string $name
      */
     public function setName(string $name)

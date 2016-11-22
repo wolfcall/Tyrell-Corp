@@ -26,8 +26,26 @@ $sami = new Sami($iterator, array(
     'remote_repository' => new GitHubRemoteRepository('Shmeve/soen343-emu', dirname($dir)),
 ));
 
+class IgnoreFilter extends TrueFilter
+{
+    public function acceptClass(\Sami\Reflection\ClassReflection $class)
+    {
+        return empty($class->getTags('ignore')) && parent::acceptClass($class);
+    }
+
+    public function acceptMethod(\Sami\Reflection\MethodReflection $method)
+    {
+        return empty($method->getTags('ignore')) && parent::acceptMethod($method);
+    }
+
+    public function acceptProperty(\Sami\Reflection\PropertyReflection $property)
+    {
+        return empty($property->getTags('ignore')) && parent::acceptProperty($property);
+    }
+}
+
 $sami['filter'] = function () {
-    return new TrueFilter();
+    return new IgnoreFilter();
 };
 
 return $sami;

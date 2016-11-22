@@ -4,7 +4,7 @@ namespace App\Data\Mappers;
 
 use App\Data\IdentityMaps\UserIdentityMap;
 use App\Data\TDGs\UserTDG;
-use App\Data\UnitsOfWork\UserUnitOfWork;
+use App\Data\UoWs\UserUoW;
 use App\Data\User;
 use App\Singleton;
 
@@ -38,6 +38,8 @@ class UserMapper extends Singleton
     /**
      * Handles the creation of a new object of type User
      *
+     * @ignore Unused
+     *
      * @param int $id
      * @param string $name
      * @param string $password
@@ -51,7 +53,7 @@ class UserMapper extends Singleton
         $this->identityMap->add($user);
 
         //Add to UoW registry so that we create it in the DB once the user is ready to commit everything.
-        UserUnitOfWork::getInstance()->registerNew($user);
+        UserUoW::getInstance()->registerNew($user);
 
         return $user;
     }
@@ -83,6 +85,8 @@ class UserMapper extends Singleton
     }
 
     /**
+     * @ignore Unused
+     *
      * @param int $id
      * @param string $name
      */
@@ -96,10 +100,12 @@ class UserMapper extends Singleton
         $user->setName($name);
 
         // We've modified something in the object so we Register the instance as Dirty in the UoW.
-        UserUnitOfWork::getInstance()->registerDirty($user);
+        UserUoW::getInstance()->registerDirty($user);
     }
 
     /**
+     * @ignore Unused
+     *
      * @param int $id
      */
     public function delete(int $id)
@@ -113,19 +119,23 @@ class UserMapper extends Singleton
         }
 
         // We want to delete this object from out DB, so we simply register it as Deleted in the UoW
-        UserUnitOfWork::getInstance()->registerDeleted($user);
+        UserUoW::getInstance()->registerDeleted($user);
     }
 
     /**
+     * @ignore Unused
+     *
      * Finalize changes
      */
     public function done()
     {
-        UserUnitOfWork::getInstance()->commit();
+        UserUoW::getInstance()->commit();
     }
 
     /**
      * Pass the list of Users to add to DB to the TDG
+     *
+     * @ignore Unused
      *
      * @param array $newList
      */
@@ -137,6 +147,8 @@ class UserMapper extends Singleton
     /**
      * Pass the list of Users to update in the DB to the TDG
      *
+     * @ignore Unused
+     *
      * @param array $updateList
      */
     public function updateMany(array $updateList)
@@ -146,6 +158,8 @@ class UserMapper extends Singleton
 
     /**
      * Pass the list of Users to remove from DB to the TDG
+     *
+     * @ignore Unused
      *
      * @param array $deleteList
      */

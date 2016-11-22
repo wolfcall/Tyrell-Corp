@@ -4,7 +4,7 @@ namespace App\Data\Mappers;
 
 use App\Data\IdentityMaps\ReservationIdentityMap;
 use App\Data\TDGs\ReservationTDG;
-use App\Data\UnitsOfWork\ReservationUnitOfWork;
+use App\Data\UoWs\ReservationUoW;
 use App\Data\Reservation;
 use App\Singleton;
 use Carbon\Carbon;
@@ -54,7 +54,7 @@ class ReservationMapper extends Singleton
         $this->identityMap->add($reservation);
 
         // add to UoW registry so that we create it in the DB once the reservation is ready to commit everything
-        ReservationUnitOfWork::getInstance()->registerNew($reservation);
+        ReservationUoW::getInstance()->registerNew($reservation);
 
         return $reservation;
     }
@@ -198,7 +198,7 @@ class ReservationMapper extends Singleton
         $reservation->setDescription($description);
 
         // we've modified something in the object so we register the instance as dirty in the UoW
-        ReservationUnitOfWork::getInstance()->registerDirty($reservation);
+        ReservationUoW::getInstance()->registerDirty($reservation);
     }
 
     /**
@@ -214,7 +214,7 @@ class ReservationMapper extends Singleton
             $this->identityMap->delete($reservation);
 
             // we want to delete this object from out DB, so we simply register it as deleted in the UoW
-            ReservationUnitOfWork::getInstance()->registerDeleted($reservation);
+            ReservationUoW::getInstance()->registerDeleted($reservation);
         }
     }
 
@@ -223,7 +223,7 @@ class ReservationMapper extends Singleton
      */
     public function done()
     {
-        ReservationUnitOfWork::getInstance()->commit();
+        ReservationUoW::getInstance()->commit();
     }
 
     /**

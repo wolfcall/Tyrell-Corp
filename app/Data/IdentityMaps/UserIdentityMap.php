@@ -34,6 +34,8 @@ class UserIdentityMap extends Singleton
     }
 
     /**
+     * @ignore Unused
+     *
      * @param User $user
      */
     public function delete(User $user)

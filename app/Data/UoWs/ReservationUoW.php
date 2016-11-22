@@ -1,22 +1,22 @@
 <?php
 
-namespace App\Data\UnitsOfWork;
+namespace App\Data\UoWs;
 
-use App\Data\Mappers\UserMapper;
-use App\Data\User;
+use App\Data\Mappers\ReservationMapper;
+use App\Data\Reservation;
 use App\Singleton;
 
 /**
- * @method static UserUnitOfWork getInstance()
+ * @method static ReservationUoW getInstance()
  */
-class UserUnitOfWork extends Singleton
+class ReservationUoW extends Singleton
 {
     private $newList = [];
     private $changedList = [];
     private $deletedList = [];
 
     /**
-     * @var UserMapper
+     * @var ReservationMapper
      */
     private $mapper;
 
@@ -24,22 +24,22 @@ class UserUnitOfWork extends Singleton
     {
         parent::__construct();
 
-        $this->mapper = UserMapper::getInstance();
+        $this->mapper = ReservationMapper::getInstance();
     }
 
-    public function registerNew(User $user)
+    public function registerNew(Reservation $reservation)
     {
-        $this->newList[] = $user;
+        $this->newList[] = $reservation;
     }
 
-    public function registerDirty(User $user)
+    public function registerDirty(Reservation $reservation)
     {
-        $this->changedList[] = $user;
+        $this->changedList[] = $reservation;
     }
 
-    public function registerDeleted(User $user)
+    public function registerDeleted(Reservation $reservation)
     {
-        $this->deletedList[] = $user;
+        $this->deletedList[] = $reservation;
     }
 
     public function commit()

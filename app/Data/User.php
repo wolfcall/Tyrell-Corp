@@ -53,6 +53,8 @@ class User extends Authenticatable
     }
 
     /**
+     * @ignore Unused
+     *
      * @param string $name
      */
     public function setName(string $name)
@@ -61,6 +63,8 @@ class User extends Authenticatable
     }
 
     /**
+     * @ignore Unused
+     *
      * @return null|string
      */
     public function getPassword(): string

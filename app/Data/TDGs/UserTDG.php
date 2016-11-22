@@ -14,6 +14,8 @@ class UserTDG extends Singleton
     /**
      * Adds a list of Users to the database
      *
+     * @ignore Unused
+     *
      * @param array $newList
      */
     public function addMany(array $newList)
@@ -25,6 +27,8 @@ class UserTDG extends Singleton
 
     /**
      * Updates a list of Users in the database
+     *
+     * @ignore Unused
      *
      * @param array $updateList
      */
@@ -38,6 +42,8 @@ class UserTDG extends Singleton
     /**
      * Removes a list of Users in the database
      *
+     * @ignore Unused
+     *
      * @param array $deleteList
      */
     public function deleteMany(array $deleteList)
@@ -50,8 +56,9 @@ class UserTDG extends Singleton
     /**
      * SQL statement to create a new User row
      *
+     * @ignore Unused
+     *
      * @param User $user
-     * @return int
      */
     public function create(User $user)
     {
@@ -65,6 +72,8 @@ class UserTDG extends Singleton
     /**
      * SQL statement to update a new User row
      *
+     * @ignore Unused
+     *
      * @param User $user
      */
     public function update(User $user)
@@ -77,6 +86,8 @@ class UserTDG extends Singleton
 
     /**
      * SQL statement to delete a new User row
+     *
+     * @ignore Unused
      *
      * @param User $user
      */
