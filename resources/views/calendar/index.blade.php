@@ -11,7 +11,7 @@
             <div class="col-md-4 col-sm-12">
                 <p>Choose from one of the time slots below to request a reservation.</p>
             </div>
-            <div class="col-md-8 col-sm-12 text-xs-right">
+            <div class="col-md-8 col-sm-12 text-md-right">
                 <form class="form-inline">
                     @if (\Carbon\Carbon::today()->ne($date))
                         <a href="{{ route('calendar') }}" class="btn btn-secondary">Return to today</a>

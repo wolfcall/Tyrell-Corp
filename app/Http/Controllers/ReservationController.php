@@ -196,7 +196,7 @@ class ReservationController extends Controller
             $reservationCount = $reservationMapper->countInRange(Auth::id(), $timeslot->copy()->startOfWeek(), $timeslot->copy()->startOfWeek()->addWeek());
 
             if ($reservationCount >= static::MAX_PER_USER) {
-                $status[] = sprintf('<strong>%s</strong>: %s', $t->format('l, F jS, Y'), sprintf("You've exceeded your reservation request limit (%d).", static::MAX_PER_USER));
+                $status[] = sprintf('<strong>%s</strong>: %s', $t->format('l, F jS, Y'), sprintf("You've exceeded your weekly reservation request limit of %d.", static::MAX_PER_USER));
                 continue;
             }
 
