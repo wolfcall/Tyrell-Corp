@@ -175,6 +175,19 @@ class ReservationMapper extends Singleton
     }
 
     /**
+     * Returns the number of reservations for a certain user within a date range
+     *
+     * @param int $userId
+     * @param \DateTime $start Start date, inclusive
+     * @param \DateTime $end End date, exclusive
+     * @return int
+     */
+    public function countInRange(int $userId, \DateTime $start, \DateTime $end): int
+    {
+        return $this->tdg->countInRange($userId, $start, $end);
+    }
+
+    /**
      * @param int $id
      * @param string $description
      */

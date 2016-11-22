@@ -170,4 +170,21 @@ class ReservationTDG extends Singleton
             WHERE user_id = ? AND timeslot >= CURDATE()
             ORDER BY timeslot;', [$user_id]);
     }
+
+    /**
+     * SQL statement to count the reservations for a certain user within a date range
+     *
+     * @param int $user_id
+     * @param \DateTime $start Start date, inclusive
+     * @param \DateTime $end End date, exclusive
+     * @return int
+     */
+    public function countInRange(int $user_id, \DateTime $start, \DateTime $end): int
+    {
+        return DB::table('reservations')
+            ->where('user_id', $user_id)
+            ->where('timeslot', '>=', $start)
+            ->where('timeslot', '<', $end)
+            ->count();
+    }
 }
