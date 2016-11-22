@@ -4,7 +4,7 @@
     <div class="container">
         <h1 class="pb-1">
             Modify your reservation
-            <small class="text-muted">for {{ $reservation->getTimeslot()->format('l, F jS, Y') }} at {{ $reservation->getTimeslot()->format('ga') }} in {{ $reservation->getRoomName() }}</small>
+            <small class="text-muted">for {{ $reservation->getTimeslot()->format('l, F jS, Y') }} at {{ $reservation->getTimeslot()->format('g a') }} in {{ $reservation->getRoomName() }}</small>
         </h1>
 
         <form method="post" action="{{ route('reservationModifyPost', ['id' => $reservation->getId()]) }}">

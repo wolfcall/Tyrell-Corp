@@ -7,15 +7,27 @@ body {
 }
 
 .calendar-timeslot-selectable {
+    hyphens: auto;
+}
+
+@media (max-width: 1440px) {
+    .calendar td {
+        padding: .2rem !important;
+    }
+
+    .calendar th {
+        padding: .4rem !important;
+    }
 }
 
 .calendar-timeslot-selectable:hover {
-    background-color: rgba(0,0,0,.05);
+    background-color: rgba(0, 0, 0, .05);
     cursor: pointer;
 }
 
 .calendar {
     table-layout: fixed;
+    min-width: 960px;
 }
 
 .pre {

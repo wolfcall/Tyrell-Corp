@@ -8,7 +8,7 @@
     @else
         {{-- On the waiting list --}}
         <td class="table-warning calendar-timeslot-selectable align-middle text-xs-center" title="Show reservation" data-href="{{ route('reservation', ['id' => $r[0]->getId()]) }}">
-            Waiting<br>(#{{ $r[1] }})
+            Waiting, #{{ $r[1] }}
         </td>
     @endif
 @elseif ($r = $activeReservations->first(function ($r) use ($room, $timeslot) { return $r->getRoomName() === $room->getName() && $r->getTimeslot()->eq($timeslot); }))

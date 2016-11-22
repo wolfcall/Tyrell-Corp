@@ -4,7 +4,7 @@
     <div class="container">
         <h1 class="pb-1">
             Request a reservation
-            <small class="text-muted">for {{ $timeslot->format('l, F jS, Y') }} at {{ $timeslot->format('ga') }} in {{ $room->getName() }}</small>
+            <small class="text-muted">for {{ $timeslot->format('l, F jS, Y') }} at {{ $timeslot->format('g a') }} in {{ $room->getName() }}</small>
         </h1>
 
         <form method="post" action="{{ route('requestPost', ['room' => $room->getName(), 'date' => $timeslot->format('Y-m-d\TH')]) }}">

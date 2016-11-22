@@ -31,13 +31,13 @@
 
     <div class="container-fluid">
         <div class="row">
-            <div class="col-sm-12 col-md-10 offset-md-1">
+            <div class="col-xs-12 col-xl-10 offset-xl-1">
                 <table class="table table-bordered calendar">
                     <thead>
                     <tr>
                         <th></th>
                         @for ($h = 7; $h < 23; ++$h)
-                            <th class="text-xs-center">{{ $h }}:00</th>
+                            <th class="text-xs-center">{{ $h >= 13 ? ($h % 13 + 1) : $h % 13 }} {{ $h >= 12 ? 'pm' : 'am' }}</th>
                         @endfor
                     </tr>
                     </thead>

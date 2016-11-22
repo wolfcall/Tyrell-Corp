@@ -245,7 +245,7 @@ class ReservationController extends Controller
         }
 
         // format the status message
-        $status = sprintf('The following reservations have been attempted for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('ga'), implode("\n", array_map(function ($m) {
+        $status = sprintf('The following reservations have been attempted for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
             return '<li>'.$m.'</li>';
         }, $status)));
 
