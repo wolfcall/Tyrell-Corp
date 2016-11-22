@@ -9,12 +9,10 @@ use Sami\Parser\Filter\TrueFilter;
 $iterator = Finder::create()
     ->files()
     ->name('*.php')
-    ->exclude('resources')
-    ->exclude('tests')
-    ->exclude('app/Console')
-    ->exclude('app/Exceptions')
-    ->exclude('app/Providers')
-    ->exclude('app/Http/Middleware')
+    ->exclude('Console')
+    ->exclude('Exceptions')
+    ->exclude('Providers')
+    ->exclude('Http/Middleware')
     ->in($dir = __DIR__.'/app');
 
 $version = new Version('develop', 'develop branch');

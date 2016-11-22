@@ -182,6 +182,7 @@ class ReservationController extends Controller
 
         $reservationMapper = ReservationMapper::getInstance();
         $recur = intval($request->input('recur', 1));
+        $uuid = \Uuid::generate();
         $status = [];
 
         // loop over every recurring week and independently request the reservation
@@ -211,7 +212,7 @@ class ReservationController extends Controller
              * Insert
              */
 
-            $reservation = $reservationMapper->create(intval(Auth::id()), $room->getName(), $t, $request->input('description', ""));
+            $reservation = $reservationMapper->create(intval(Auth::id()), $room->getName(), $t, $request->input('description', ""), $uuid);
             $reservationMapper->done();
 
             /*
@@ -227,7 +228,7 @@ class ReservationController extends Controller
             // find the new reservation's position #
             $position = $reservationMapper->findPosition($reservation);
 
-            if ($position >= static::MAX_PER_TIMESLOT) {
+            if ($position > static::MAX_PER_TIMESLOT) {
                 // ensure this request hasn't exceeded the limit
                 $reservationMapper->delete($reservation->getId());
                 $reservationMapper->done();

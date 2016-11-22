@@ -91,7 +91,7 @@ class UserTDG extends Singleton
      * SQL statement to find a User by its id
      *
      * @param int $id
-     * @return null
+     * @return \stdClass|null
      */
     public function find(int $id)
     {

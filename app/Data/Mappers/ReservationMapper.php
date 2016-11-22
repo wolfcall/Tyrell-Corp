@@ -43,16 +43,17 @@ class ReservationMapper extends Singleton
      * @param string $roomName
      * @param \DateTime $timeslot
      * @param string $description
+     * @param string $uuid
      * @return Reservation
      */
-    public function create(int $userId, string $roomName, \DateTime $timeslot, string $description): Reservation
+    public function create(int $userId, string $roomName, \DateTime $timeslot, string $description, string $uuid): Reservation
     {
-        $reservation = new Reservation($userId, $roomName, $timeslot, $description);
+        $reservation = new Reservation($userId, $roomName, $timeslot, $description, $uuid);
 
-        //Add the new Client to the list of existing objects in Live memory
+        // add the new Reservation to the list of existing objects in live memory
         $this->identityMap->add($reservation);
 
-        //Add to UoW registry so that we create it in the DB once the reservation is ready to commit everything.
+        // add to UoW registry so that we create it in the DB once the reservation is ready to commit everything
         ReservationUnitOfWork::getInstance()->registerNew($reservation);
 
         return $reservation;
@@ -69,15 +70,15 @@ class ReservationMapper extends Singleton
         $reservation = $this->identityMap->get($id);
         $result = null;
 
-        // If Identity Map doesn't have it then use TDG.
+        // if Identity Map doesn't have it, use TDG
         if ($reservation === null) {
             $result = $this->tdg->find($id);
         }
 
-        // If TDG doesn't have it then it doens't exist.
+        // if TDG doesn't have it, it doesn't exist
         if ($result !== null) {
-            //We got the client from the TDG who got it from the DB and now the mapper must add it to the ClientIdentityMap
-            $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, intval($result->id));
+            // we got the Reservation from the TDG who got it from the DB and now the mapper must add it to the ReservationIdentityMap
+            $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id));
             $this->identityMap->add($reservation);
         }
 
@@ -98,7 +99,7 @@ class ReservationMapper extends Singleton
             if ($reservation = $this->identityMap->get($result->id)) {
                 $reservations[] = $reservation;
             } else {
-                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, intval($result->id));
+                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id));
                 $this->identityMap->add($reservation);
                 $reservations[] = $reservation;
             }
@@ -142,7 +143,7 @@ class ReservationMapper extends Singleton
             if ($reservation = $this->identityMap->get($result->id)) {
                 $reservations[] = $reservation;
             } else {
-                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, intval($result->id));
+                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id));
                 $this->identityMap->add($reservation);
                 $reservations[] = $reservation;
             }
@@ -164,7 +165,7 @@ class ReservationMapper extends Singleton
             if ($reservation = $this->identityMap->get($result->id)) {
                 $reservations[] = [$reservation, $result->position];
             } else {
-                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, intval($result->id));
+                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id));
                 $this->identityMap->add($reservation);
                 $reservations[] = [$reservation, intval($result->position)];
             }
@@ -183,7 +184,7 @@ class ReservationMapper extends Singleton
 
         $reservation->setDescription($description);
 
-        // We've modified something in the object so we Register the instance as Dirty in the UoW.
+        // we've modified something in the object so we register the instance as dirty in the UoW
         ReservationUnitOfWork::getInstance()->registerDirty($reservation);
     }
 
@@ -192,14 +193,14 @@ class ReservationMapper extends Singleton
      */
     public function delete(int $id)
     {
-        //Fire we fetch the client by checking the identity map
+        // first we fetch the client by checking the identity map
         $reservation = $this->find($id);
 
-        // If the identity map returned the object, then remove it from the IdentityMap
+        // if the identity map returned the object, then remove it from the IdentityMap
         if ($reservation !== null) {
             $this->identityMap->delete($reservation);
 
-            // We want to delete this object from out DB, so we simply register it as Deleted in the UoW
+            // we want to delete this object from out DB, so we simply register it as deleted in the UoW
             ReservationUnitOfWork::getInstance()->registerDeleted($reservation);
         }
     }

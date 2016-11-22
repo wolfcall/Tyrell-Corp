@@ -65,7 +65,8 @@ class ReservationTDG extends Singleton
                 'user_id' => $reservation->getUserId(),
                 'room_name' => $reservation->getRoomName(),
                 'timeslot' => $reservation->getTimeslot(),
-                'description' => $reservation->getDescription()
+                'description' => $reservation->getDescription(),
+                'recur_id' => $reservation->getRecurId()
             ]);
         } catch (QueryException $e) {
             // error inserting, duplicate row
@@ -88,14 +89,15 @@ class ReservationTDG extends Singleton
     }
 
     /**
-     * SQL statement to delete a new Reservation row
+     * SQL statement to delete Reservation rows based on the Reservation id, or the recurrence id
      *
      * @param Reservation $reservation
      */
     public function remove(Reservation $reservation)
     {
-        DB::delete('DELETE FROM reservations WHERE id = :id', [
-            'id' => $reservation->getId()
+        DB::delete('DELETE FROM reservations WHERE id = :id OR (recur_id = :recur_id AND timeslot >= CURDATE())', [
+            'id' => $reservation->getId(),
+            'recur_id' => $reservation->getRecurId()
         ]);
     }
 
@@ -103,7 +105,7 @@ class ReservationTDG extends Singleton
      * SQL statement to find a Reservation by its id
      *
      * @param int $id
-     * @return null
+     * @return \stdClass|null
      */
     public function find(int $id)
     {

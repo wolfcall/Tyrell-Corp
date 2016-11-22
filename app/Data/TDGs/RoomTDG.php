@@ -15,7 +15,7 @@ class RoomTDG extends Singleton
      * Gets a specific Room from the database by name
      *
      * @param string $name
-     * @return null|array
+     * @return \stdClass|null
      */
     public function find(string $name)
     {

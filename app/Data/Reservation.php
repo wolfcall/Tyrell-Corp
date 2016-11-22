@@ -30,20 +30,29 @@ class Reservation
     protected $description;
 
     /**
+     * @var string
+     */
+    protected $recurId;
+
+    /**
      * Room constructor.
      * @param int $userId
      * @param string $roomName
      * @param \DateTime $timeslot
      * @param string $description
+     * @param null $recurId
      * @param int $id
      */
-    public function __construct(int $userId, string $roomName, \DateTime $timeslot, string $description = null, $id = null)
+    public function __construct(int $userId, string $roomName, \DateTime $timeslot, string $description = null, $recurId = null, $id = null)
     {
-        $this->id = $id;
         $this->userId = $userId;
         $this->roomName = $roomName;
         $this->description = $description;
         $this->timeslot = $timeslot;
+        $this->recurId = $recurId;
+
+        // key
+        $this->id = $id;
     }
 
     /**
@@ -124,5 +133,21 @@ class Reservation
     public function setDescription(string $description)
     {
         $this->description = $description;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRecurId(): string
+    {
+        return $this->recurId;
+    }
+
+    /**
+     * @param string $recurId
+     */
+    public function setRecurId(string $recurId)
+    {
+        $this->recurId = $recurId;
     }
 }

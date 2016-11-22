@@ -21,7 +21,7 @@
                     @endif
                     <a href="{{ route('calendar', ['date' => $date->copy()->addDay()->toDateString() ]) }}" class="btn btn-secondary"><i class="fa fa-step-forward" aria-hidden="true"></i></a>
                     <div class="form-group">
-                        <input class="form-control" type="date" name="date" min="{{ \Carbon\Carbon::today()->toDateString() }}" value="{{ $date->toDateString() }}" id="example-date-input">
+                        <input class="form-control" type="date" name="date" min="{{ \Carbon\Carbon::today()->toDateString() }}" value="{{ $date->toDateString() }}" title="Date">
                     </div>
                     <button type="submit" class="btn btn-primary">Jump to date</button>
                 </form>
