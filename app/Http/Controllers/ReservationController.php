@@ -234,7 +234,7 @@ class ReservationController extends Controller
 
             // check if there was an error inserting the reservation, ie. duplicate reservation
             if ($reservation->getId() === null) {
-                $errored[] = [$reservation, 'You already have a reservation for this time slot.'];
+                $errored[] = [$t, 'You already have a reservation for this time slot.'];
                 continue;
             }
 
