@@ -180,12 +180,19 @@ class ReservationController extends Controller
             return abort(404);
         }
 
+        // generate a UUID for this reservation session, which will link recurring reservations together
+        $uuid = \Uuid::generate();
+        $reservations = [];
+
         $reservationMapper = ReservationMapper::getInstance();
         $recur = intval($request->input('recur', 1));
-        $uuid = \Uuid::generate();
-        $status = [];
 
-        // loop over every recurring week and independently request the reservation
+        // status message arrays
+        $successful = [];
+        $waitlisted = [];
+        $errored = [];
+
+        // loop over every recurring week and independently request the reservation for that week
         for ($t = $timeslot->copy(), $i = 0; $i < $recur; $t->addWeek(), ++$i) {
 
             /*
@@ -194,17 +201,15 @@ class ReservationController extends Controller
 
             // check if user exceeded maximum amount of reservations
             $reservationCount = $reservationMapper->countInRange(Auth::id(), $timeslot->copy()->startOfWeek(), $timeslot->copy()->startOfWeek()->addWeek());
-
             if ($reservationCount >= static::MAX_PER_USER) {
-                $status[] = sprintf('<strong>%s</strong>: %s', $t->format('l, F jS, Y'), sprintf("You've exceeded your weekly reservation request limit of %d.", static::MAX_PER_USER));
+                $errored[] = [$t, sprintf("You've exceeded your weekly reservation request limit of %d.", static::MAX_PER_USER)];
                 continue;
             }
 
             // check if waiting list for timeslot is full
-            $reservations = $reservationMapper->findForTimeslot($roomName, $t);
-
-            if (count($reservations) >= static::MAX_PER_TIMESLOT) {
-                $status[] = sprintf('<strong>%s</strong>: %s', $t->format('l, F jS, Y'), "The waiting list is full.");
+            $waitingList = $reservationMapper->findForTimeslot($roomName, $t);
+            if (count($waitingList) >= static::MAX_PER_TIMESLOT) {
+                $errored[] = [$t, 'The waiting list is full.'];
                 continue;
             }
 
@@ -212,16 +217,22 @@ class ReservationController extends Controller
              * Insert
              */
 
-            $reservation = $reservationMapper->create(intval(Auth::id()), $room->getName(), $t, $request->input('description', ""), $uuid);
-            $reservationMapper->done();
+            $reservations[] = $reservationMapper->create(intval(Auth::id()), $room->getName(), $t->copy(), $request->input('description', ''), $uuid);
+        }
 
-            /*
-             * Post-insert checks
-             */
+        // run the reservation operations now, as we need to process the results
+        $reservationMapper->done();
 
+        /*
+         * Post-insert checks
+         */
+
+        foreach ($reservations as $reservation) {
+            $t = $reservation->getTimeslot();
+
+            // check if there was an error inserting the reservation, ie. duplicate reservation
             if ($reservation->getId() === null) {
-                // error inserting the reservation
-                $status[] = sprintf('<strong>%s</strong>: %s', $t->format('l, F jS, Y'), "You already have a reservation for this time slot.");
+                $errored[] = [$reservation, 'You already have a reservation for this time slot.'];
                 continue;
             }
 
@@ -229,29 +240,47 @@ class ReservationController extends Controller
             $position = $reservationMapper->findPosition($reservation);
 
             if ($position > static::MAX_PER_TIMESLOT) {
-                // ensure this request hasn't exceeded the limit
+                // this request has exceeded the limit, delete it
                 $reservationMapper->delete($reservation->getId());
-                $reservationMapper->done();
-
-                $status[] = sprintf('<strong>%s</strong>: %s', $t->format('l, F jS, Y'), "The waiting list is full.");
+                $errored[] = [$t, 'The waiting list is full.'];
             } else if ($position === 0) {
-                // not waitlisted
-                $status[] = sprintf('<strong>%s</strong>: %s', $t->format('l, F jS, Y'), "Your reservation is now active.");
+                // the reservation is active
+                $successful[] = $t;
             } else {
-                // waitlisted
-                $status[] = sprintf('<strong>%s</strong>: %s', $t->format('l, F jS, Y'), "You've been placed on a waiting list for your reservation. Your position is #$position.");
+                // user has been put on a waiting list
+                $waitlisted[] = [$t, $position];
             }
-
         }
 
-        // format the status message
-        $status = sprintf('The following reservations have been attempted for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
-            return '<li>'.$m.'</li>';
-        }, $status)));
+        // commit one last time, to finalize any deletes we had to do
+        $reservationMapper->done();
 
-        return redirect()
-            ->route('calendar', ['date' => $timeslot->toDateString()])
-            ->with('status', $status);
+        $response = redirect()
+            ->route('calendar', ['date' => $timeslot->toDateString()]);
+
+        /*
+         * Format the status messages
+         */
+
+        if (count($successful)) {
+            $response = $response->with('success', sprintf('The following reservations have been successfully created for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
+                return sprintf("<li><strong>%s</strong></li>", $m->format('l, F jS, Y'));
+            }, $successful))));
+        }
+
+        if (count($waitlisted)) {
+            $response = $response->with('warning', sprintf('You have been put on a waiting list for the following reservations for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
+                return sprintf("<li><strong>%s</strong>: Position #%d</li>", $m[0]->format('l, F jS, Y'), $m[1]);
+            }, $waitlisted))));
+        }
+
+        if (count($errored)) {
+            $response = $response->with('error', sprintf('The following requests were unsuccessful for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
+                return sprintf("<li><strong>%s</strong>: %s</li>", $m[0]->format('l, F jS, Y'), $m[1]);
+            }, $errored))));
+        }
+
+        return $response;
     }
 
     /**
