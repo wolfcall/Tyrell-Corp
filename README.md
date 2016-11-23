@@ -32,6 +32,8 @@ For this installation manual, an Ubuntu Linux 15.10 installation will be assumed
  -	Web server user is www-data
  -	MySQL database address is localhost
 
+For local development, any easy-install _AMP_ server such as _MAMP_, _WampServer_, _XAMPP_ (or others) may be used instead of a manual server setup. 
+
 1. Please run the following commands to check your environment:
 
   ```
@@ -133,36 +135,36 @@ After extracting the Chronos system files, it is necessary to create a database 
 
 ### Install Chronos
 
-Most of the Chronos installation is done via Composer, PHP’s package manager. An install script is included to accelerate the process, which will create all necessary database tables and install all dependencies. A copy of the install script is attached as Appendix A in order to assist in manual installation.
+Most of the Chronos installation is done via Composer, PHP’s package manager. An install script, `install.sh` is included to accelerate the process, which will create all necessary database tables and install all dependencies.
 
 1. Execute `install.sh`:
 
-```
-dev@:/var/www/chronos$ ./install.sh
-All settings correct for using Composer
-Downloading 1.2.0...
-
-Composer successfully installed to: /var/www/chronos/composer.phar
-Use it: php composer.phar 
-Application is now down.
-Loading composer repositories with package information
-Installing dependencies from lock file
-  - Installing symfony/finder (v3.1.7)
+  ```
+  dev@:/var/www/chronos$ ./install.sh
+  All settings correct for using Composer
+  Downloading 1.2.0...
+  
+  Composer successfully installed to: /var/www/chronos/composer.phar
+  Use it: php composer.phar 
+  Application is now down.
+  Loading composer repositories with package information
+  Installing dependencies from lock file
+    - Installing symfony/finder (v3.1.7)
     Loading from cache
-
-[...]
-
-Generating autoload files
-> php artisan clear-compiled
-> php artisan optimize
-Generating optimized class loader
-Compiling common classes
-Migration table created successfully.
-Migrated: 2016_11_16_000000_create_users_table
-Migrated: 2016_11_17_045934_create_rooms_table
-Migrated: 2016_11_17_051557_create_reservations_table
-Generating optimized class loader
-Compiling common classes
-Application cache cleared!
-Application is now live.
-```
+  
+  [...]
+  
+  Generating autoload files
+  > php artisan clear-compiled
+  > php artisan optimize
+  Generating optimized class loader
+  Compiling common classes
+  Migration table created successfully.
+  Migrated: 2016_11_16_000000_create_users_table
+  Migrated: 2016_11_17_045934_create_rooms_table
+  Migrated: 2016_11_17_051557_create_reservations_table
+  Generating optimized class loader
+  Compiling common classes
+  Application cache cleared!
+  Application is now live.
+  ```
