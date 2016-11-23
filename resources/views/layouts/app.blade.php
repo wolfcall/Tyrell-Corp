@@ -37,7 +37,8 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/css/bootstrap.min.css" integrity="sha384-AysaV+vQoT3kOAXZkl02PThvDr8HYKPZhNT5h/CXfBThSRXQ6jW5DO2ekP5ViFdi" crossorigin="anonymous">
-    <link href="/css/app.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link rel="stylesheet" href="/css/app.css">
 
     <!-- Scripts -->
     <script>
@@ -45,8 +46,6 @@
             'csrfToken' => csrf_token(),
         ]); ?>
     </script>
-
-    <script src="https://use.fontawesome.com/9abe837e3b.js"></script>
 </head>
 <body>
     <nav class="navbar navbar-fixed-top navbar-light bg-faded">
