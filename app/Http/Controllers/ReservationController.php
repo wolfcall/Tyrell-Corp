@@ -117,7 +117,8 @@ class ReservationController extends Controller
 
         // don't allow reserving in the past
         if ($timeslot->copy()->addDay()->isPast()) {
-            return abort(404);
+            return redirect()->route('calendar', ['date' => $timeslot->toDateString()])
+                ->with('error', 'You cannot reserve time slots in the past.');
         }
 
         // validate room exists
@@ -169,7 +170,8 @@ class ReservationController extends Controller
 
         // don't allow reserving in the past
         if ($timeslot->copy()->addDay()->isPast()) {
-            return abort(404);
+            return redirect()->route('calendar', ['date' => $timeslot->toDateString()])
+                ->with('error', 'You cannot reserve time slots in the past.');
         }
 
         // validate room exists
