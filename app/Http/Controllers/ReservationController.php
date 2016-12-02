@@ -204,14 +204,14 @@ class ReservationController extends Controller
             // check if user exceeded maximum amount of reservations
             $reservationCount = $reservationMapper->countInRange(Auth::id(), $t->copy()->startOfWeek(), $t->copy()->startOfWeek()->addWeek());
             if ($reservationCount >= static::MAX_PER_USER) {
-                $errored[] = [$t, sprintf("You've exceeded your weekly reservation request limit of %d.", static::MAX_PER_USER)];
+                $errored[] = [$t->copy(), sprintf("You've exceeded your weekly reservation request limit of %d.", static::MAX_PER_USER)];
                 continue;
             }
 
             // check if waiting list for timeslot is full
             $waitingList = $reservationMapper->findForTimeslot($roomName, $t);
             if (count($waitingList) >= static::MAX_PER_TIMESLOT) {
-                $errored[] = [$t, 'The waiting list is full.'];
+                $errored[] = [$t->copy(), 'The waiting list is full.'];
                 continue;
             }
 
