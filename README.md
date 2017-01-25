@@ -64,11 +64,12 @@ For local development, any easy-install _AMP_ server such as _MAMP_, _WampServer
 Obtain a Chronos release by downloading it from the official repository, and extract it into your installation directory.
 
 1. Change your directory to the installation path:
-
+  
+  Linux
   ```
   dev:~$ cd /var/www/chronos
   ```
-
+  
 2. Download the Chronos release:
 
   ```
@@ -137,7 +138,8 @@ After extracting the Chronos system files, it is necessary to create a database 
 
 Most of the Chronos installation is done via Composer, PHP’s package manager. An install script, `install.sh` is included to accelerate the process, which will create all necessary database tables and install all dependencies.
 
-1. Execute `install.sh`:
+1. Execute `install.sh`
+   Execute `install.bat` for windows:
 
   ```
   dev@:/var/www/chronos$ ./install.sh
