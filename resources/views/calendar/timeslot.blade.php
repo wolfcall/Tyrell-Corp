@@ -3,7 +3,7 @@
     @if ($r[1] === 0)
         {{-- Active reservation --}}
         <td class="table-success calendar-timeslot-selectable align-middle text-xs-center" title="Show reservation" data-href="{{ route('reservation', ['id' => $r[0]->getId()]) }}">
-            Reserved
+            
         </td>
     @else
         {{-- On the waiting list --}}
