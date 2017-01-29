@@ -14,7 +14,7 @@
 @elseif ($r = $activeReservations->first(function ($r) use ($room, $timeslot) { return $r->getRoomName() === $room->getName() && $r->getTimeslot()->eq($timeslot); }))
     {{-- Room has been booked by someone else --}}
     <td class="table-info calendar-timeslot-selectable align-middle text-xs-center" title="Reserve" data-href="{{ route('request', ['room' => $room->getName(), 'timeslot' => $timeslot->format('Y-m-d\TH') ]) }}">
-        Taken
+        
     </td>
 @else
     {{-- Room is free --}}

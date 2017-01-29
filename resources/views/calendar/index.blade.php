@@ -11,6 +11,8 @@
             <div class="col-md-4 col-sm-12">
                 <p>Choose from one of the time slots below to request a reservation.</p>
             </div>
+            
+            
             <div class="col-md-8 col-sm-12 text-md-right">
                 <form class="form-inline">
                     @if (\Carbon\Carbon::today()->ne($date))
@@ -27,6 +29,15 @@
                 </form>
             </div>
         </div>
+        
+         <fieldset>
+              <legend>Legend</legend>
+                <ul>
+                    <li type="square" style="color:#61ad2e">Your reservations</li>
+                    <li type="square" style="color:#4286f4">Reserved by another user</li>
+                    <li type="square" style="color:#c4c10b">Waiting list</li>
+                </ul>
+            </fieldset>
     </div>
 
     <div class="container-fluid">
