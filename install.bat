@@ -1,3 +1,4 @@
+abc > storage/framework/down
 
 rm bootstrap/cache/*
 
