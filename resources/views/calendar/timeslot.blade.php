@@ -1,6 +1,14 @@
-@if ($r = $userReservations->first(function ($r) use ($room, $timeslot) { return $r[0]->getRoomName() === $room->getName() && $r[0]->getTimeslot()->eq($timeslot); }))
-    {{-- User has a reservation for this timeslot --}}
-    @if ($r[1] === 0)
+	@if ($r = $userReservations->first(function ($r) use ($room, $timeslot) 
+	{ 
+		{{-- First half makes sure the room is the same --}}
+		{{-- Second half makes sure it is the right timeslot --}}
+		return $r[0]->getRoomName() === $room->getName() && $r[0]->getTimeslot()->eq($timeslot); 
+	}
+	))
+    
+	{{-- User has a reservation for this timeslot --}}
+    
+	@if ($r[1] === 0)
         {{-- Active reservation --}}
         <td class="table-success calendar-timeslot-selectable align-middle text-xs-center" title="Show reservation" data-href="{{ route('reservation', ['id' => $r[0]->getId()]) }}">
             

@@ -42,9 +42,9 @@
                     <i class="fa fa-pencil" aria-hidden="true"></i>
                     Modify
                 </a>
-                <a href="{{ route('reservationCancel', ['id' => $reservation->getId(), 'back' => $back]) }}" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel this reservation and all recurring ones?');">
+                <a href="{{ route('reservationCancel', ['id' => $reservation->getId(), 'back' => $back]) }}" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel this reservation?');">
                     <i class="fa fa-trash" aria-hidden="true"></i>
-                    Cancel this and all recurring
+                    Cancel this Reservation
                 </a>
             </div>
         </div>
