@@ -13,7 +13,7 @@
 @section('content')
     <div class="container">
         <h1 class="pb-1">
-            Your reservation
+            Your Reservation
             <small class="text-muted">for {{ $reservation->getTimeslot()->format('l, F jS, Y') }} at {{ $reservation->getTimeslot()->format('g a') }} in {{ $reservation->getRoomName() }}</small>
         </h1>
 
