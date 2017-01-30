@@ -215,6 +215,7 @@ class ReservationMapper extends Singleton
 
             // we want to delete this object from out DB, so we simply register it as deleted in the UoW
             ReservationUoW::getInstance()->registerDeleted($reservation);
+			
         }
     }
 

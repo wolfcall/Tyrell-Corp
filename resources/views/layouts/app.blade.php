@@ -62,7 +62,7 @@
                 <ul class="nav navbar-nav">
                     @if (Auth::check())
                         <li class="nav-item {{ active('calendar') }}"><a class="nav-link" href="{{ route('calendar') }}">Calendar</a></li>
-                        <li class="nav-item {{ active('reservationList') }}"><a class="nav-link" href="{{ route('reservationList') }}">My reservations</a></li>
+                        <li class="nav-item {{ active('reservationList') }}"><a class="nav-link" href="{{ route('reservationList') }}">My Reservations</a></li>
                     @endif
                 </ul>
 
@@ -91,7 +91,7 @@
             </div>
         </div>
     </nav>
-
+	
     <div class="container">
         @if (Session::has('status'))
             <div class="alert alert-info alert-dismissible" role="alert">
@@ -101,7 +101,7 @@
                 <i class="fa fa-info-circle" aria-hidden="true"></i> {!! Session::get('status') !!}
             </div>
         @endif
-
+		
         @if (Session::has('success'))
             <div class="alert alert-success alert-dismissible" role="alert">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">

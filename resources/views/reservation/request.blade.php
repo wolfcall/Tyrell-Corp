@@ -24,7 +24,7 @@
                 <label for="inputRecur" class="col-xs-3 col-sm-2 col-form-label">Recur for</label>
                 <div class="col-xs-9 col-md-3">
                     <div class="input-group">
-                        <input class="form-control{{ $errors->has('recur') ? ' form-control-danger' : '' }}" type="number" name="recur" min="1" max="10" value="1" id="inputRecur">
+                        <input class="form-control{{ $errors->has('recur') ? ' form-control-danger' : '' }}" type="number" name="recur" min="1" max="3" value="1" id="inputRecur">
                         <span class="input-group-addon">week(s)</span>
                     </div>
                     @if ($errors->has('recur'))
