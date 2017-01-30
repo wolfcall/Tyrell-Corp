@@ -95,9 +95,8 @@ class ReservationTDG extends Singleton
      */
     public function remove(Reservation $reservation)
     {
-        DB::delete('DELETE FROM reservations WHERE id = :id OR (recur_id = :recur_id AND timeslot >= CURDATE())', [
-            'id' => $reservation->getId(),
-            'recur_id' => $reservation->getRecurId()
+        DB::delete('DELETE FROM reservations WHERE id = :id', [
+            'id' => $reservation->getId()
         ]);
     }
 

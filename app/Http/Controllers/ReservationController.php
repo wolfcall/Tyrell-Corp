@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 class ReservationController extends Controller
 {
     const MAX_PER_TIMESLOT = 4;
-    const MAX_PER_USER = 10;
+    const MAX_PER_USER = 3;
 
     /**
      * Create a new controller instance.
@@ -295,7 +295,7 @@ class ReservationController extends Controller
         // valiadte reservation exists and is owned by user
         $reservationMapper = ReservationMapper::getInstance();
         $reservation = $reservationMapper->find($id);
-
+						
         if ($reservation === null || $reservation->getUserId() !== Auth::id()) {
             return abort(404);
         }
