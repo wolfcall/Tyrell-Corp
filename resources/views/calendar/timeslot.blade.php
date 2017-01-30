@@ -5,7 +5,11 @@
 	$passedDate = $date->toDateString();
 	?>
 	
-	@if ($r = $userReservations->first(function ($r) use ($room, $timeslot) 
+	@if ( ($timeslot->hour) <= $ourTime && $passedDate <= $ourDate )
+		{{-- Room cannot be selected. Time has past --}}
+		<td class="table-active align-middle text-xs-center" title="Reserve">
+		</td>
+	@elseif ($r = $userReservations->first(function ($r) use ($room, $timeslot) 
 	{ 
 		{{-- First half makes sure the room is the same --}}
 		{{-- Second half makes sure it is the right timeslot --}}
@@ -23,13 +27,10 @@
 				Waiting, #{{ $r[1] }}
 			</td>
 		@endif
+	
 	@elseif ($r = $activeReservations->first(function ($r) use ($room, $timeslot) { return $r->getRoomName() === $room->getName() && $r->getTimeslot()->eq($timeslot); }))
 		{{-- Room has been booked by someone else --}}
 		<td class="table-info calendar-timeslot-selectable align-middle text-xs-center" title="Reserve" data-href="{{ route('request', ['room' => $room->getName(), 'timeslot' => $timeslot->format('Y-m-d\TH') ]) }}">
-		</td>
-	@elseif ( ($timeslot->hour) <= $ourTime && $passedDate <= $ourDate )
-		{{-- Room cannot be selected. Time has past --}}
-		<td class="table-active align-middle text-xs-center" title="Reserve">
 		</td>
 	@else
 		{{-- Room is free --}}
