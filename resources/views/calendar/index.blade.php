@@ -17,7 +17,7 @@
 				<legend style="text-align: center">Legend</legend>
 				<ul>
 				<li type="square" style="color:#61ad2e">Your Reservations</li>
-				<li type="square" style="color:#4286f4">Reserved by another User</li>
+				<li type="square" style="color:#f98b8b">Reserved by another User</li>
 				<li type="square" style="color:#c4c10b">Waiting List Position</li>
 				<li type="square" style="color:#b3b3cc">Unavailable</li>
 				</ul>
