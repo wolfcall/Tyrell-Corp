@@ -3,7 +3,7 @@
 @section('content')
     <div class="container">
         <h1 class="pb-1">
-            Room calendar
+            Room Calendar
             <small class="text-muted">for {{ $date->format('l, F jS, Y') }}</small>
         </h1>
 
@@ -12,8 +12,18 @@
                 <p>Choose from one of the time slots below to request a reservation.</p>
             </div>
             
-            
-            <div class="col-md-8 col-sm-12 text-md-right">
+			<div class="col-md-4 col-sm-12">
+				<fieldset>
+				<legend style="text-align: center">Legend</legend>
+				<ul>
+				<li type="square" style="color:#61ad2e">Your Reservations</li>
+				<li type="square" style="color:#4286f4">Reserved by another User</li>
+				<li type="square" style="color:#c4c10b">Waiting List Position</li>
+				</ul>
+				</fieldset>
+			</div>
+			           
+            <div class="col-md-4 col-sm-12 ">
                 <form class="form-inline">
                     @if (\Carbon\Carbon::today()->ne($date))
                         <a href="{{ route('calendar') }}" class="btn btn-secondary">Return to today</a>
@@ -29,39 +39,50 @@
                 </form>
             </div>
         </div>
-        
-         <fieldset>
-              <legend>Legend</legend>
-                <ul>
-                    <li type="square" style="color:#61ad2e">Your reservations</li>
-                    <li type="square" style="color:#4286f4">Reserved by another user</li>
-                    <li type="square" style="color:#c4c10b">Waiting list</li>
-                </ul>
-            </fieldset>
     </div>
 
     <div class="container-fluid">
         <div class="row">
             <div class="col-xs-12 col-xl-10 offset-xl-1">
                 <table class="table table-bordered calendar">
-                    <thead>
+                 	<thead>
                     <tr>
                         <th></th>
-                        @for ($h = 7; $h < 23; ++$h)
-                            <th class="text-xs-center">{{ $h >= 13 ? ($h % 13 + 1) : $h % 13 }} {{ $h >= 12 ? 'pm' : 'am' }}</th>
+                        @for ($h = 0; $h < 12; $h++)
+                            <th class="text-xs-center">{{ $h == 0 ? (12) : $h }} {{ 'am' }}</th>
                         @endfor
                     </tr>
                     </thead>
-                    <tbody>
+					<tbody>
                     @foreach($rooms as $room)
                         <tr class="calendar-room-row">
-                            <th class="align-middle text-xs-center">{{ $room->getName() }}</th>
-                            @for ($timeslot = $date->copy()->addHours(7); $timeslot->hour < 23; $timeslot->addHour())
-                                @include('calendar.timeslot')
+							<th class="align-middle text-xs-center">{{ $room->getName() }}</th>
+                            @for ($timeslot = $date->copy()->addHours(0); $timeslot->hour < 12; $timeslot->addHour())
+                               	@include('calendar.timeslot')
                             @endfor
                         </tr>
                     @endforeach
                     </tbody>
+					<thead>
+                    <tr>
+                        <th></th>
+                        @for ($h = 12; $h < 24; $h++)
+                            <th class="text-xs-center">{{ $h == 12 ? (12) : ($h % 13 + 1) }}{{ 'pm' }}</th>
+                        @endfor
+                    </tr>
+                    </thead>
+					<tbody>
+                    @foreach($rooms as $room)
+                        <tr class="calendar-room-row">
+                            <th class="align-middle text-xs-center">{{ $room->getName() }}</th>
+							@for ($timeslot = $date->copy()->addHours(12); $timeslot->hour < 23; $timeslot->addHour())              
+								@include('calendar.timeslot')
+							@endfor
+                        @include('calendar.timeslot')
+						</tr>	
+                    @endforeach             
+                    </tbody>
+					<thead>
                 </table>
             </div>
         </div>
