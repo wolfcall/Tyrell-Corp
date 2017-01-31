@@ -160,14 +160,9 @@ class ReservationController extends Controller
 		//If the student is in capstone, we must know to give him priority
 		$capstone = $reservationMapper->capstone(Auth::id());
 		
-		//Reminder that the student ID is accessible through the following code
-		//$studentID = Auth::id();
-				
-		echo Auth::id();
-		echo '<br><br>';
-		echo $capstone;
-		die();
-		
+		/**Reminder that the student ID is accessible through the following code
+		$studentID = Auth::id();
+		*/
 		$this->validate($request, [
             'description' => 'required',
             'recur' => 'required|integer|min:1|max:'.static::MAX_PER_USER
