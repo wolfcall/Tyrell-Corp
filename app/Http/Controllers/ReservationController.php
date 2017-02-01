@@ -114,13 +114,7 @@ class ReservationController extends Controller
     public function showRequestForm(Request $request, $roomName, $timeslot)
     {
         $timeslot = Carbon::createFromFormat('Y-m-d\TH', $timeslot);
-
-        // don't allow reserving in the past
-        if ($timeslot->copy()->addDay()->isPast()) {
-            return redirect()->route('calendar', ['date' => $timeslot->toDateString()])
-                ->with('error', 'You cannot reserve time slots in the past.');
-        }
-
+    
         // validate room exists
         $roomMapper = RoomMapper::getInstance();
         $room = $roomMapper->find($roomName);
@@ -161,18 +155,20 @@ class ReservationController extends Controller
      */
     public function requestReservation(Request $request, $roomName, $timeslot)
     {
-        $this->validate($request, [
+        $reservationMapper = ReservationMapper::getInstance();
+		
+		//If the student is in capstone, we must know to give him priority
+		$capstone = $reservationMapper->capstone(Auth::id());
+		
+		/**Reminder that the student ID is accessible through the following code
+		$studentID = Auth::id();
+		*/
+		$this->validate($request, [
             'description' => 'required',
             'recur' => 'required|integer|min:1|max:'.static::MAX_PER_USER
         ]);
 
         $timeslot = Carbon::createFromFormat('Y-m-d\TH', $timeslot);
-
-        // don't allow reserving in the past
-        if ($timeslot->copy()->addDay()->isPast()) {
-            return redirect()->route('calendar', ['date' => $timeslot->toDateString()])
-                ->with('error', 'You cannot reserve time slots in the past.');
-        }
 
         // validate room exists
         $roomMapper = RoomMapper::getInstance();
@@ -186,7 +182,6 @@ class ReservationController extends Controller
         $uuid = \Uuid::generate();
         $reservations = [];
 
-        $reservationMapper = ReservationMapper::getInstance();
         $recur = intval($request->input('recur', 1));
 
         // status message arrays

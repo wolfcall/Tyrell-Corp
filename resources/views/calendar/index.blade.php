@@ -17,8 +17,9 @@
 				<legend style="text-align: center">Legend</legend>
 				<ul>
 				<li type="square" style="color:#61ad2e">Your Reservations</li>
-				<li type="square" style="color:#4286f4">Reserved by another User</li>
+				<li type="square" style="color:#f98b8b">Reserved by another User</li>
 				<li type="square" style="color:#c4c10b">Waiting List Position</li>
+				<li type="square" style="color:#b3b3cc">Unavailable</li>
 				</ul>
 				</fieldset>
 			</div>
@@ -45,7 +46,7 @@
         <div class="row">
             <div class="col-xs-12 col-xl-10 offset-xl-1">
                 <table class="table table-bordered calendar">
-                 	<thead>
+                 	<thead class="thead-inverse">
                     <tr>
                         <th></th>
                         @for ($h = 0; $h < 12; $h++)
@@ -63,7 +64,7 @@
                         </tr>
                     @endforeach
                     </tbody>
-					<thead>
+					<thead class="thead-inverse">
                     <tr>
                         <th></th>
                         @for ($h = 12; $h < 24; $h++)

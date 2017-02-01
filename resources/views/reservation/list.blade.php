@@ -7,7 +7,7 @@
             return $number . 'th';
         else
             return $number . $ends[$number % 10];
-    }
+    }	
 @endphp
 
 @section('content')
@@ -27,20 +27,30 @@
             </thead>
             <tbody>
             @foreach ($reservations as $r)
-                <tr class="{{ $r[1] > 0 ? 'table-warning' : '' }}">
-                    <th scope="row">
-                        @if ($r[1] === 0)
-                            Active
-                        @else
-                            Waiting, position #{{ $r[1] }}
-                        @endif
-                    </th>
-                    <td>{{ $r[0]->getTimeslot()->format('l, F jS, Y') }}</td>
-                    <td>{{ $r[0]->getTimeslot()->format('g a') }}</td>
-                    <td>{{ $r[0]->getRoomName() }}</td>
-                    <td class="pre">{{ $r[0]->getDescription() }}</td>
-                    <td><a href="{{ route('reservation', ['id' => $r[0]->getId(), 'back' => 'list']) }}" class="btn btn-primary">View</a></td>
-                </tr>
+                <?php
+				
+				date_default_timezone_set('US/Eastern');
+				$ourTime = date('H');	
+				$ourDate = date('Y-m-d');
+				$passedDate = $r[0]->getTimeslot()->format('Y-m-d')
+				
+				?>
+				@if ( $r[0]->getTimeslot()->format('H') > $ourTime && $passedDate >= $ourDate )
+					<tr class="{{ $r[1] > 0 ? 'table-warning' : '' }}">
+						<th scope="row">
+							@if ($r[1] === 0)
+								Active
+							@else
+								Waiting, position #{{ $r[1] }}
+							@endif
+						</th>
+						<td>{{ $r[0]->getTimeslot()->format('l, F jS, Y') }}</td>
+						<td>{{ $r[0]->getTimeslot()->format('g a') }}</td>
+						<td>{{ $r[0]->getRoomName() }}</td>
+						<td class="pre">{{ $r[0]->getDescription() }}</td>
+						<td><a href="{{ route('reservation', ['id' => $r[0]->getId(), 'back' => 'list']) }}" class="btn btn-primary">View</a></td>
+					</tr>
+				@endif
             @endforeach
             </tbody>
         </table>
