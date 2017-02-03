@@ -36,7 +36,7 @@
             </div>
             <div class="form-group row">
                 <div class="offset-sm-2 col-sm-10">
-                    <a href="{{ route('calendar', ['date' => $timeslot->toDateString()]) }}" class="btn btn-secondary"><i class="fa fa-chevron-left" aria-hidden="true"></i> Cancel</a>
+                    <a href="{{ route('requestCancel', ['room' => $room->getName()]) }}" class="btn btn-secondary"><i class="fa fa-chevron-left" aria-hidden="true"></i> Cancel</a>
                     <button type="submit" class="btn btn-primary">Request</button>
                 </div>
             </div>

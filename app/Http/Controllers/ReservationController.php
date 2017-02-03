@@ -27,7 +27,10 @@ class ReservationController extends Controller
      */
     public function viewReservationList(Request $request)
     {
-        $reservationMapper = ReservationMapper::getInstance();
+        $roomMapper = RoomMapper::getInstance();
+		$roomMapper->clearStudent(Auth::id());
+		
+		$reservationMapper = ReservationMapper::getInstance();
         $reservations = $reservationMapper->findPositionsForUser(Auth::id());
 
         return view('reservation.list', [
@@ -115,16 +118,34 @@ class ReservationController extends Controller
     {
         $timeslot = Carbon::createFromFormat('Y-m-d\TH', $timeslot);
     
-        // validate room exists
+		// validate room exists
         $roomMapper = RoomMapper::getInstance();
         $room = $roomMapper->find($roomName);
-
-        if ($room === null) {
+		
+		if ($room === null) {
             return abort(404);
         }
 
+		//Check to see who is currently using the room
+		$roomStatus = $roomMapper->getStatus($roomName);
+		/*
+		var_dump($roomStatus);
+		echo "<br><br>";
+		var_dump(($roomStatus[0]->busy) != Auth::id());
+		die();
+		*/
+		if (($roomStatus[0]->busy) != 0 && $roomStatus[0]->busy != Auth::id()) {
+            return redirect()->route('calendar', ['date' => $timeslot->toDateString()])
+                ->with('error', sprintf("The room %s is currently busy! Please try again later. We apologize for any inconvenience.", $roomName));
+        }
+		//If its not busy, then set it to busy
+		else
+		{
+			$roomStatus = $roomMapper->setBusy($roomName, Auth::id());
+		}
+		
         $reservationMapper = ReservationMapper::getInstance();
-
+		
         // check if user exceeded maximum amount of reservations
         $reservationCount = $reservationMapper->countInRange(Auth::id(), $timeslot->copy()->startOfWeek(), $timeslot->copy()->startOfWeek()->addWeek());
 
@@ -140,7 +161,7 @@ class ReservationController extends Controller
             return redirect()->route('calendar', ['date' => $timeslot->toDateString()])
                 ->with('error', 'The waiting list for that time slot is full.');
         }
-
+	
         return view('reservation.request', [
             'room' => $room,
             'timeslot' => $timeslot
@@ -277,9 +298,29 @@ class ReservationController extends Controller
             }, $errored))));
         }
 
+		//Now that the user is done with the room, open it up again
+		$roomStatus = $roomMapper->setFree($roomName);
+		
         return $response;
     }
 
+	/**
+	* @param string $roomName
+
+	* @return \Illuminate\Http\Response
+	*/
+    public function requestCancel($roomName)
+    {
+		//Now that the user is done with the room, open it up again
+		$roomMapper = RoomMapper::getInstance();
+		$roomStatus = $roomMapper->setFree($roomName);
+		
+		$response = redirect()
+            ->route('calendar');
+		
+		return $response;
+	}
+		
     /**
      * @param Request $request
      * @param string $id

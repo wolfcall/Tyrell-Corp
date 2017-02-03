@@ -43,7 +43,8 @@ class CalendarController extends Controller
         // fetch all rooms to display
         $roomMapper = RoomMapper::getInstance();
         $rooms = $roomMapper->findAll();
-
+		
+		$roomMapper->clearStudent(Auth::id());
         $reservationMapper = ReservationMapper::getInstance();
 
         // find all of today's active (ie. not wait listed) reservations
