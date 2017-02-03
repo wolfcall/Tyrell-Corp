@@ -1,12 +1,29 @@
 @extends('layouts.app')
+<script>
+	i = 60;
+		function onTimer() {
+		document.getElementById('timer').innerHTML = i;
+		i--;
+			if (i < 0) 
+			{
+				window.location.href = '{{route("calendar")}}';
+			}
+			else 
+			{
+				setTimeout(onTimer, 1000);
+			}
+		}
+</script>
 
 @section('content')
-    <div class="container">
+    <body onload="onTimer()">
+	<div class="container" >
         <h1 class="pb-1">
-            Request a reservation
+            Request a Reservation
             <small class="text-muted">for {{ $timeslot->format('l, F jS, Y') }} at {{ $timeslot->format('g a') }} in {{ $room->getName() }}</small>
         </h1>
-
+			
+		<div class = "timer" style="color:red;text-align: center;">Reservation Request closes in <span id="timer"></span> seconds!</div><br>
         <form method="post" action="{{ route('requestPost', ['room' => $room->getName(), 'date' => $timeslot->format('Y-m-d\TH')]) }}">
             {{ csrf_field() }}
             <div class="form-group row{{ $errors->has('description') ? ' has-danger' : '' }}">
@@ -42,4 +59,5 @@
             </div>
         </form>
     </div>
+	</body>
 @endsection
