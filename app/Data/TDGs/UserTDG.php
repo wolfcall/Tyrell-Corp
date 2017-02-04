@@ -83,6 +83,31 @@ class UserTDG extends Singleton
             'name' => $user->getName()
         ]);
     }
+	
+	/**
+     * SQL statement to update that a user has attemped to make a reservation
+     * @param User $user
+     */
+    public function setAttempt($userId, $status)
+    {
+        DB::update('UPDATE users SET attempt = :status WHERE id = :id', [
+            'id' => $userId,
+            'status' => $status
+        ]);
+    }
+	
+	/**
+     * SQL statement to check that a user has attempted to make a reservation
+     *
+     * @param int $id
+     * @return \stdClass|null
+     */
+    public function getAttempt($userId)
+    {
+        $users = DB::select('SELECT attempt FROM users WHERE id = ?', [$userId]);
+		
+        return $users[0]->attempt;
+    }
 
     /**
      * SQL statement to delete a new User row
