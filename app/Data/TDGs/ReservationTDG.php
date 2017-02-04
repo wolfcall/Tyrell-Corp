@@ -83,8 +83,9 @@ class ReservationTDG extends Singleton
      */
     public function update(Reservation $reservation)
     {
-        DB::update('UPDATE reservations SET description = :description WHERE id = :id', [
+        DB::update('UPDATE reservations SET description = :description, wait_position = :wait_position WHERE id = :id', [
             'id' => $reservation->getId(),
+			'wait_position' => $reservation->getPosition(),
             'description' => $reservation->getDescription()
         ]);
     }

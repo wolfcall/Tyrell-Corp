@@ -202,6 +202,21 @@ class ReservationMapper extends Singleton
         // we've modified something in the object so we register the instance as dirty in the UoW
         ReservationUoW::getInstance()->registerDirty($reservation);
     }
+	
+	/**
+     * @param int $id
+     * @param string $description
+     */
+    public function setNewWaitlist(int $id, int $newPosition)
+    {
+        $reservation = $this->find($id);
+
+        $reservation->setPosition($newPosition);
+
+        // we've modified something in the object so we register the instance as dirty in the UoW
+        ReservationUoW::getInstance()->registerDirty($reservation);
+    }
+	
 
     /**
      * @param int $id

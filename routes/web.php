@@ -55,8 +55,9 @@ Route::get('/reservation/modify/{id}', 'ReservationController@showModifyForm')
 Route::post('/reservation/modify/{id}', 'ReservationController@modifyReservation')
     ->name('reservationModifyPost');
 
-Route::get('/reservation/cancel/{id}', 'ReservationController@cancelReservation')
-    ->name('reservationCancel');
+Route::get('/reservation/cancel/{id}/{room}/{timeslot}', 'ReservationController@cancelReservation')
+    ->where(['timeslot' => '2[0-9]{3}-[0-9]{2}-[0-9]{2}T[0-9]{2}'])
+	->name('reservationCancel');
 	
 Route::get('/reservation/requestCancel/{id}', 'ReservationController@requestCancel')
     ->name('requestCancel');

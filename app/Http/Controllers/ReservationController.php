@@ -324,14 +324,39 @@ class ReservationController extends Controller
     /**
      * @param Request $request
      * @param string $id
+	 * @param string $timeslot
      * @return \Illuminate\Http\Response
      */
-    public function cancelReservation(Request $request, $id)
+    public function cancelReservation(Request $request, $id, $roomName, $timeslot)
     {
-        // valiadte reservation exists and is owned by user
+		// valiadte reservation exists and is owned by user
         $reservationMapper = ReservationMapper::getInstance();
         $reservation = $reservationMapper->find($id);
-						
+		
+		$timeslot = Carbon::createFromFormat('Y-m-d\TH', $timeslot);
+
+		$waitingList = $reservationMapper->findForTimeslot($roomName, $timeslot);
+		
+		//Find out the position in the waiting list of the Reservation we will be deleting
+		foreach($waitingList as $w)
+		{
+			$target = $w->getId();
+			if($target == $id)
+			{
+				$position = $w->getPosition();
+			}
+		}
+		
+		//For everyone in position after the Reservation to be deleted, move them down one
+		foreach($waitingList as $w)
+		{
+			$next = $w->getPosition();
+			if($position < $next)
+			{
+				$reservationMapper->setNewWaitlist($w->getId(), $next-1);
+			}
+		}
+				
         if ($reservation === null || $reservation->getUserId() !== Auth::id()) {
             return abort(404);
         }
