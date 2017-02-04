@@ -27,14 +27,13 @@
 				Waiting, #{{ $r[1] }}
 			</td>
 		@endif
-	
-	@elseif ($r = $activeReservations->first(function ($r) use ($room, $timeslot) { return $r->getRoomName() === $room->getName() && $r->getTimeslot()->eq($timeslot); }))
-		{{-- Room has been booked by someone else --}}
-		<td class="table-danger calendar-timeslot-selectable align-middle text-xs-center" title="Reserve" data-href="{{ route('request', ['room' => $room->getName(), 'timeslot' => $timeslot->format('Y-m-d\TH') ]) }}">
-		</td>
 	{{-- Room is being used --}}
 	@elseif (($roomStatus[0]->busy) != 0)
 		<td class="table-info align-middle text-xs-center" title="Reserve">
+		</td>
+	@elseif ($r = $activeReservations->first(function ($r) use ($room, $timeslot) { return $r->getRoomName() === $room->getName() && $r->getTimeslot()->eq($timeslot); }))
+		{{-- Room has been booked by someone else --}}
+		<td class="table-danger calendar-timeslot-selectable align-middle text-xs-center" title="Reserve" data-href="{{ route('request', ['room' => $room->getName(), 'timeslot' => $timeslot->format('Y-m-d\TH') ]) }}">
 		</td>
 	@else
 		{{-- Room is free --}}
