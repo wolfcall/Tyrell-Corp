@@ -139,4 +139,17 @@ class UserTDG extends Singleton
 
         return $users[0];
     }
+	
+	/**
+     * Returns the check to see if a student is part of Capstone or not
+     *
+     * @param int $userId
+     * @return int
+     */
+    public function capstone(int $user_id): int
+    {
+        $status = DB::select('SELECT capstone FROM users WHERE id = ?', [$user_id]);
+        
+        return $status[0]->capstone;
+    }
 }

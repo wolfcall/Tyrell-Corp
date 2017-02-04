@@ -186,17 +186,4 @@ class ReservationTDG extends Singleton
             ->where('timeslot', '<', $end)
             ->count();
     }
-	
-	/**
-     * Returns the check to see if a student is part of Capstone or not
-     *
-     * @param int $userId
-     * @return int
-     */
-    public function capstone(int $user_id): int
-    {
-        $reservations = DB::select('SELECT capstone FROM users WHERE id = ?', [$user_id]);
-        
-        return $reservations[0]->capstone;
-    }
 }

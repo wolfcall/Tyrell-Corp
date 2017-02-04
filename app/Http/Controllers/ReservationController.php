@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Data\Mappers\ReservationMapper;
 use App\Data\Mappers\RoomMapper;
+use App\Data\Mappers\UserMapper;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -177,9 +178,10 @@ class ReservationController extends Controller
     public function requestReservation(Request $request, $roomName, $timeslot)
     {
         $reservationMapper = ReservationMapper::getInstance();
+		$userMapper = UserMapper::getInstance();
 		
 		//If the student is in capstone, we must know to give him priority
-		$capstone = $reservationMapper->capstone(Auth::id());
+		$capstone = $userMapper->capstone(Auth::id());
 		
 		/**Reminder that the student ID is accessible through the following code
 		$studentID = Auth::id();

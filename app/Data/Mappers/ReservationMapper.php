@@ -188,17 +188,6 @@ class ReservationMapper extends Singleton
     }
 	
 	/**
-     * Returns the check to see if a student is part of Capstone or not
-     *
-     * @param int $userId
-     * @return int
-     */
-    public function capstone(int $userId): int
-    {
-        return $this->tdg->capstone($userId);
-    }
-
-    /**
      * @param int $id
      * @param string $description
      */
