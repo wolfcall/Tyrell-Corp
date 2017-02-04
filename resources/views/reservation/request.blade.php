@@ -1,5 +1,6 @@
 @extends('layouts.app')
 <script>
+	var i = 60;
 	var left = localStorage.left;
 	//Check to see if the page was reloaded
 	//If it was, continue the timer where it left off
