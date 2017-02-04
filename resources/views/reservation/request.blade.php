@@ -1,11 +1,26 @@
 @extends('layouts.app')
 <script>
-	i = 60;
+	var left = localStorage.left;
+	//Check to see if the page was reloaded
+	//If it was, continue the timer where it left off
+	if (performance.navigation.type == 1) 
+	{
+	  console.info( "This page is reloaded" );
+	  i = localStorage.left;
+	}
+	//If it was not, simply continue
+	else
+	{
+	  console.info( "This page is not reloaded");
+	}
+	
 		function onTimer() {
 		document.getElementById('timer').innerHTML = i;
 		i--;
+		localStorage.left = i;	
 			if (i < 0) 
 			{
+				localStorage.removeItem("left");
 				window.location.href = '{{route("calendar")}}';
 			}
 			else 
@@ -13,7 +28,13 @@
 				setTimeout(onTimer, 1000);
 			}
 		}
+	
 </script>
+
+<?php
+
+?> 
+
 
 @section('content')
     <body onload="onTimer()">
