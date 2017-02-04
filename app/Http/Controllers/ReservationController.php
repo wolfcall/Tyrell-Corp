@@ -183,9 +183,6 @@ class ReservationController extends Controller
 		//If the student is in capstone, we must know to give him priority
 		$capstone = $userMapper->capstone(Auth::id());
 		
-		/**Reminder that the student ID is accessible through the following code
-		$studentID = Auth::id();
-		*/
 		$this->validate($request, [
             'description' => 'required',
             'recur' => 'required|integer|min:1|max:'.static::MAX_PER_USER
@@ -227,8 +224,9 @@ class ReservationController extends Controller
             }
 
             // check if waiting list for timeslot is full
-            $waitingList = $reservationMapper->findForTimeslot($roomName, $t);
-            if (count($waitingList) >= static::MAX_PER_TIMESLOT) {
+           	$waitingList = $reservationMapper->findForTimeslot($roomName, $t);
+            
+			if (count($waitingList) >= static::MAX_PER_TIMESLOT) {
                 $errored[] = [$t->copy(), 'The waiting list is full.'];
                 continue;
             }
@@ -237,7 +235,7 @@ class ReservationController extends Controller
              * Insert
              */
 
-            $reservations[] = $reservationMapper->create(intval(Auth::id()), $room->getName(), $t->copy(), $request->input('description', ''), $uuid);
+            $reservations[] = $reservationMapper->create(intval(Auth::id()), $room->getName(), $t->copy(), $request->input('description', ''), $uuid, count($waitingList));
         }
 
         // run the reservation operations now, as we need to process the results

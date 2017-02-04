@@ -63,7 +63,8 @@ class ReservationTDG extends Singleton
         try {
             $id = DB::table('reservations')->insertGetId([
                 'user_id' => $reservation->getUserId(),
-                'room_name' => $reservation->getRoomName(),
+                'wait_position' => $reservation->getPosition(),
+				'room_name' => $reservation->getRoomName(),
                 'timeslot' => $reservation->getTimeslot(),
                 'description' => $reservation->getDescription(),
                 'recur_id' => $reservation->getRecurId()
