@@ -23,10 +23,10 @@
 
             <dt class="col-sm-2">Status</dt>
             <dd class="col-sm-10">
-                @if ($position === 0)
+                @if ($reservation->getPosition() === 0)
                     Your reservation is <strong>active</strong>.
                 @else
-                    You are currently <strong>{{ ordinal($position) }}</strong> on the waiting list.
+                    You are currently <strong>{{ ordinal($reservation->getPosition()) }}</strong> on the waiting list.
                 @endif
             </dd>
         </dl>

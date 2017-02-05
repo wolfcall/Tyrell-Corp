@@ -17,14 +17,14 @@
 	}
 	))
     	{{-- User has a reservation for this timeslot --}}
-		@if ($r[1] === 0)
+		@if ($r[0]->getPosition() === 0)
 			{{-- Active reservation --}}
 			<td class="table-success calendar-timeslot-selectable align-middle text-xs-center" title="Show reservation" data-href="{{ route('reservation', ['id' => $r[0]->getId()]) }}">
 			</td>
 		@else
 			{{-- On the waiting list --}}
 			<td class="table-warning calendar-timeslot-selectable align-middle text-xs-center" title="Show reservation" data-href="{{ route('reservation', ['id' => $r[0]->getId()]) }}">
-				Waiting, #{{ $r[1] }}
+				Waiting #{{ $r[0]->getPosition() }}
 			</td>
 		@endif
 	{{-- Room is being used --}}
