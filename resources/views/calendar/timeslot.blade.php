@@ -7,7 +7,7 @@
 	
 	{{-- Room cannot be selected. Time has past --}}
 	@if ( ($timeslot->hour) <= $ourTime && $passedDate <= $ourDate )
-		<td class="table-active align-middle text-xs-center" title="Reserve">
+		<td class="table-active align-middle text-xs-center">
 		</td>
 	@elseif ($r = $userReservations->first(function ($r) use ($room, $timeslot) 
 	{ 
