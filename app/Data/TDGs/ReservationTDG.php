@@ -133,6 +133,36 @@ class ReservationTDG extends Singleton
             WHERE timeslot = :timeslot AND room_name = :room_name
             ORDER BY id', ['timeslot' => $timeslot, 'room_name' => $roomName]);
     }
+	
+	/**
+     * Returns a list of all active Reservations (if any) for a given timeslot by the user passed in
+     *
+	 * @param int $id
+     * @param \DateTime $timeslot
+     * @return array
+     */
+    public function findAllTimeslotActive(\DateTime $timeslot, $id)
+    {
+        return DB::select('SELECT *
+            FROM reservations
+            WHERE timeslot = :timeslot AND user_id = :id AND wait_position = 0
+            ORDER BY id', ['timeslot' => $timeslot, 'id' => $id]);
+    }
+	
+	/**
+     * Returns a list of all waitlisted Reservations (if any) for a given timeslot by the user passed in
+     *
+	 * @param int $id
+     * @param \DateTime $timeslot
+     * @return array
+     */
+    public function findAllTimeslotWaitlisted(\DateTime $timeslot, $id)
+    {
+        return DB::select('SELECT *
+            FROM reservations
+            WHERE timeslot = :timeslot AND user_id = :id AND wait_position != 0
+            ORDER BY id', ['timeslot' => $timeslot, 'id' => $id]);
+    }
 
     /**
      * Returns a list of all active (eg. not waitlisted) reservations for a user
