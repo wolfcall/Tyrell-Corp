@@ -19,6 +19,8 @@ class CreateReservationsTable extends Migration
             $table->string('room_name');
             $table->dateTime('timeslot');
             $table->text('description');
+			//$table->string('recur_id');
+			$table->integer('wait_position')->unsigned();
             $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('room_name')->references('name')->on('rooms');
             $table->unique(['user_id', 'room_name', 'timeslot']);
