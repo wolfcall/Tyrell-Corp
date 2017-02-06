@@ -354,7 +354,7 @@ class ReservationController extends Controller
          * Format the status messages
          */
         if (count($successful)) {
-			if(count($errored))
+			if(count($active) == 3)
 			{
 				$response = $response->with('success', sprintf('You have reached the maximum reservations for the week! Removing all waitlists.<br> The following reservations have been successfully created for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
 					return sprintf("<li><strong>%s</strong></li>", $m->format('l, F jS, Y'));

@@ -42,10 +42,10 @@
 						@if($r[0]->getTimeslot()->format('H') > $ourTime)
 						<tr class="{{ $r[1] > 0 ? 'table-warning' : '' }}">
 							<th scope="row">
-								@if ($r[1] === 0)
+								@if ($r[0]->getPosition() === 0)
 									Active
 								@else
-									Waiting, position #{{ $r[1] }}
+									Waiting, position #{{ $r[0]->getPosition() }}
 								@endif
 							</th>
 							<td>{{ $r[0]->getTimeslot()->format('l, F jS, Y') }}</td>
@@ -59,10 +59,10 @@
 					@else
 						<tr class="{{ $r[1] > 0 ? 'table-warning' : '' }}">
 								<th scope="row">
-									@if ($r[1] === 0)
+									@if ($r[0]->getPosition() === 0)
 										Active
 									@else
-										Waiting, position #{{ $r[1] }}
+										Waiting: Position #{{ $r[0]->getPosition() }}
 									@endif
 								</th>
 								<td>{{ $r[0]->getTimeslot()->format('l, F jS, Y') }}</td>
