@@ -180,9 +180,6 @@ class ReservationController extends Controller
         $reservationMapper = ReservationMapper::getInstance();
 		$userMapper = UserMapper::getInstance();
 		
-		//If the student is in capstone, we must know to give him priority
-		$capstone = $userMapper->capstone(Auth::id());
-		
 		$this->validate($request, [
             'description' => 'required',
             'recur' => 'required|integer|min:1|max:'.static::MAX_PER_USER
@@ -210,8 +207,8 @@ class ReservationController extends Controller
         $errored = [];
 
         // loop over every recurring week and independently request the reservation for that week
-        for ($t = $timeslot->copy(), $i = 0; $i < $recur; $t->addWeek(), ++$i) {
-
+        for ($t = $timeslot->copy(), $i = 0; $i < $recur; $t->addWeek(), ++$i) 
+		{
             /*
              * Pre-insert checks
              */
@@ -229,14 +226,54 @@ class ReservationController extends Controller
 			if (count($waitingList) >= static::MAX_PER_TIMESLOT) {
                 $errored[] = [$t->copy(), 'The waiting list is full.'];
                 continue;
-            }
-
-            /*
-             * Insert
-             */
-
-            $reservations[] = $reservationMapper->create(intval(Auth::id()), $room->getName(), $t->copy(), $request->input('description', ''), $uuid, count($waitingList));
-        }
+            }			
+			
+			//Check if the student is in capstone, so we can know to give him priority or not
+			$capstone = $userMapper->capstone(Auth::id());
+					
+			//Only execute if the student is a Capstone student
+			//And if there are already someone in the waitling list
+			//Iterate through all the reservations found
+			$count = 1;
+			if($capstone && count($waitingList) > 1)
+			{
+				foreach($waitingList as $w)
+				{
+					$student = $w->getUserId();
+					$position = $w->getPosition();
+					$status = $userMapper->capstone($student);
+					//If any of the users are from capstone, then increment the count variable
+					if($status)
+					{
+						$count++;
+					}
+					//This means the person who has the room is not a capstone student
+					//However we will not kick him out, we will just skip him
+					elseif($position == 0)
+					{
+						continue;
+					}
+					//Move them down by incrementing their position on the waitlist
+					else
+					{
+						//Increment waitlist position
+						$reservationMapper->moveDown($w);
+					}
+				}
+				/*
+				* Insert
+				*/
+				$reservations[] = $reservationMapper->create(intval(Auth::id()), $room->getName(), $t->copy(), $request->input('description', ''), $uuid, $count);
+			}
+			//If no one is in the room, then execute as if it was a regular student
+			else
+			{
+				/*
+				* Insert
+				*/
+				$reservations[] = $reservationMapper->create(intval(Auth::id()), $room->getName(), $t->copy(), $request->input('description', ''), $uuid, count($waitingList));
+			}	
+		}
 
         // run the reservation operations now, as we need to process the results
         $reservationMapper->done();
@@ -245,7 +282,8 @@ class ReservationController extends Controller
          * Post-insert checks
          */
 
-        foreach ($reservations as $reservation) {
+        foreach ($reservations as $reservation) 
+		{
             $t = $reservation->getTimeslot();
 
             // check if there was an error inserting the reservation, ie. duplicate reservation
@@ -255,7 +293,7 @@ class ReservationController extends Controller
             }
 
             // find the new reservation's position #
-            $position = $reservationMapper->findPosition($reservation);
+            $position = $reservation->getPosition();
 
             if ($position > static::MAX_PER_TIMESLOT) {
                 // this request has exceeded the limit, delete it
@@ -279,7 +317,6 @@ class ReservationController extends Controller
         /*
          * Format the status messages
          */
-
         if (count($successful)) {
             $response = $response->with('success', sprintf('The following reservations have been successfully created for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
                 return sprintf("<li><strong>%s</strong></li>", $m->format('l, F jS, Y'));

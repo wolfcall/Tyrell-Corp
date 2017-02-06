@@ -32,11 +32,6 @@
 	
 </script>
 
-<?php
-
-?> 
-
-
 @section('content')
     <body onload="onTimer()">
 	<div class="container" >
