@@ -184,9 +184,22 @@ class ReservationMapper extends Singleton
      * @param \DateTime $end End date, exclusive
      * @return int
      */
-    public function countInRange(int $userId, \DateTime $start, \DateTime $end): int
+    public function countInRange(int $userId, \DateTime $start, \DateTime $end)
     {
         return $this->tdg->countInRange($userId, $start, $end);
+    }
+	
+	/**
+     * SQL statement to count all wait-listed reservations for a certain user within a date range
+     *
+     * @param int $userId
+     * @param \DateTime $start Start date, inclusive
+     * @param \DateTime $end End date, exclusive
+     * @return int
+     */
+    public function countAll(int $userId, \DateTime $start, \DateTime $end)
+    {
+        return $this->tdg->countAll($userId, $start, $end);
     }
 	
 	/**
