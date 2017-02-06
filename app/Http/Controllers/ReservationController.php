@@ -129,12 +129,7 @@ class ReservationController extends Controller
 
 		//Check to see who is currently using the room
 		$roomStatus = $roomMapper->getStatus($roomName);
-		/*
-		var_dump($roomStatus);
-		echo "<br><br>";
-		var_dump(($roomStatus[0]->busy) != Auth::id());
-		die();
-		*/
+
 		if (($roomStatus[0]->busy) != 0 && $roomStatus[0]->busy != Auth::id()) {
             return redirect()->route('calendar', ['date' => $timeslot->toDateString()])
                 ->with('error', sprintf("The room %s is currently busy! Please try again later. We apologize for any inconvenience.", $roomName));
@@ -146,11 +141,11 @@ class ReservationController extends Controller
 		}
 		
         $reservationMapper = ReservationMapper::getInstance();
-		
+			
         // check if user exceeded maximum amount of reservations
-        $reservationCount = $reservationMapper->countInRange(Auth::id(), $timeslot->copy()->startOfWeek(), $timeslot->copy()->startOfWeek()->addWeek());
+        $reservationCount = count($reservationMapper->countInRange(Auth::id(), $timeslot->copy()->startOfWeek(), $timeslot->copy()->startOfWeek()->addWeek()));
 
-        if ($reservationCount >= static::MAX_PER_USER) {
+		if ($reservationCount >= static::MAX_PER_USER) {
             return redirect()->route('calendar', ['date' => $timeslot->toDateString()])
                 ->with('error', sprintf("You've exceeded your reservation request limit (%d).", static::MAX_PER_USER));
         }
@@ -203,6 +198,7 @@ class ReservationController extends Controller
 
         // status message arrays
         $successful = [];
+		$deleted = [];
         $waitlisted = [];
         $errored = [];
 
@@ -214,7 +210,7 @@ class ReservationController extends Controller
              */
 
             // check if user exceeded maximum amount of reservations
-            $reservationCount = $reservationMapper->countInRange(Auth::id(), $t->copy()->startOfWeek(), $t->copy()->startOfWeek()->addWeek());
+            $reservationCount = count($reservationMapper->countInRange(Auth::id(), $t->copy()->startOfWeek(), $t->copy()->startOfWeek()->addWeek()));
             if ($reservationCount >= static::MAX_PER_USER) {
                 $errored[] = [$t->copy(), sprintf("You've exceeded your weekly reservation request limit of %d.", static::MAX_PER_USER)];
                 continue;
@@ -282,7 +278,20 @@ class ReservationController extends Controller
          * Post-insert checks
          */
 
-        foreach ($reservations as $reservation) 
+        $active = $reservationMapper->countInRange(Auth::id(), $timeslot->copy()->startOfWeek(), $timeslot->copy()->startOfWeek()->addWeek());
+
+		if(count($active == 3))
+		{
+			$waited = $reservationMapper->countAll(Auth::id(), $timeslot->copy()->startOfWeek(), $timeslot->copy()->startOfWeek()->addWeek());
+		
+			foreach($waited as $w)
+			{
+				$reservationMapper->delete($w->id);
+				$deleted[] = $w;
+			}
+		}
+				
+		foreach ($reservations as $reservation) 
 		{
             $t = $reservation->getTimeslot();
 
@@ -318,10 +327,22 @@ class ReservationController extends Controller
          * Format the status messages
          */
         if (count($successful)) {
-            $response = $response->with('success', sprintf('The following reservations have been successfully created for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
-                return sprintf("<li><strong>%s</strong></li>", $m->format('l, F jS, Y'));
-            }, $successful))));
+			if(count($deleted))
+			{
+				$response = $response->with('success', sprintf('You have reached the maximum reservations for the week!<br> You have been removed from all waitlisted positions this week.<br> The following reservations have been successfully created for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
+					return sprintf("<li><strong>%s</strong></li>", $m->format('l, F jS, Y'));
+				}, $successful))));				
+			}
+			else			
+			{
+				$response = $response->with('success', sprintf('The following reservations have been successfully created for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
+					return sprintf("<li><strong>%s</strong></li>", $m->format('l, F jS, Y'));
+				}, $successful))));
+			}
+			
+			
         }
+
 
         if (count($waitlisted)) {
             $response = $response->with('warning', sprintf('You have been put on a waiting list for the following reservations for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {

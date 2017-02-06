@@ -173,19 +173,35 @@ class ReservationTDG extends Singleton
     }
 
     /**
-     * SQL statement to count the reservations for a certain user within a date range
+     * SQL statement to count the active reservations for a certain user within a date range
      *
      * @param int $user_id
      * @param \DateTime $start Start date, inclusive
      * @param \DateTime $end End date, exclusive
      * @return int
      */
-    public function countInRange(int $user_id, \DateTime $start, \DateTime $end): int
+    public function countInRange(int $user_id, \DateTime $start, \DateTime $end)
     {
-        return DB::table('reservations')
-            ->where('user_id', $user_id)
-            ->where('timeslot', '>=', $start)
-            ->where('timeslot', '<', $end)
-            ->count();
+        return DB::select('SELECT *
+            FROM reservations
+            WHERE user_id = :user AND timeslot >= :start AND timeslot < :end AND wait_position = 0', 
+			['user' => $user_id, 'start' => $start, 'end' => $end]);
     }
+	
+	/**
+     * SQL statement to count all wait-listed reservations for a certain user within a date range
+     *
+     * @param int $user_id
+     * @param \DateTime $start Start date, inclusive
+     * @param \DateTime $end End date, exclusive
+     * @return int
+     */
+    public function countAll(int $user_id, \DateTime $start, \DateTime $end)
+    {
+        return DB::select('SELECT *
+            FROM reservations
+            WHERE user_id = :user AND timeslot >= :start AND timeslot < :end AND wait_position != 0', 
+			['user' => $user_id, 'start' => $start, 'end' => $end]);
+    }
+	
 }
