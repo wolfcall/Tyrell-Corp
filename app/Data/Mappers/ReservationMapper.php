@@ -217,6 +217,19 @@ class ReservationMapper extends Singleton
         ReservationUoW::getInstance()->registerDirty($reservation);
     }
 	
+	/**
+	* @param int $id
+	* @param string $description
+	*/
+    public function moveDown(Reservation $reservation)
+    {
+        $old = $reservation->getPosition();
+		$reservation->setPosition($old+1);
+
+        // we've modified something in the object so we register the instance as dirty in the UoW
+        ReservationUoW::getInstance()->registerDirty($reservation);
+    }
+	
 
     /**
      * @param int $id
