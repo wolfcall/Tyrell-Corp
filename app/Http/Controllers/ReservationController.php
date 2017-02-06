@@ -147,7 +147,8 @@ class ReservationController extends Controller
 
 		if ($reservationCount >= static::MAX_PER_USER) {
             return redirect()->route('calendar', ['date' => $timeslot->toDateString()])
-                ->with('error', sprintf("You've exceeded your reservation request limit (%d).", static::MAX_PER_USER));
+                ->with('error', sprintf("You've exceeded your reservation request limit of (%d) for this week.<br> 
+				Please try reserving next week or remove a reservation from this week to be eligible.", static::MAX_PER_USER));
         }
 
         // check if waiting list for timeslot is full
