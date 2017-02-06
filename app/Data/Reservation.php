@@ -8,6 +8,11 @@ class Reservation
      * @var int
      */
     protected $id;
+	
+	 /**
+     * @var int
+     */
+    protected $position;
 
     /**
      * @var int
@@ -43,9 +48,10 @@ class Reservation
      * @param null $recurId
      * @param int $id
      */
-    public function __construct(int $userId, string $roomName, \DateTime $timeslot, string $description = null, $recurId = null, $id = null)
+    public function __construct(int $userId, string $roomName, \DateTime $timeslot, string $description = null, $recurId = null, $id = null, int $position)
     {
         $this->userId = $userId;
+		$this->position = $position;
         $this->roomName = $roomName;
         $this->description = $description;
         $this->timeslot = $timeslot;
@@ -86,6 +92,23 @@ class Reservation
     {
         $this->userId = $userId;
     }
+	
+	  /**
+     * @return int
+     */
+    public function getPosition(): int
+    {
+        return $this->position;
+    }
+
+    /**
+     * @param int $userId
+     */
+    public function setPosition(int $position)
+    {
+        $this->position = $position;
+    }
+	
 
     /**
      * @return string

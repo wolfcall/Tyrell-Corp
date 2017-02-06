@@ -63,7 +63,8 @@ class ReservationTDG extends Singleton
         try {
             $id = DB::table('reservations')->insertGetId([
                 'user_id' => $reservation->getUserId(),
-                'room_name' => $reservation->getRoomName(),
+                'wait_position' => $reservation->getPosition(),
+				'room_name' => $reservation->getRoomName(),
                 'timeslot' => $reservation->getTimeslot(),
                 'description' => $reservation->getDescription(),
                 'recur_id' => $reservation->getRecurId()
@@ -82,8 +83,9 @@ class ReservationTDG extends Singleton
      */
     public function update(Reservation $reservation)
     {
-        DB::update('UPDATE reservations SET description = :description WHERE id = :id', [
+        DB::update('UPDATE reservations SET description = :description, wait_position = :wait_position WHERE id = :id', [
             'id' => $reservation->getId(),
+			'wait_position' => $reservation->getPosition(),
             'description' => $reservation->getDescription()
         ]);
     }
@@ -185,18 +187,5 @@ class ReservationTDG extends Singleton
             ->where('timeslot', '>=', $start)
             ->where('timeslot', '<', $end)
             ->count();
-    }
-	
-	/**
-     * Returns the check to see if a student is part of Capstone or not
-     *
-     * @param int $userId
-     * @return int
-     */
-    public function capstone(int $user_id): int
-    {
-        $reservations = DB::select('SELECT capstone FROM users WHERE id = ?', [$user_id]);
-        
-        return $reservations[0]->capstone;
     }
 }
