@@ -198,8 +198,7 @@ class ReservationController extends Controller
 
         // status message arrays
         $successful = [];
-		$deleted = [];
-        $waitlisted = [];
+		$waitlisted = [];
         $errored = [];
 
         // loop over every recurring week and independently request the reservation for that week
@@ -224,9 +223,17 @@ class ReservationController extends Controller
                 continue;
             }			
 			
+			//Check if any active reservations in any other rooms would overlap with the current reservation
+			$overlap = $reservationMapper->findAllTimeslotActive($t, Auth::id());
+						
+			if (count($overlap)) {
+                $errored[] = [$t->copy(), 'You already have a reservation for that time in Room '.$overlap[0]->room_name.'. Choose another time slot.'];
+                continue;
+            }		
+			
 			//Check if the student is in capstone, so we can know to give him priority or not
 			$capstone = $userMapper->capstone(Auth::id());
-					
+				
 			//Only execute if the student is a Capstone student
 			//And if there are already someone in the waitling list
 			//Iterate through all the reservations found
@@ -278,29 +285,49 @@ class ReservationController extends Controller
          * Post-insert checks
          */
 
-        $active = $reservationMapper->countInRange(Auth::id(), $timeslot->copy()->startOfWeek(), $timeslot->copy()->startOfWeek()->addWeek());
-
-		if(count($active == 3))
-		{
-			$waited = $reservationMapper->countAll(Auth::id(), $timeslot->copy()->startOfWeek(), $timeslot->copy()->startOfWeek()->addWeek());
-		
-			foreach($waited as $w)
-			{
-				$reservationMapper->delete($w->id);
-				$deleted[] = $w;
-			}
-		}
-				
-		foreach ($reservations as $reservation) 
+        foreach ($reservations as $reservation) 
 		{
             $t = $reservation->getTimeslot();
+			
+			// Check the current active reservations
+			$active = $reservationMapper->countInRange(Auth::id(), $t->copy()->startOfWeek(), $t->copy()->startOfWeek()->addWeek());
 
+			// Check the current waitlisted reservations
+			$waited = $reservationMapper->countAll(Auth::id(), $t->copy()->startOfWeek(), $t->copy()->startOfWeek()->addWeek());
+
+			//Check if any waitlisted reservations in any other rooms would overlap with the recently added reservation
+			$overlap = $reservationMapper->findAllTimeslotWaitlisted($t, Auth::id());
+			
+			//If the amount of active reservaitons is at 3, then delete all the ones on the waitlist from the current week
+			if(count($active) == 3)
+			{
+				foreach($waited as $w)
+				{
+					$temp = $reservationMapper->find($w->id);
+					$t2 = $temp->getTimeslot();
+					
+					$reservationMapper->delete($w->id);
+					$errored[] = [$t2, 'You have been removed from the waitlist in room '.$w->room_name.' at '. $t2->format('g a').'.'];
+					continue;
+				}
+			}
+			elseif (count($overlap)) 
+			{
+                $temp = $reservationMapper->find($overlap[0]->id);
+				$t2 = $temp->getTimeslot();
+				
+				$errored[] = [$t2, 'You have been removed from the waitlist in room '.$overlap[0]->room_name.' at '. $t2->format('g a').'.'];
+               	$reservationMapper->delete($overlap[0]->id);
+            }
+			
+			
+			
             // check if there was an error inserting the reservation, ie. duplicate reservation
             if ($reservation->getId() === null) {
                 $errored[] = [$t, 'You already have a reservation for this time slot.'];
                 continue;
             }
-
+							
             // find the new reservation's position #
             $position = $reservation->getPosition();
 
@@ -327,9 +354,9 @@ class ReservationController extends Controller
          * Format the status messages
          */
         if (count($successful)) {
-			if(count($deleted))
+			if(count($errored))
 			{
-				$response = $response->with('success', sprintf('You have reached the maximum reservations for the week!<br> You have been removed from all waitlisted positions this week.<br> The following reservations have been successfully created for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
+				$response = $response->with('success', sprintf('You have reached the maximum reservations for the week! Removing all waitlists.<br> The following reservations have been successfully created for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
 					return sprintf("<li><strong>%s</strong></li>", $m->format('l, F jS, Y'));
 				}, $successful))));				
 			}
@@ -338,11 +365,8 @@ class ReservationController extends Controller
 				$response = $response->with('success', sprintf('The following reservations have been successfully created for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
 					return sprintf("<li><strong>%s</strong></li>", $m->format('l, F jS, Y'));
 				}, $successful))));
-			}
-			
-			
+			}			
         }
-
 
         if (count($waitlisted)) {
             $response = $response->with('warning', sprintf('You have been put on a waiting list for the following reservations for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {

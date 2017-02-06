@@ -107,6 +107,27 @@ class ReservationMapper extends Singleton
 
         return $reservations;
     }
+	
+	/**
+	 * @param int $id
+     * @param \DateTime $timeslot
+     * @return Reservation[]
+     */
+    public function findAllTimeslotActive(\DateTime $timeslot, $id)
+    {
+        return  $this->tdg->findAllTimeslotActive($timeslot, $id);
+    }
+	
+	/**
+	 * @param int $id
+     * @param \DateTime $timeslot
+     * @return Reservation[]
+     */
+    public function findAllTimeslotWaitlisted(\DateTime $timeslot, $id)
+    {
+        return  $this->tdg->findAllTimeslotWaitlisted($timeslot, $id);
+    }
+	
 
     /**
      * @param Reservation $reservation
