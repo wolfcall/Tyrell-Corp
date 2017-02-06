@@ -1,5 +1,7 @@
 @extends('layouts.app')
-
+<?php
+	use App\Data\Mappers\RoomMapper;
+?>
 @section('content')
     <div class="container">
         <h1 class="pb-1">
@@ -19,7 +21,8 @@
 				<li type="square" style="color:#61ad2e">Your Reservations</li>
 				<li type="square" style="color:#f98b8b">Reserved by another User</li>
 				<li type="square" style="color:#c4c10b">Waiting List Position</li>
-				<li type="square" style="color:#b3b3cc">Unavailable</li>
+				<li type="square" style="color:#b3b3cc">Unavailable. Cannot book a time in the past</li>
+				<li type="square" style="color:#84d2f9">Room is being used by another student</li>
 				</ul>
 				</fieldset>
 			</div>
@@ -56,7 +59,11 @@
                     </thead>
 					<tbody>
                     @foreach($rooms as $room)
-                        <tr class="calendar-room-row">
+					<?php						
+						$roomMapper = RoomMapper::getInstance();
+						$roomStatus = $roomMapper->getStatus($room->getName());
+					?>
+						<tr class="calendar-room-row">
 							<th class="align-middle text-xs-center">{{ $room->getName() }}</th>
                             @for ($timeslot = $date->copy()->addHours(0); $timeslot->hour < 12; $timeslot->addHour())
                                	@include('calendar.timeslot')
@@ -74,7 +81,11 @@
                     </thead>
 					<tbody>
                     @foreach($rooms as $room)
-                        <tr class="calendar-room-row">
+                    <?php						
+						$roomMapper = RoomMapper::getInstance();
+						$roomStatus = $roomMapper->getStatus($room->getName());
+					?>
+						<tr class="calendar-room-row">
                             <th class="align-middle text-xs-center">{{ $room->getName() }}</th>
 							@for ($timeslot = $date->copy()->addHours(12); $timeslot->hour < 23; $timeslot->addHour())              
 								@include('calendar.timeslot')

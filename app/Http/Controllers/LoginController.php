@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Data\Mappers\RoomMapper;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Auth;
 
@@ -65,7 +66,10 @@ class LoginController extends Controller
      */
     public function logout(Request $request)
     {
-        $this->guard()->logout();
+        $roomMapper = RoomMapper::getInstance();
+		$roomMapper->clearStudent(Auth::id());
+		
+		$this->guard()->logout();
         $request->session()->flush();
         $request->session()->regenerate();
 

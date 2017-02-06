@@ -34,6 +34,38 @@ class RoomMapper extends Singleton
         $this->tdg = RoomTDG::getInstance();
         $this->identityMap = RoomIdentityMap::getInstance();
     }
+	
+	/**
+     * Set the Room to busy when it is busy
+     */
+    public function setBusy(string $roomName, $student)
+    {
+        $this->tdg->setBusy($roomName, $student);
+    }
+	
+	/**
+     * Set the Room to free when it is free
+     */
+    public function setFree(string $roomName)
+    {
+        $this->tdg->setFree($roomName);
+    }
+	
+	/**
+     * Set the Room to free when it is free
+     */
+    public function clearStudent($student)
+    {
+        $this->tdg->clearStudent($student);
+    }
+	
+	/**
+     * Set the Room to busy when it is busy
+     */
+    public function getStatus($roomName)
+    {
+        return $this->tdg->getStatus($roomName);
+    }
 
     /**
      * Fetch message for retrieving a User with the given ID

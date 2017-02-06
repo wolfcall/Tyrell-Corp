@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Data\Mappers\ReservationMapper;
 use App\Data\Mappers\RoomMapper;
+use App\Data\Mappers\UserMapper;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,7 +28,10 @@ class ReservationController extends Controller
      */
     public function viewReservationList(Request $request)
     {
-        $reservationMapper = ReservationMapper::getInstance();
+        $roomMapper = RoomMapper::getInstance();
+		$roomMapper->clearStudent(Auth::id());
+		
+		$reservationMapper = ReservationMapper::getInstance();
         $reservations = $reservationMapper->findPositionsForUser(Auth::id());
 
         return view('reservation.list', [
@@ -115,16 +119,34 @@ class ReservationController extends Controller
     {
         $timeslot = Carbon::createFromFormat('Y-m-d\TH', $timeslot);
     
-        // validate room exists
+		// validate room exists
         $roomMapper = RoomMapper::getInstance();
         $room = $roomMapper->find($roomName);
-
-        if ($room === null) {
+		
+		if ($room === null) {
             return abort(404);
         }
 
+		//Check to see who is currently using the room
+		$roomStatus = $roomMapper->getStatus($roomName);
+		/*
+		var_dump($roomStatus);
+		echo "<br><br>";
+		var_dump(($roomStatus[0]->busy) != Auth::id());
+		die();
+		*/
+		if (($roomStatus[0]->busy) != 0 && $roomStatus[0]->busy != Auth::id()) {
+            return redirect()->route('calendar', ['date' => $timeslot->toDateString()])
+                ->with('error', sprintf("The room %s is currently busy! Please try again later. We apologize for any inconvenience.", $roomName));
+        }
+		//If its not busy, then set it to busy
+		else
+		{
+			$roomStatus = $roomMapper->setBusy($roomName, Auth::id());
+		}
+		
         $reservationMapper = ReservationMapper::getInstance();
-
+		
         // check if user exceeded maximum amount of reservations
         $reservationCount = $reservationMapper->countInRange(Auth::id(), $timeslot->copy()->startOfWeek(), $timeslot->copy()->startOfWeek()->addWeek());
 
@@ -140,7 +162,7 @@ class ReservationController extends Controller
             return redirect()->route('calendar', ['date' => $timeslot->toDateString()])
                 ->with('error', 'The waiting list for that time slot is full.');
         }
-
+	
         return view('reservation.request', [
             'room' => $room,
             'timeslot' => $timeslot
@@ -156,13 +178,11 @@ class ReservationController extends Controller
     public function requestReservation(Request $request, $roomName, $timeslot)
     {
         $reservationMapper = ReservationMapper::getInstance();
+		$userMapper = UserMapper::getInstance();
 		
 		//If the student is in capstone, we must know to give him priority
-		$capstone = $reservationMapper->capstone(Auth::id());
+		$capstone = $userMapper->capstone(Auth::id());
 		
-		/**Reminder that the student ID is accessible through the following code
-		$studentID = Auth::id();
-		*/
 		$this->validate($request, [
             'description' => 'required',
             'recur' => 'required|integer|min:1|max:'.static::MAX_PER_USER
@@ -204,8 +224,9 @@ class ReservationController extends Controller
             }
 
             // check if waiting list for timeslot is full
-            $waitingList = $reservationMapper->findForTimeslot($roomName, $t);
-            if (count($waitingList) >= static::MAX_PER_TIMESLOT) {
+           	$waitingList = $reservationMapper->findForTimeslot($roomName, $t);
+            
+			if (count($waitingList) >= static::MAX_PER_TIMESLOT) {
                 $errored[] = [$t->copy(), 'The waiting list is full.'];
                 continue;
             }
@@ -214,7 +235,7 @@ class ReservationController extends Controller
              * Insert
              */
 
-            $reservations[] = $reservationMapper->create(intval(Auth::id()), $room->getName(), $t->copy(), $request->input('description', ''), $uuid);
+            $reservations[] = $reservationMapper->create(intval(Auth::id()), $room->getName(), $t->copy(), $request->input('description', ''), $uuid, count($waitingList));
         }
 
         // run the reservation operations now, as we need to process the results
@@ -277,20 +298,65 @@ class ReservationController extends Controller
             }, $errored))));
         }
 
+		//Now that the user is done with the room, open it up again
+		$roomStatus = $roomMapper->setFree($roomName);
+		
         return $response;
     }
 
+	/**
+	* @param string $roomName
+
+	* @return \Illuminate\Http\Response
+	*/
+    public function requestCancel($roomName)
+    {
+		//Now that the user is done with the room, open it up again
+		$roomMapper = RoomMapper::getInstance();
+		$roomStatus = $roomMapper->setFree($roomName);
+		
+		$response = redirect()
+            ->route('calendar');
+		
+		return $response;
+	}
+		
     /**
      * @param Request $request
      * @param string $id
+	 * @param string $timeslot
      * @return \Illuminate\Http\Response
      */
-    public function cancelReservation(Request $request, $id)
+    public function cancelReservation(Request $request, $id, $roomName, $timeslot)
     {
-        // valiadte reservation exists and is owned by user
+		// valiadte reservation exists and is owned by user
         $reservationMapper = ReservationMapper::getInstance();
         $reservation = $reservationMapper->find($id);
-						
+		
+		$timeslot = Carbon::createFromFormat('Y-m-d\TH', $timeslot);
+
+		$waitingList = $reservationMapper->findForTimeslot($roomName, $timeslot);
+		
+		//Find out the position in the waiting list of the Reservation we will be deleting
+		foreach($waitingList as $w)
+		{
+			$target = $w->getId();
+			if($target == $id)
+			{
+				$position = $w->getPosition();
+			}
+		}
+		
+		//For everyone in position after the Reservation to be deleted, move them down one
+		foreach($waitingList as $w)
+		{
+			$next = $w->getPosition();
+			if($position < $next)
+			{
+				$reservationMapper->setNewWaitlist($w->getId(), $next-1);
+			}
+		}
+				
         if ($reservation === null || $reservation->getUserId() !== Auth::id()) {
             return abort(404);
         }

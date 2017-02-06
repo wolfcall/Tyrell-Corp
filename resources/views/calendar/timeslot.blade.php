@@ -5,9 +5,9 @@
 	$passedDate = $date->toDateString();
 	?>
 	
+	{{-- Room cannot be selected. Time has past --}}
 	@if ( ($timeslot->hour) <= $ourTime && $passedDate <= $ourDate )
-		{{-- Room cannot be selected. Time has past --}}
-		<td class="table-active align-middle text-xs-center" title="Reserve">
+		<td class="table-active align-middle text-xs-center">
 		</td>
 	@elseif ($r = $userReservations->first(function ($r) use ($room, $timeslot) 
 	{ 
@@ -17,17 +17,20 @@
 	}
 	))
     	{{-- User has a reservation for this timeslot --}}
-		@if ($r[1] === 0)
+		@if ($r[0]->getPosition() === 0)
 			{{-- Active reservation --}}
 			<td class="table-success calendar-timeslot-selectable align-middle text-xs-center" title="Show reservation" data-href="{{ route('reservation', ['id' => $r[0]->getId()]) }}">
 			</td>
 		@else
 			{{-- On the waiting list --}}
 			<td class="table-warning calendar-timeslot-selectable align-middle text-xs-center" title="Show reservation" data-href="{{ route('reservation', ['id' => $r[0]->getId()]) }}">
-				Waiting, #{{ $r[1] }}
+				Waiting #{{ $r[0]->getPosition() }}
 			</td>
 		@endif
-	
+	{{-- Room is being used --}}
+	@elseif (($roomStatus[0]->busy) != 0)
+		<td class="table-info align-middle text-xs-center" title="Reserve">
+		</td>
 	@elseif ($r = $activeReservations->first(function ($r) use ($room, $timeslot) { return $r->getRoomName() === $room->getName() && $r->getTimeslot()->eq($timeslot); }))
 		{{-- Room has been booked by someone else --}}
 		<td class="table-danger calendar-timeslot-selectable align-middle text-xs-center" title="Reserve" data-href="{{ route('request', ['room' => $room->getName(), 'timeslot' => $timeslot->format('Y-m-d\TH') ]) }}">
