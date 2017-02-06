@@ -44,8 +44,10 @@ class CalendarController extends Controller
         $roomMapper = RoomMapper::getInstance();
         $rooms = $roomMapper->findAll();
 		
+		// Clear student from any room that they were keeping busy
 		$roomMapper->clearStudent(Auth::id());
-        $reservationMapper = ReservationMapper::getInstance();
+        
+		$reservationMapper = ReservationMapper::getInstance();
 
         // find all of today's active (ie. not wait listed) reservations
         $activeReservations = $reservationMapper->findAllActive($date);
