@@ -46,9 +46,9 @@ class ReservationMapper extends Singleton
      * @param string $uuid
      * @return Reservation
      */
-    public function create(int $userId, string $roomName, \DateTime $timeslot, string $description, string $uuid): Reservation
+    public function create(int $userId, string $roomName, \DateTime $timeslot, string $description, string $uuid, int $position): Reservation
     {
-        $reservation = new Reservation($userId, $roomName, $timeslot, $description, $uuid);
+        $reservation = new Reservation($userId, $roomName, $timeslot, $description, $uuid, null, $position);
 
         // add the new Reservation to the list of existing objects in live memory
         $this->identityMap->add($reservation);
@@ -78,7 +78,7 @@ class ReservationMapper extends Singleton
         // if TDG doesn't have it, it doesn't exist
         if ($result !== null) {
             // we got the Reservation from the TDG who got it from the DB and now the mapper must add it to the ReservationIdentityMap
-            $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id));
+            $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id), $result->wait_position);
             $this->identityMap->add($reservation);
         }
 
@@ -99,7 +99,7 @@ class ReservationMapper extends Singleton
             if ($reservation = $this->identityMap->get($result->id)) {
                 $reservations[] = $reservation;
             } else {
-                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id));
+                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id), $result->wait_position);
                 $this->identityMap->add($reservation);
                 $reservations[] = $reservation;
             }
@@ -139,11 +139,13 @@ class ReservationMapper extends Singleton
         $results = $this->tdg->findAllActive($date);
         $reservations = [];
 
+		//var_dump($results);
+		//die();
         foreach ($results as $result) {
             if ($reservation = $this->identityMap->get($result->id)) {
                 $reservations[] = $reservation;
             } else {
-                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id));
+                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id), $result->wait_position);
                 $this->identityMap->add($reservation);
                 $reservations[] = $reservation;
             }
@@ -165,7 +167,7 @@ class ReservationMapper extends Singleton
             if ($reservation = $this->identityMap->get($result->id)) {
                 $reservations[] = [$reservation, $result->position];
             } else {
-                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id));
+                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id), $result->wait_position);
                 $this->identityMap->add($reservation);
                 $reservations[] = [$reservation, intval($result->position)];
             }
@@ -182,23 +184,25 @@ class ReservationMapper extends Singleton
      * @param \DateTime $end End date, exclusive
      * @return int
      */
-    public function countInRange(int $userId, \DateTime $start, \DateTime $end): int
+    public function countInRange(int $userId, \DateTime $start, \DateTime $end)
     {
         return $this->tdg->countInRange($userId, $start, $end);
     }
 	
 	/**
-     * Returns the check to see if a student is part of Capstone or not
+     * SQL statement to count all wait-listed reservations for a certain user within a date range
      *
      * @param int $userId
+     * @param \DateTime $start Start date, inclusive
+     * @param \DateTime $end End date, exclusive
      * @return int
      */
-    public function capstone(int $userId): int
+    public function countAll(int $userId, \DateTime $start, \DateTime $end)
     {
-        return $this->tdg->capstone($userId);
+        return $this->tdg->countAll($userId, $start, $end);
     }
-
-    /**
+	
+	/**
      * @param int $id
      * @param string $description
      */
@@ -211,6 +215,34 @@ class ReservationMapper extends Singleton
         // we've modified something in the object so we register the instance as dirty in the UoW
         ReservationUoW::getInstance()->registerDirty($reservation);
     }
+	
+	/**
+     * @param int $id
+     * @param string $description
+     */
+    public function setNewWaitlist(int $id, int $newPosition)
+    {
+        $reservation = $this->find($id);
+
+        $reservation->setPosition($newPosition);
+
+        // we've modified something in the object so we register the instance as dirty in the UoW
+        ReservationUoW::getInstance()->registerDirty($reservation);
+    }
+	
+	/**
+	* @param int $id
+	* @param string $description
+	*/
+    public function moveDown(Reservation $reservation)
+    {
+        $old = $reservation->getPosition();
+		$reservation->setPosition($old+1);
+
+        // we've modified something in the object so we register the instance as dirty in the UoW
+        ReservationUoW::getInstance()->registerDirty($reservation);
+    }
+	
 
     /**
      * @param int $id

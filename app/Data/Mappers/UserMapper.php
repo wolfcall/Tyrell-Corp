@@ -102,6 +102,38 @@ class UserMapper extends Singleton
         // We've modified something in the object so we Register the instance as Dirty in the UoW.
         UserUoW::getInstance()->registerDirty($user);
     }
+	
+	/**
+     * Used to update that a user has attemped to make a reservation
+     *
+     * @param int $id
+     * @param int $status
+     */
+    public function setAttempt($userId, $status)
+    {
+        $this->tdg->setAttempt($userId, $status);
+    }
+	
+	/**
+     * Used to check that a user has attemped to make a reservation
+     *
+     * @param int $id
+     */
+    public function getAttempt($userId)
+    {
+        return $this->tdg->getAttempt($userId);
+    }
+	
+	/**
+     * Returns the check to see if a student is part of Capstone or not
+     *
+     * @param int $userId
+     * @return int
+     */
+    public function capstone(int $userId): int
+    {
+        return $this->tdg->capstone($userId);
+    }
 
     /**
      * @ignore Unused

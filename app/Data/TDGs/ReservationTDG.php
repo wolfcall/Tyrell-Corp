@@ -63,7 +63,8 @@ class ReservationTDG extends Singleton
         try {
             $id = DB::table('reservations')->insertGetId([
                 'user_id' => $reservation->getUserId(),
-                'room_name' => $reservation->getRoomName(),
+                'wait_position' => $reservation->getPosition(),
+				'room_name' => $reservation->getRoomName(),
                 'timeslot' => $reservation->getTimeslot(),
                 'description' => $reservation->getDescription(),
                 'recur_id' => $reservation->getRecurId()
@@ -82,8 +83,9 @@ class ReservationTDG extends Singleton
      */
     public function update(Reservation $reservation)
     {
-        DB::update('UPDATE reservations SET description = :description WHERE id = :id', [
+        DB::update('UPDATE reservations SET description = :description, wait_position = :wait_position WHERE id = :id', [
             'id' => $reservation->getId(),
+			'wait_position' => $reservation->getPosition(),
             'description' => $reservation->getDescription()
         ]);
     }
@@ -171,32 +173,35 @@ class ReservationTDG extends Singleton
     }
 
     /**
-     * SQL statement to count the reservations for a certain user within a date range
+     * SQL statement to count the active reservations for a certain user within a date range
      *
      * @param int $user_id
      * @param \DateTime $start Start date, inclusive
      * @param \DateTime $end End date, exclusive
      * @return int
      */
-    public function countInRange(int $user_id, \DateTime $start, \DateTime $end): int
+    public function countInRange(int $user_id, \DateTime $start, \DateTime $end)
     {
-        return DB::table('reservations')
-            ->where('user_id', $user_id)
-            ->where('timeslot', '>=', $start)
-            ->where('timeslot', '<', $end)
-            ->count();
+        return DB::select('SELECT *
+            FROM reservations
+            WHERE user_id = :user AND timeslot >= :start AND timeslot < :end AND wait_position = 0', 
+			['user' => $user_id, 'start' => $start, 'end' => $end]);
     }
 	
 	/**
-     * Returns the check to see if a student is part of Capstone or not
+     * SQL statement to count all wait-listed reservations for a certain user within a date range
      *
-     * @param int $userId
+     * @param int $user_id
+     * @param \DateTime $start Start date, inclusive
+     * @param \DateTime $end End date, exclusive
      * @return int
      */
-    public function capstone(int $user_id): int
+    public function countAll(int $user_id, \DateTime $start, \DateTime $end)
     {
-        $reservations = DB::select('SELECT capstone FROM users WHERE id = ?', [$user_id]);
-        
-        return $reservations[0]->capstone;
+        return DB::select('SELECT *
+            FROM reservations
+            WHERE user_id = :user AND timeslot >= :start AND timeslot < :end AND wait_position != 0', 
+			['user' => $user_id, 'start' => $start, 'end' => $end]);
     }
+	
 }

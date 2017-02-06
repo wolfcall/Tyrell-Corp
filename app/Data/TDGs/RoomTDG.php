@@ -17,9 +17,9 @@ class RoomTDG extends Singleton
      * @param string $name
      * @return \stdClass|null
      */
-    public function find(string $name)
+    public function find(string $roomName)
     {
-        $rooms = DB::select('SELECT * FROM rooms WHERE name = ?', [$name]);
+        $rooms = DB::select('SELECT * FROM rooms WHERE name = ?', [$roomName]);
 
         if (empty($rooms)) {
             return null;
@@ -38,5 +38,47 @@ class RoomTDG extends Singleton
         $rooms = DB::select('SELECT * FROM rooms');
 
         return $rooms;
+    }
+	
+	/**
+     * Set the Room Passd in to busy
+     */
+    public function setBusy($roomName, $student)
+    {
+        DB::update('UPDATE rooms SET busy = :id WHERE name = :room', [
+            'id' => $student,
+            'room' => $roomName
+        ]);
+    }
+	
+	/**
+     * Set the Room Passd in to free
+     */
+    public function setFree($roomName)
+    {
+        DB::update('UPDATE rooms SET busy = 0 WHERE name = ?', [$roomName]);
+    }
+	
+	/**
+     * Set the Room Passd in to free
+     */
+    public function clearStudent($student)
+    {
+        $roomName = DB::select('SELECT name FROM rooms WHERE busy = ?', [$student]);
+		
+		foreach ($roomName as $room)
+		{
+			$this->setFree($room->name);
+		}
+    }
+	
+	/**
+     * Check if the Room Passed in is busy
+     *
+     * @return boolean
+     */
+    public function getStatus($roomName)
+    {
+        return DB::select('SELECT busy FROM rooms WHERE name = ?', [$roomName]);
     }
 }
