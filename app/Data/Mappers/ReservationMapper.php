@@ -86,6 +86,7 @@ class ReservationMapper extends Singleton
     }
 
     /**
+	 * Returns a list of all Reservations for a given room-timeslot, ordered by id
      * @param string $roomName
      * @param \DateTime $timeslot
      * @return Reservation[]
@@ -107,6 +108,39 @@ class ReservationMapper extends Singleton
 
         return $reservations;
     }
+	
+	/**
+	 * Returns a list of all active Reservations (if any) for a given timeslot by the user passed in
+	 * @param int $id
+     * @param \DateTime $timeslot
+     * @return Reservation[]
+     */
+    public function findAllTimeslotActive(\DateTime $timeslot, $id)
+    {
+        return  $this->tdg->findAllTimeslotActive($timeslot, $id);
+    }
+	
+	/**
+	 * Returns a list of all waitlisted Reservations (if any) for a given timeslot by the user passed in
+	 * @param int $id
+     * @param \DateTime $timeslot
+     * @return Reservation[]
+     */
+    public function findAllTimeslotWaitlisted(\DateTime $timeslot, $id, $roomName)
+    {
+        return  $this->tdg->findAllTimeslotWaitlisted($timeslot, $id, $roomName);
+    }
+	
+	/**
+	 * Returns who has the reservation for the timeslot
+     * @param \DateTime $timeslot
+     * @return Reservation[]
+     */
+    public function findTimeslotWinner(\DateTime $timeslot, $roomName)
+    {
+        return  $this->tdg->findTimeslotWinner($timeslot, $roomName);
+    }
+	
 
     /**
      * @param Reservation $reservation
@@ -184,9 +218,22 @@ class ReservationMapper extends Singleton
      * @param \DateTime $end End date, exclusive
      * @return int
      */
-    public function countInRange(int $userId, \DateTime $start, \DateTime $end): int
+    public function countInRange(int $userId, \DateTime $start, \DateTime $end)
     {
         return $this->tdg->countInRange($userId, $start, $end);
+    }
+	
+	/**
+     * SQL statement to count all wait-listed reservations for a certain user within a date range
+     *
+     * @param int $userId
+     * @param \DateTime $start Start date, inclusive
+     * @param \DateTime $end End date, exclusive
+     * @return int
+     */
+    public function countAll(int $userId, \DateTime $start, \DateTime $end)
+    {
+        return $this->tdg->countAll($userId, $start, $end);
     }
 	
 	/**
