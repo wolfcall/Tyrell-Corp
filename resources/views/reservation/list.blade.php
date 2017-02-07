@@ -45,7 +45,7 @@
 								@if ($r[0]->getPosition() === 0)
 									Active
 								@else
-									Waiting, position #{{ $r[0]->getPosition() }}
+									Waiting: Position #{{ $r[0]->getPosition() }}
 								@endif
 							</th>
 							<td>{{ $r[0]->getTimeslot()->format('l, F jS, Y') }}</td>

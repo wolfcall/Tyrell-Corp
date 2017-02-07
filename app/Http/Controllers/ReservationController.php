@@ -296,8 +296,8 @@ class ReservationController extends Controller
 			// Check the current waitlisted reservations
 			$waited = $reservationMapper->countAll(Auth::id(), $t->copy()->startOfWeek(), $t->copy()->startOfWeek()->addWeek());
 
-			//Check if any waitlisted reservations in any other rooms would overlap with the recently added reservation
-			$overlap = $reservationMapper->findAllTimeslotWaitlisted($t, Auth::id());
+			//Check if any waitlisted reservations in any other rooms would overlap with the recently added active reservation
+			$overlap = $reservationMapper->findAllTimeslotWaitlisted($t, Auth::id(), $reservation->getRoomName());
 			
 			//If the amount of active reservaitons is at 3, then delete all the ones on the waitlist from the current week
 			if(count($active) == 3)
@@ -312,16 +312,18 @@ class ReservationController extends Controller
 					continue;
 				}
 			}
-			elseif (count($overlap)) 
+			//If any waitlisted reservations in any parallel rooms exist for the user, delete them
+			elseif (count($overlap) && $reservation->getPosition() == 0) 
 			{
-                $temp = $reservationMapper->find($overlap[0]->id);
-				$t2 = $temp->getTimeslot();
-				
-				$errored[] = [$t2, 'You have been removed from the waitlist in room '.$overlap[0]->room_name.' at '. $t2->format('g a').'.'];
-               	$reservationMapper->delete($overlap[0]->id);
+                foreach($overlap as $o)
+				{
+					$temp = $reservationMapper->find($o->id);
+					$t2 = $temp->getTimeslot();
+					
+					$errored[] = [$t2, 'You have been removed from the waitlist in room '.$o[0]->room_name.' at '. $t2->format('g a').'.'];
+					$reservationMapper->delete($o->id);
+				}
             }
-			
-			
 			
             // check if there was an error inserting the reservation, ie. duplicate reservation
             if ($reservation->getId() === null) {
@@ -419,7 +421,7 @@ class ReservationController extends Controller
 		$timeslot = Carbon::createFromFormat('Y-m-d\TH', $timeslot);
 
 		$waitingList = $reservationMapper->findForTimeslot($roomName, $timeslot);
-		
+			
 		//Find out the position in the waiting list of the Reservation we will be deleting
 		foreach($waitingList as $w)
 		{
@@ -447,7 +449,59 @@ class ReservationController extends Controller
         // delete the reservation
         $reservationMapper->delete($reservation->getId());
         $reservationMapper->done();
-
+		
+		/**
+		* 	Post delete checks
+		*/
+		
+		//Find out who took the place of the user who deleted their reservation
+		$winner = $reservationMapper->findTimeslotWinner($timeslot, $reservation->getRoomName());
+		
+		if(count($winner))
+		{
+			$winnerID = $winner[0]->user_id;
+						
+			// Check the current amount of active reservations for the winner
+			$active = $reservationMapper->countInRange($winnerID, $timeslot->copy()->startOfWeek(), $timeslot->copy()->startOfWeek()->addWeek());
+			
+			// Check the current waitlisted reservations
+			$waited = $reservationMapper->countAll($winnerID, $timeslot->copy()->startOfWeek(), $timeslot->copy()->startOfWeek()->addWeek());
+			
+			//Check if any waitlisted reservations in any other rooms would overlap with the recently added active reservation
+			$overlap = $reservationMapper->findAllTimeslotWaitlisted($timeslot, $winnerID, $reservation->getRoomName());
+		
+			//If the amount of active reservaitons is at 3, then delete all the ones on the waitlist from the current week
+			if(count($active) == 3)
+			{
+				foreach($waited as $w)
+				{
+					$temp = $reservationMapper->find($w->id);
+					$t2 = $temp->getTimeslot();
+					
+					$reservationMapper->delete($w->id);
+					//No need to display this information to the user
+					continue;
+				}
+			}
+			//If any waitlisted reservations in any parallel rooms exist for the winnning user, delete them
+			elseif (count($overlap) && $winner[0]->wait_position == 0) 
+			{
+				foreach($overlap as $o)
+				{
+					$temp = $reservationMapper->find($o->id);
+					$t2 = $temp->getTimeslot();
+					
+					$reservationMapper->delete($o->id);
+					//No need to display this information to the user
+					continue;
+				}
+			}
+			
+			//Commit once again
+			$reservationMapper->done();	
+		}
+		
+		
         $response = redirect();
 
         // redirect to appropriate back page
