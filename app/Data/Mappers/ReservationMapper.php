@@ -86,6 +86,7 @@ class ReservationMapper extends Singleton
     }
 
     /**
+	 * Returns a list of all Reservations for a given room-timeslot, ordered by id
      * @param string $roomName
      * @param \DateTime $timeslot
      * @return Reservation[]
@@ -109,6 +110,7 @@ class ReservationMapper extends Singleton
     }
 	
 	/**
+	 * Returns a list of all active Reservations (if any) for a given timeslot by the user passed in
 	 * @param int $id
      * @param \DateTime $timeslot
      * @return Reservation[]
@@ -119,13 +121,24 @@ class ReservationMapper extends Singleton
     }
 	
 	/**
+	 * Returns a list of all waitlisted Reservations (if any) for a given timeslot by the user passed in
 	 * @param int $id
      * @param \DateTime $timeslot
      * @return Reservation[]
      */
-    public function findAllTimeslotWaitlisted(\DateTime $timeslot, $id)
+    public function findAllTimeslotWaitlisted(\DateTime $timeslot, $id, $roomName)
     {
-        return  $this->tdg->findAllTimeslotWaitlisted($timeslot, $id);
+        return  $this->tdg->findAllTimeslotWaitlisted($timeslot, $id, $roomName);
+    }
+	
+	/**
+	 * Returns who has the reservation for the timeslot
+     * @param \DateTime $timeslot
+     * @return Reservation[]
+     */
+    public function findTimeslotWinner(\DateTime $timeslot, $roomName)
+    {
+        return  $this->tdg->findTimeslotWinner($timeslot, $roomName);
     }
 	
 
