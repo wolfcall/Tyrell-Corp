@@ -48,6 +48,21 @@
 		}
 	}	
 	
+	function remove() {
+
+		if(j == 0)
+		{
+			alert("You cannot remove any more Equipment!");
+		}
+		else
+		{
+			var original = document.getElementById('duplicater' + j);
+			original.parentNode.removeChild(original);
+			--j;
+			
+		}
+	}	
+	
 </script>
 @section('content')
 	<!-- <body onload="onTimer()"> -->
@@ -105,7 +120,8 @@
 			</div>
 			<div class="form-group row">
 				<div class="offset-sm-2 col-sm-10">
-					<a id = 'adding' onclick = duplicate() class="btn btn-secondary"><i class="fa fa-chevron-up" aria-hidden="true"></i> Add more Equipment</a>
+					<a id = 'adding' onclick = duplicate() class="btn btn-secondary"><i class="fa fa-chevron-down" aria-hidden="true"></i> Add more Equipment</a>
+					<a id = 'remove' onclick = remove() class="btn btn-secondary"><i class="fa fa-chevron-up" aria-hidden="true"></i> Remove Equipment</a>
 				</div>
 			</div>
             <div class="form-group row{{ $errors->has('recur') ? ' has-danger' : '' }}">
