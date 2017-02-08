@@ -13,7 +13,7 @@
 @section('content')
     <div class="container">
         <h1 class="pb-1">
-            Your reservation
+            Your Reservation
             <small class="text-muted">for {{ $reservation->getTimeslot()->format('l, F jS, Y') }} at {{ $reservation->getTimeslot()->format('g a') }} in {{ $reservation->getRoomName() }}</small>
         </h1>
 
@@ -23,10 +23,10 @@
 
             <dt class="col-sm-2">Status</dt>
             <dd class="col-sm-10">
-                @if ($position === 0)
+                @if ($reservation->getPosition() === 0)
                     Your reservation is <strong>active</strong>.
                 @else
-                    You are currently <strong>{{ ordinal($position) }}</strong> on the waiting list.
+                    You are currently <strong>{{ ordinal($reservation->getPosition()) }}</strong> on the waiting list.
                 @endif
             </dd>
         </dl>
@@ -42,9 +42,9 @@
                     <i class="fa fa-pencil" aria-hidden="true"></i>
                     Modify
                 </a>
-                <a href="{{ route('reservationCancel', ['id' => $reservation->getId(), 'back' => $back]) }}" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel this reservation and all recurring ones?');">
+                <a href="{{ route('reservationCancel', ['id' => $reservation->getId(), 'room' => $reservation->getRoomName(), 'timeslot' => $reservation->getTimeslot()->format('Y-m-d\TH'), 'back' => $back]) }}" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel this reservation?');">
                     <i class="fa fa-trash" aria-hidden="true"></i>
-                    Cancel this and all recurring
+                    Cancel this Reservation
                 </a>
             </div>
         </div>

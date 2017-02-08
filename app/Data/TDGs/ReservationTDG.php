@@ -63,7 +63,8 @@ class ReservationTDG extends Singleton
         try {
             $id = DB::table('reservations')->insertGetId([
                 'user_id' => $reservation->getUserId(),
-                'room_name' => $reservation->getRoomName(),
+                'wait_position' => $reservation->getPosition(),
+				'room_name' => $reservation->getRoomName(),
                 'timeslot' => $reservation->getTimeslot(),
                 'description' => $reservation->getDescription(),
                 'recur_id' => $reservation->getRecurId()
@@ -82,8 +83,9 @@ class ReservationTDG extends Singleton
      */
     public function update(Reservation $reservation)
     {
-        DB::update('UPDATE reservations SET description = :description WHERE id = :id', [
+        DB::update('UPDATE reservations SET description = :description, wait_position = :wait_position WHERE id = :id', [
             'id' => $reservation->getId(),
+			'wait_position' => $reservation->getPosition(),
             'description' => $reservation->getDescription()
         ]);
     }
@@ -95,9 +97,8 @@ class ReservationTDG extends Singleton
      */
     public function remove(Reservation $reservation)
     {
-        DB::delete('DELETE FROM reservations WHERE id = :id OR (recur_id = :recur_id AND timeslot >= CURDATE())', [
-            'id' => $reservation->getId(),
-            'recur_id' => $reservation->getRecurId()
+        DB::delete('DELETE FROM reservations WHERE id = :id', [
+            'id' => $reservation->getId()
         ]);
     }
 
@@ -119,7 +120,7 @@ class ReservationTDG extends Singleton
     }
 
     /**
-     * Returns a list of all Reservations for a given room-timeslot, ordered by id
+     * Returns a list of all Reservations (waitlist and active) for a given room-timeslot, ordered by id
      *
      * @param string $roomName
      * @param \DateTime $timeslot
@@ -131,6 +132,51 @@ class ReservationTDG extends Singleton
             FROM reservations
             WHERE timeslot = :timeslot AND room_name = :room_name
             ORDER BY id', ['timeslot' => $timeslot, 'room_name' => $roomName]);
+    }
+	
+	/**
+     * Returns a list of all active Reservations (if any) for a given timeslot by the user passed in
+     *
+	 * @param int $id
+     * @param \DateTime $timeslot
+     * @return array
+     */
+    public function findAllTimeslotActive(\DateTime $timeslot, $id)
+    {
+        return DB::select('SELECT *
+            FROM reservations
+            WHERE timeslot = :timeslot AND user_id = :id AND wait_position = 0
+            ORDER BY id', ['timeslot' => $timeslot, 'id' => $id]);
+    }
+	
+	/**
+     * Returns who has the reservation for the timeslot
+     *
+	 * @param String $roomName
+     * @param \DateTime $timeslot
+     * @return array
+     */
+    public function findTimeslotWinner(\DateTime $timeslot, $roomName)
+    {
+        return DB::select('SELECT *
+            FROM reservations
+            WHERE timeslot = :timeslot AND room_name = :room AND wait_position = 0
+            ORDER BY id', ['timeslot' => $timeslot, 'room' => $roomName]);
+    }
+	
+	/**
+     * Returns a list of all waitlisted Reservations (if any) for a given timeslot by the user passed in
+     *
+	 * @param int $id
+     * @param \DateTime $timeslot
+     * @return array
+     */
+    public function findAllTimeslotWaitlisted(\DateTime $timeslot, $id, $roomName)
+    {
+        return DB::select('SELECT *
+            FROM reservations
+            WHERE timeslot = :timeslot AND user_id = :id AND wait_position != 0 AND room_name != :roomName
+            ORDER BY id', ['timeslot' => $timeslot, 'id' => $id, 'roomName' => $roomName]);
     }
 
     /**
@@ -172,19 +218,35 @@ class ReservationTDG extends Singleton
     }
 
     /**
-     * SQL statement to count the reservations for a certain user within a date range
+     * SQL statement to count the active reservations for a certain user within a date range
      *
      * @param int $user_id
      * @param \DateTime $start Start date, inclusive
      * @param \DateTime $end End date, exclusive
      * @return int
      */
-    public function countInRange(int $user_id, \DateTime $start, \DateTime $end): int
+    public function countInRange(int $user_id, \DateTime $start, \DateTime $end)
     {
-        return DB::table('reservations')
-            ->where('user_id', $user_id)
-            ->where('timeslot', '>=', $start)
-            ->where('timeslot', '<', $end)
-            ->count();
+        return DB::select('SELECT *
+            FROM reservations
+            WHERE user_id = :user AND timeslot >= :start AND timeslot < :end AND wait_position = 0', 
+			['user' => $user_id, 'start' => $start, 'end' => $end]);
     }
+	
+	/**
+     * SQL statement to count all wait-listed reservations for a certain user within a date range
+     *
+     * @param int $user_id
+     * @param \DateTime $start Start date, inclusive
+     * @param \DateTime $end End date, exclusive
+     * @return int
+     */
+    public function countAll(int $user_id, \DateTime $start, \DateTime $end)
+    {
+        return DB::select('SELECT *
+            FROM reservations
+            WHERE user_id = :user AND timeslot >= :start AND timeslot < :end AND wait_position != 0', 
+			['user' => $user_id, 'start' => $start, 'end' => $end]);
+    }
+	
 }

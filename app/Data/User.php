@@ -20,6 +20,16 @@ class User extends Authenticatable
      * @var string
      */
     protected $password;
+	
+	/**
+     * @var int
+     */
+    protected $attempt;
+	
+	/**
+     * @var int
+     */
+    protected $capstone;
 
     /**
      * User constructor.
@@ -27,13 +37,15 @@ class User extends Authenticatable
      * @param string $name
      * @param string $password
      */
-    public function __construct(int $id, string $name, string $password)
+    public function __construct(int $id, string $name, string $password, int $attempt, int $capstone)
     {
         parent::__construct();
 
         $this->id = $id;
         $this->name = $name;
         $this->password = $password;
+		$this->attempt = $attempt;
+		$this->capstone = $capstone;
     }
 
     /**
@@ -42,6 +54,22 @@ class User extends Authenticatable
     public function getId(): int
     {
         return $this->id;
+    }
+	
+	 /**
+     * @return int
+     */
+    public function getAttempt(): int
+    {
+        return $this->attempt;
+    }
+	
+	 /**
+     * @return int
+     */
+    public function getCapstone(): int
+    {
+        return $this->capstone;
     }
 
     /**
