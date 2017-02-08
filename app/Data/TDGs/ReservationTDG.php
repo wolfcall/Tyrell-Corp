@@ -67,7 +67,11 @@ class ReservationTDG extends Singleton
 				'room_name' => $reservation->getRoomName(),
                 'timeslot' => $reservation->getTimeslot(),
                 'description' => $reservation->getDescription(),
-                'recur_id' => $reservation->getRecurId()
+                'recur_id' => $reservation->getRecurId(),
+				'quantity_markers' => $reservation->getMarkers(),
+				'quantity_projectors' => $reservation->getProjectors(),
+				'quantity_laptops' => $reservation->getLaptops(),
+				'quantity_cables' => $reservation->getCables()
             ]);
         } catch (QueryException $e) {
             // error inserting, duplicate row
@@ -249,4 +253,18 @@ class ReservationTDG extends Singleton
 			['user' => $user_id, 'start' => $start, 'end' => $end]);
     }
 	
+	/**
+     * SQL statement to count all Equipment in active reservations for a certain user within a date range
+     *
+     * @param \DateTime $start Start date, inclusive
+     * @param \DateTime $end End date, exclusive
+     * @return int
+     */
+    public function countEquipment(\DateTime $timeslot)
+    {
+        return DB::select('SELECT quantity_markers, quantity_projectors, quantity_laptops, quantity_cables
+            FROM reservations
+            WHERE timeslot = :time AND wait_position = 0', 
+			['time' => $timeslot]);
+    }
 }
