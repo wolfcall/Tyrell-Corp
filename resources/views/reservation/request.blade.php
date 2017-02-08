@@ -35,12 +35,14 @@
 
 	function duplicate() {
 
-		if(j<3)
+		if(j < 3)
 		{
 			var original = document.getElementById('duplicater' + j);
 			var clone = original.cloneNode(true); // "deep" clone
 			clone.id = "duplicater" + ++j; // there can only be one element with an ID
 			original.parentNode.appendChild(clone);
+			document.getElementById(clone.id).getElementsByClassName('equipment-select')[0].setAttribute("name", "equipment"+j);
+			document.getElementById(clone.id).getElementsByClassName('quantity-select')[0].setAttribute("name", "quantity"+j);
 		}
 		else
 		{
@@ -91,8 +93,8 @@
 					<label for="inputEquipment" class="col-xs-3 col-sm-2 col-form-label">Equipment</label>
 					<div class="col-xs-9 col-md-3">
 						<div class="input-group">
-							<select class="form-control{{ $errors->has('equipment') ? ' form-control-danger' : '' }}">
-								<option value="None" selected="selected">None</option>
+							<select name="equipment" class="equipment-select form-control{{ $errors->has('equipment') ? ' form-control-danger' : '' }}">
+								<option value = "" selected="selected">None</option>
 								<option value="Display Cables">Display Cables</option>
 								<option value="Laptop">Laptop</option>
 								<option value="Projector">Projector</option>
@@ -107,7 +109,7 @@
 					</div>
 					<div class="col-xs-9 col-md-3">
 						<div class="input-group">
-							<input class="form-control{{ $errors->has('quantity') ? ' form-control-danger' : '' }}" type="number" name="quantity" min="0" max="3" value="0" id="quantity">
+							<input name="quantity" class="quantity-select form-control{{ $errors->has('quantity') ? ' form-control-danger' : '' }}" type="number" min="0" max="3" value="0" id="quantity">
 							<span class="input-group-addon">Quantity</span>
 						</div>
 						@if ($errors->has('quantity'))

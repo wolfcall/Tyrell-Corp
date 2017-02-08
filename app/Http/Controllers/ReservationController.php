@@ -178,7 +178,8 @@ class ReservationController extends Controller
 		
 		$this->validate($request, [
             'description' => 'required',
-            'recur' => 'required|integer|min:1|max:'.static::MAX_PER_USER
+			'recur' => 'required|integer|min:1|max:'.static::MAX_PER_USER,
+			'quantity' => 'required|integer|min:0|max:'.static::MAX_PER_USER
         ]);
 
         $timeslot = Carbon::createFromFormat('Y-m-d\TH', $timeslot);
@@ -196,7 +197,7 @@ class ReservationController extends Controller
         $reservations = [];
 
         $recur = intval($request->input('recur', 1));
-
+				
         // status message arrays
         $successful = [];
 		$waitlisted = [];
@@ -230,8 +231,105 @@ class ReservationController extends Controller
 			if (count($overlap)) {
                 $errored[] = [$t->copy(), 'You already have a reservation for that time in Room '.$overlap[0]->room_name.'. Choose another time slot.'];
                 continue;
-            }		
+            }
+
+			$markersCount = 0;
+			$projectorsCount = 0;
+			$laptopsCount = 0;
+			$cablesCount = 0;
 			
+			//Check all the equipment that is being used during that timeslot
+			$equipmentCount = $reservationMapper->countEquipment($t);
+			foreach($equipmentCount as $e)
+			{
+				$markersCount += $e->quantity_markers;
+				$projectorsCount += $e->quantity_projectors;
+				$laptopsCount += $e->quantity_laptops;
+				$cablesCount += $e->quantity_cables;
+			}
+						
+			//Compile all the requested equipment into an associative array
+			$equipmentRequest = array();
+			
+			$q1 = intval($request->input('quantity', ''));
+			$e1 = $request->input('equipment', '');
+			if($q1 && $e1 != '')
+			{
+				$equipmentRequest[$e1] = $q1;
+			}
+			
+			$q2 = intval($request->input('quantity1', ''));
+			$e2 = $request->input('equipment1', '');
+			if($q2 && $e2 != '')
+			{
+				$equipmentRequest[$e2] = $q2;
+			}
+			
+			$q3 = intval($request->input('quantity2', ''));
+			$e3 = $request->input('equipment2', '');
+			if($q3 && $e3 != '')
+			{
+				$equipmentRequest[$e3] = $q3;
+			}
+			
+			$q4 = intval($request->input('quantity3', ''));
+			$e4 = $request->input('equipment3', '');
+			if($q4 && $e4 != '')
+			{
+				$equipmentRequest[$e4] = $q4;
+			}
+			
+			//Use a boolean to know if the status of the equipment is ok
+			//Start the boolean as true
+			$eStatus = true;
+			
+			//Keep track of how much they asked for
+			$markersRequest = 0;
+			$projectorsRequest = 0;
+			$laptopsRequest = 0;
+			$cablesRequest = 0;
+			
+			//Loop through all the equipment and check if it is available compared to what is found in the database 
+			foreach ($equipmentRequest as $key => $value) 
+			{
+				if($key == 'Markers')
+				{
+					$markersRequest = $value;
+					if($markersRequest > (3-$markersCount))
+					{
+						$eStatus = false;
+						continue;
+					}
+				}
+				else if ($key == 'Laptop')
+				{
+					$projectorsRequest = $value;
+					if($projectorsRequest > (3-$laptopsCount))
+					{
+						$eStatus = false;
+						continue;
+					}
+				}
+				else if ($key == 'Projector')
+				{
+					$laptopsRequest = $value;
+					if($laptopsRequest > (3-$projectorsCount))
+					{
+						$eStatus = false;
+						continue;
+					}
+				}
+				else if ($key == 'Display Cables')
+				{
+					$cablesRequest = $value;
+					if($cablesRequest > (3-$cablesCount))
+					{
+						$eStatus = false;
+						continue;
+					}
+				}
+			}
+
 			//Check if the student is in capstone, so we can know to give him priority or not
 			$capstone = $userMapper->capstone(Auth::id());
 				
@@ -267,7 +365,7 @@ class ReservationController extends Controller
 				/*
 				* Insert
 				*/
-				$reservations[] = $reservationMapper->create(intval(Auth::id()), $room->getName(), $t->copy(), $request->input('description', ''), $uuid, $count);
+				$reservations[] = $reservationMapper->create(intval(Auth::id()), $room->getName(), $t->copy(), $request->input('description', ''), $uuid, $count, $markersRequest, $projectorsRequest, $laptopsRequest, $cablesRequest);
 			}
 			//If no one is in the room, then execute as if it was a regular student
 			else
@@ -275,7 +373,14 @@ class ReservationController extends Controller
 				/*
 				* Insert
 				*/
-				$reservations[] = $reservationMapper->create(intval(Auth::id()), $room->getName(), $t->copy(), $request->input('description', ''), $uuid, count($waitingList));
+				if($eStatus)
+				{
+					$reservations[] = $reservationMapper->create(intval(Auth::id()), $room->getName(), $t->copy(), $request->input('description', ''), $uuid, count($waitingList), $markersRequest, $projectorsRequest, $laptopsRequest, $cablesRequest);
+				}
+				else if(!$eStatus)
+				{
+					$reservations[] = $reservationMapper->create(intval(Auth::id()), $room->getName(), $t->copy(), $request->input('description', ''), $uuid, 1, $markersRequest, $projectorsRequest, $laptopsRequest, $cablesRequest);
+				}
 			}	
 		}
 
@@ -372,9 +477,18 @@ class ReservationController extends Controller
         }
 
         if (count($waitlisted)) {
-            $response = $response->with('warning', sprintf('You have been put on a waiting list for the following reservations for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
+            if(!$eStatus)
+			{
+				$response = $response->with('warning', sprintf('Equipment is not available for your Reservation. You have been put on a waiting list for the following: %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
                 return sprintf("<li><strong>%s</strong>: Position #%d</li>", $m[0]->format('l, F jS, Y'), $m[1]);
-            }, $waitlisted))));
+				}, $waitlisted))));
+			}
+			else
+			{
+				$response = $response->with('warning', sprintf('You have been put on a waiting list for the following reservations for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
+                return sprintf("<li><strong>%s</strong>: Position #%d</li>", $m[0]->format('l, F jS, Y'), $m[1]);
+				}, $waitlisted))));
+			}
         }
 
         if (count($errored)) {
