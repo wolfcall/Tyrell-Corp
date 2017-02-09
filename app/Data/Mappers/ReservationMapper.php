@@ -74,15 +74,19 @@ class ReservationMapper extends Singleton
         if ($reservation === null) {
             $result = $this->tdg->find($id);
         }
-
+		
+		$markers = $result->quantity_markers;
+		$projectors = $result->quantity_projectors;
+		$laptops = $result->quantity_laptops;
+		$cables = $result->quantity_cables;
+		
         // if TDG doesn't have it, it doesn't exist
         if ($result !== null) {
             // we got the Reservation from the TDG who got it from the DB and now the mapper must add it to the ReservationIdentityMap
             $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id), $result->wait_position,
-				$result->wait_position, $result->quantity_markers, $result->quantity_projectors, $result->quantity_laptops, $result->quantity_cables);
+				$markers,$projectors,$laptops,$cables);
             $this->identityMap->add($reservation);
         }
-
         return $reservation;
     }
 
