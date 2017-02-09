@@ -100,9 +100,13 @@ class ReservationController extends Controller
             return abort(404);
         }
 
-        // update the description
-        $reservationMapper->set($reservation->getId(), $request->input('description', ""));
-        $reservationMapper->done();
+        // update the description, and all equipment
+        $reservationMapper->set($reservation->getId(), $request->input('description', ""), $request->input('markers', ""),
+			$request->input('projectors', ""), $request->input('laptops', ""), $request->input('cables', ""),
+			$request->input('timeslot', ""), $request->input('roomName', ""));
+
+		$reservationMapper->done();
+
 
         return redirect()
             ->route('reservation', ['id' => $reservation->getId(), 'back' => $request->input('back')])
@@ -373,7 +377,6 @@ class ReservationController extends Controller
 				/*
 				* Insert
 				*/
-				var_dump("here");
 				if($eStatus)
 				{
 					$reservations[] = $reservationMapper->create(intval(Auth::id()), $room->getName(), $t->copy(), $request->input('description', ''), $uuid, count($waitingList), $markersRequest, $projectorsRequest, $laptopsRequest, $cablesRequest);
@@ -426,7 +429,7 @@ class ReservationController extends Controller
 					$temp = $reservationMapper->find($o->id);
 					$t2 = $temp->getTimeslot();
 					
-					$errored[] = [$t2, 'You have been removed from the waitlist in room '.$o[0]->room_name.' at '. $t2->format('g a').'.'];
+					$errored[] = [$t2, 'You have been removed from the waitlist in room '.$o->room_name.' at '. $t2->format('g a').'.'];
 					$reservationMapper->delete($o->id);
 				}
             }
