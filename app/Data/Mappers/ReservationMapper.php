@@ -179,8 +179,6 @@ class ReservationMapper extends Singleton
         $results = $this->tdg->findAllActive($date);
         $reservations = [];
 
-		//var_dump($results);
-		//die();
         foreach ($results as $result) {
             if ($reservation = $this->identityMap->get($result->id)) {
                 $reservations[] = $reservation;

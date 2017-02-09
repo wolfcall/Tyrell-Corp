@@ -21,6 +21,18 @@
             <dt class="col-sm-2">Description</dt>
             <dd class="col-sm-10 pre bg-faded">{{ $reservation->getDescription() ?: 'None specified.' }}</dd>
 
+            <dt class="col-sm-3">WhiteBoard Markers</dt>
+            <dd class="col-sm-1 pre bg-faded">{{ $reservation->getMarkers() ?: '0' }}</dd>
+
+            <dt class="col-sm-3">Projectors</dt>
+            <dd class="col-sm-1 pre bg-faded">{{ $reservation->getProjectors() ?: '0' }}</dd>
+
+            <dt class="col-sm-3">Laptops</dt>
+            <dd class="col-sm-1 pre bg-faded">{{ $reservation->getLaptops() ?: '0' }}</dd>
+
+            <dt class="col-sm-3">Display Cables</dt>
+            <dd class="col-sm-1 pre bg-faded">{{ $reservation->getCables() ?: '0' }}</dd>
+
             <dt class="col-sm-2">Status</dt>
             <dd class="col-sm-10">
                 @if ($reservation->getPosition() === 0)

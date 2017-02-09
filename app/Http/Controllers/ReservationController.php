@@ -373,7 +373,6 @@ class ReservationController extends Controller
 				/*
 				* Insert
 				*/
-				var_dump("here");
 				if($eStatus)
 				{
 					$reservations[] = $reservationMapper->create(intval(Auth::id()), $room->getName(), $t->copy(), $request->input('description', ''), $uuid, count($waitingList), $markersRequest, $projectorsRequest, $laptopsRequest, $cablesRequest);
