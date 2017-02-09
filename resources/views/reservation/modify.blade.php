@@ -9,7 +9,6 @@
 
         <form method="post" action="{{ route('reservationModifyPost', ['id' => $reservation->getId()]) }}">
             {{ csrf_field() }}
-         <!--   <?php var_dump($reservation); ?> -->
             <div class="form-group row{{ $errors->has('description') ? ' has-danger' : '' }}">
                 <label for="inputDescription" class="col-sm-3 col-form-label">Description</label>
                 <div class="col-sm-9">

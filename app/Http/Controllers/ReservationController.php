@@ -425,7 +425,6 @@ class ReservationController extends Controller
 			{
                 foreach($overlap as $o)
 				{
-					var_dump($o);
 					$temp = $reservationMapper->find($o->id);
 					$t2 = $temp->getTimeslot();
 					
