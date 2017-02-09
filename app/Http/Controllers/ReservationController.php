@@ -104,7 +104,7 @@ class ReservationController extends Controller
         $reservationMapper->set($reservation->getId(), $request->input('description', ""), $request->input('markers', ""),
 			$request->input('projectors', ""), $request->input('laptops', ""), $request->input('cables', ""));
 
-		requestReservation($request, $reservation->getRoomName(), $reservation->getTimeslot());
+		//requestReservation($request, $reservation->getRoomName(), $reservation->getTimeslot());
         $reservationMapper->done();
 
         return redirect()
