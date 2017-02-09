@@ -46,9 +46,9 @@ class ReservationMapper extends Singleton
      * @param string $uuid
      * @return Reservation
      */
-    public function create(int $userId, string $roomName, \DateTime $timeslot, string $description, string $uuid, int $position): Reservation
+    public function create(int $userId, string $roomName, \DateTime $timeslot, string $description, string $uuid, int $position, int $markers, int $projectors, int $laptops, int $cables): Reservation
     {
-        $reservation = new Reservation($userId, $roomName, $timeslot, $description, $uuid, null, $position);
+        $reservation = new Reservation($userId, $roomName, $timeslot, $description, $uuid, null, $position, $markers, $projectors, $laptops, $cables);
 
         // add the new Reservation to the list of existing objects in live memory
         $this->identityMap->add($reservation);
@@ -74,14 +74,19 @@ class ReservationMapper extends Singleton
         if ($reservation === null) {
             $result = $this->tdg->find($id);
         }
-
+		
+		$markers = $result->quantity_markers;
+		$projectors = $result->quantity_projectors;
+		$laptops = $result->quantity_laptops;
+		$cables = $result->quantity_cables;
+		
         // if TDG doesn't have it, it doesn't exist
         if ($result !== null) {
             // we got the Reservation from the TDG who got it from the DB and now the mapper must add it to the ReservationIdentityMap
-            $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id), $result->wait_position);
+            $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id), $result->wait_position,
+				$markers,$projectors,$laptops,$cables);
             $this->identityMap->add($reservation);
         }
-
         return $reservation;
     }
 
@@ -100,7 +105,8 @@ class ReservationMapper extends Singleton
             if ($reservation = $this->identityMap->get($result->id)) {
                 $reservations[] = $reservation;
             } else {
-                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id), $result->wait_position);
+                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id), $result->wait_position,
+					$result->wait_position, $result->quantity_markers, $result->quantity_projectors, $result->quantity_laptops, $result->quantity_cables);
                 $this->identityMap->add($reservation);
                 $reservations[] = $reservation;
             }
@@ -179,7 +185,8 @@ class ReservationMapper extends Singleton
             if ($reservation = $this->identityMap->get($result->id)) {
                 $reservations[] = $reservation;
             } else {
-                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id), $result->wait_position);
+                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id),
+					$result->wait_position, $result->quantity_markers, $result->quantity_projectors, $result->quantity_laptops, $result->quantity_cables);
                 $this->identityMap->add($reservation);
                 $reservations[] = $reservation;
             }
@@ -201,7 +208,8 @@ class ReservationMapper extends Singleton
             if ($reservation = $this->identityMap->get($result->id)) {
                 $reservations[] = [$reservation, $result->position];
             } else {
-                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id), $result->wait_position);
+                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id), $result->wait_position,
+					$result->wait_position, $result->quantity_markers, $result->quantity_projectors, $result->quantity_laptops, $result->quantity_cables);
                 $this->identityMap->add($reservation);
                 $reservations[] = [$reservation, intval($result->position)];
             }
@@ -234,6 +242,18 @@ class ReservationMapper extends Singleton
     public function countAll(int $userId, \DateTime $start, \DateTime $end)
     {
         return $this->tdg->countAll($userId, $start, $end);
+    }
+	
+	/**
+     * SQL statement to count all Equipment in active reservations for a certain user within a date range
+     *
+     * @param \DateTime $start Start date, inclusive
+     * @param \DateTime $end End date, exclusive
+     * @return int
+     */
+    public function countEquipment(\DateTime $timeslot)
+    {
+        return $this->tdg->countEquipment($timeslot);
     }
 	
 	/**
