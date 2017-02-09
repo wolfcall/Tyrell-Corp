@@ -258,7 +258,7 @@ class ReservationMapper extends Singleton
      * @param int $id
      * @param string $description
      */
-    public function set(int $id, string $description, int $markers, int $projectors, int $laptops, int $cables)
+    public function set(int $id, string $description, int $markers, int $projectors, int $laptops, int $cables, string $timeslot, string $roomName)
     {
         $reservation = $this->find($id);
 
@@ -267,6 +267,12 @@ class ReservationMapper extends Singleton
         $reservation->setProjectors($projectors);
         $reservation->setLaptops($laptops);
         $reservation->setCables($cables);
+
+        $date = substr($reservation->getTimeslot()->toDateTimeString(), 0, 10);
+        $newTimeslot = $date." ".$timeslot.":00:00";
+        
+        $reservation->setTimeslot(new Carbon($newTimeslot));
+        $reservation->setRoomName($roomName);
 
         // we've modified something in the object so we register the instance as dirty in the UoW
         ReservationUoW::getInstance()->registerDirty($reservation);

@@ -99,7 +99,6 @@
 								<option value="Projector">Projector</option>
 								<option value="Laptop">Laptop</option>
 								<option value="Display Cables">Display Cables</option>
-								
 							</select>
 						</div>
 						@if ($errors->has('equipment'))
