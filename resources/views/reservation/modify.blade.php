@@ -41,7 +41,7 @@
                                 @endif
                             @endfor
                         @else ($reserveDate == $ourDate)
-                            @for ($i = $ourTime; $i < 24; $i++)
+                            @for ($i = $ourTime+1; $i < 24; $i++)
                                 @if ($i == $reserveTime)
                                     <option value = {{$i}} selected>{{$i}}:00</option>
                                 @else
