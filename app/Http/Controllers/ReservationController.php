@@ -103,8 +103,9 @@ class ReservationController extends Controller
         // update the description, and all equipment
         $reservationMapper->set($reservation->getId(), $request->input('description', ""), $request->input('markers', ""),
 			$request->input('projectors', ""), $request->input('laptops', ""), $request->input('cables', ""));
-			
+
 		$reservationMapper->done();
+
 
         return redirect()
             ->route('reservation', ['id' => $reservation->getId(), 'back' => $request->input('back')])
