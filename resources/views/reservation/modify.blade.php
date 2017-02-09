@@ -38,7 +38,7 @@
             <div class = "form-group row">
                 <label for="inputLaptops" class="col-sm-3 col-form-label">Laptop</label>
                 <div class = "col-sm-3">
-                    <input type = "number" class="form-control" id="inputLaptop" name="laptop" value = "{{$reservation->getLaptops()}}"
+                    <input type = "number" class="form-control" id="inputLaptop" name="laptops" value = "{{$reservation->getLaptops()}}"
                     min = "0" max = "3"  required >
                 </div>
             </div>

@@ -100,8 +100,11 @@ class ReservationController extends Controller
             return abort(404);
         }
 
-        // update the description
-        $reservationMapper->set($reservation->getId(), $request->input('description', ""));
+        // update the description, and all equipment
+        $reservationMapper->set($reservation->getId(), $request->input('description', ""), $request->input('markers', ""),
+			$request->input('projectors', ""), $request->input('laptops', ""), $request->input('cables', ""));
+
+		requestReservation($request, $reservation->getRoomName(), $reservation->getTimeslot());
         $reservationMapper->done();
 
         return redirect()
@@ -422,10 +425,11 @@ class ReservationController extends Controller
 			{
                 foreach($overlap as $o)
 				{
+					var_dump($o);
 					$temp = $reservationMapper->find($o->id);
 					$t2 = $temp->getTimeslot();
 					
-					$errored[] = [$t2, 'You have been removed from the waitlist in room '.$o[0]->room_name.' at '. $t2->format('g a').'.'];
+					$errored[] = [$t2, 'You have been removed from the waitlist in room '.$o->room_name.' at '. $t2->format('g a').'.'];
 					$reservationMapper->delete($o->id);
 				}
             }
