@@ -292,7 +292,7 @@ class ReservationController extends Controller
 			//Loop through all the equipment and check if it is available compared to what is found in the database 
 			foreach ($equipmentRequest as $key => $value) 
 			{
-				if($key == 'Markers')
+				if($key == 'WhiteBoard Markers')
 				{
 					$markersRequest = $value;
 					if($markersRequest > (3-$markersCount))
@@ -303,8 +303,8 @@ class ReservationController extends Controller
 				}
 				else if ($key == 'Laptop')
 				{
-					$projectorsRequest = $value;
-					if($projectorsRequest > (3-$laptopsCount))
+					$laptopsRequest = $value;
+					if($laptopsRequest > (3-$laptopsCount))
 					{
 						$eStatus = false;
 						continue;
@@ -312,8 +312,8 @@ class ReservationController extends Controller
 				}
 				else if ($key == 'Projector')
 				{
-					$laptopsRequest = $value;
-					if($laptopsRequest > (3-$projectorsCount))
+					$projectorsRequest = $value;
+					if($projectorsRequest > (3-$projectorsCount))
 					{
 						$eStatus = false;
 						continue;
@@ -373,6 +373,7 @@ class ReservationController extends Controller
 				/*
 				* Insert
 				*/
+				var_dump("here");
 				if($eStatus)
 				{
 					$reservations[] = $reservationMapper->create(intval(Auth::id()), $room->getName(), $t->copy(), $request->input('description', ''), $uuid, count($waitingList), $markersRequest, $projectorsRequest, $laptopsRequest, $cablesRequest);
