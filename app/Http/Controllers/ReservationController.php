@@ -177,13 +177,12 @@ class ReservationController extends Controller
      */
     public function requestReservation(Request $request, $roomName, $timeslot)
     {
-        $reservationMapper = ReservationMapper::getInstance();
+		$reservationMapper = ReservationMapper::getInstance();
 		$userMapper = UserMapper::getInstance();
 		
 		$this->validate($request, [
             'description' => 'required',
 			'recur' => 'required|integer|min:1|max:'.static::MAX_PER_USER,
-			'quantity' => 'required|integer|min:0|max:'.static::MAX_PER_USER
         ]);
 
         $timeslot = Carbon::createFromFormat('Y-m-d\TH', $timeslot);
@@ -201,7 +200,6 @@ class ReservationController extends Controller
         $reservations = [];
 
         $recur = intval($request->input('recur', 1));
-				
         // status message arrays
         $successful = [];
 		$waitlisted = [];
@@ -213,7 +211,6 @@ class ReservationController extends Controller
             /*
              * Pre-insert checks
              */
-
             // check if user exceeded maximum amount of reservations
             $reservationCount = count($reservationMapper->countInRange(Auth::id(), $t->copy()->startOfWeek(), $t->copy()->startOfWeek()->addWeek()));
             if ($reservationCount >= static::MAX_PER_USER) {
@@ -237,6 +234,7 @@ class ReservationController extends Controller
                 continue;
             }
 
+			//Count all equipment already being used
 			$markersCount = 0;
 			$projectorsCount = 0;
 			$laptopsCount = 0;
@@ -251,87 +249,40 @@ class ReservationController extends Controller
 				$laptopsCount += $e->quantity_laptops;
 				$cablesCount += $e->quantity_cables;
 			}
-						
-			//Compile all the requested equipment into an associative array
-			$equipmentRequest = array();
+					
+			//Compile all the requested equipment
+			$markersRequest = intval($request->input('markers', 1));
+			$projectorsRequest = intval($request->input('projectors', 1));
+			$laptopsRequest = intval($request->input('laptops', 1));
+			$cablesRequest = intval($request->input('cables', 1));
 			
-			$q1 = intval($request->input('quantity', ''));
-			$e1 = $request->input('equipment', '');
-			if($q1 && $e1 != '')
-			{
-				$equipmentRequest[$e1] = $q1;
-			}
-			
-			$q2 = intval($request->input('quantity1', ''));
-			$e2 = $request->input('equipment1', '');
-			if($q2 && $e2 != '')
-			{
-				$equipmentRequest[$e2] = $q2;
-			}
-			
-			$q3 = intval($request->input('quantity2', ''));
-			$e3 = $request->input('equipment2', '');
-			if($q3 && $e3 != '')
-			{
-				$equipmentRequest[$e3] = $q3;
-			}
-			
-			$q4 = intval($request->input('quantity3', ''));
-			$e4 = $request->input('equipment3', '');
-			if($q4 && $e4 != '')
-			{
-				$equipmentRequest[$e4] = $q4;
-			}
 			
 			//Use a boolean to know if the status of the equipment is ok
 			//Start the boolean as true
 			$eStatus = true;
 			
-			//Keep track of how much they asked for
-			$markersRequest = 0;
-			$projectorsRequest = 0;
-			$laptopsRequest = 0;
-			$cablesRequest = 0;
-			
-			//Loop through all the equipment and check if it is available compared to what is found in the database 
-			foreach ($equipmentRequest as $key => $value) 
+			//Check the markers
+			if($markersRequest > (3-$markersCount))
 			{
-				if($key == 'WhiteBoard Markers')
-				{
-					$markersRequest = $value;
-					if($markersRequest > (3-$markersCount))
-					{
-						$eStatus = false;
-						continue;
-					}
-				}
-				else if ($key == 'Laptop')
-				{
-					$laptopsRequest = $value;
-					if($laptopsRequest > (3-$laptopsCount))
-					{
-						$eStatus = false;
-						continue;
-					}
-				}
-				else if ($key == 'Projector')
-				{
-					$projectorsRequest = $value;
-					if($projectorsRequest > (3-$projectorsCount))
-					{
-						$eStatus = false;
-						continue;
-					}
-				}
-				else if ($key == 'Display Cables')
-				{
-					$cablesRequest = $value;
-					if($cablesRequest > (3-$cablesCount))
-					{
-						$eStatus = false;
-						continue;
-					}
-				}
+				$eStatus = false;
+			}
+
+			//Check the laptops
+			if($laptopsRequest > (3-$laptopsCount))
+			{
+				$eStatus = false;
+			}
+
+			//Check the projectors
+			if($projectorsRequest > (3-$projectorsCount))
+			{
+				$eStatus = false;
+			}
+
+			//Check the cables
+			if($cablesRequest > (3-$cablesCount))
+			{
+				$eStatus = false;
 			}
 
 			//Check if the student is in capstone, so we can know to give him priority or not
