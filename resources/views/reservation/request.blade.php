@@ -95,10 +95,10 @@
 						<div class="input-group">
 							<select name="equipment" class="equipment-select form-control{{ $errors->has('equipment') ? ' form-control-danger' : '' }}">
 								<option value = "" selected="selected">None</option>
-								<option value="Display Cables">Display Cables</option>
-								<option value="Laptop">Laptop</option>
-								<option value="Projector">Projector</option>
 								<option value="WhiteBoard Markers">WhiteBoard Markers</option>
+								<option value="Projector">Projector</option>
+								<option value="Laptop">Laptop</option>
+								<option value="Display Cables">Display Cables</option>
 							</select>
 						</div>
 						@if ($errors->has('equipment'))

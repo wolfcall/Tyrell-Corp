@@ -100,9 +100,13 @@ class ReservationController extends Controller
             return abort(404);
         }
 
-        // update the description
-        $reservationMapper->set($reservation->getId(), $request->input('description', ""));
-        $reservationMapper->done();
+        // update the description, and all equipment
+        $reservationMapper->set($reservation->getId(), $request->input('description', ""), $request->input('markers', ""),
+			$request->input('projectors', ""), $request->input('laptops', ""), $request->input('cables', ""),
+			$request->input('timeslot', ""), $request->input('roomName', ""));
+
+		$reservationMapper->done();
+
 
         return redirect()
             ->route('reservation', ['id' => $reservation->getId(), 'back' => $request->input('back')])
@@ -292,7 +296,7 @@ class ReservationController extends Controller
 			//Loop through all the equipment and check if it is available compared to what is found in the database 
 			foreach ($equipmentRequest as $key => $value) 
 			{
-				if($key == 'Markers')
+				if($key == 'WhiteBoard Markers')
 				{
 					$markersRequest = $value;
 					if($markersRequest > (3-$markersCount))
@@ -303,8 +307,8 @@ class ReservationController extends Controller
 				}
 				else if ($key == 'Laptop')
 				{
-					$projectorsRequest = $value;
-					if($projectorsRequest > (3-$laptopsCount))
+					$laptopsRequest = $value;
+					if($laptopsRequest > (3-$laptopsCount))
 					{
 						$eStatus = false;
 						continue;
@@ -312,8 +316,8 @@ class ReservationController extends Controller
 				}
 				else if ($key == 'Projector')
 				{
-					$laptopsRequest = $value;
-					if($laptopsRequest > (3-$projectorsCount))
+					$projectorsRequest = $value;
+					if($projectorsRequest > (3-$projectorsCount))
 					{
 						$eStatus = false;
 						continue;
@@ -425,7 +429,7 @@ class ReservationController extends Controller
 					$temp = $reservationMapper->find($o->id);
 					$t2 = $temp->getTimeslot();
 					
-					$errored[] = [$t2, 'You have been removed from the waitlist in room '.$o[0]->room_name.' at '. $t2->format('g a').'.'];
+					$errored[] = [$t2, 'You have been removed from the waitlist in room '.$o->room_name.' at '. $t2->format('g a').'.'];
 					$reservationMapper->delete($o->id);
 				}
             }
