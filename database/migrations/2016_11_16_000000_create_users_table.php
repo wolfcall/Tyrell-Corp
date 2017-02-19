@@ -17,6 +17,8 @@ class CreateUsersTable extends Migration
             $table->integer('id')->unsigned();
             $table->string('name');
             $table->string('password');
+			$table->boolean('attempt')->default(false);
+			$table->boolean('capstone')->default(false);
             $table->rememberToken();
             $table->primary('id');
         });
