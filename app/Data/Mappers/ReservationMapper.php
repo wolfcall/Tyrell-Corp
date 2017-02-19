@@ -255,7 +255,65 @@ class ReservationMapper extends Singleton
     }
 	
 	/**
-     * @param int $id
+     * Confirm the status of all the equipment that is requested by the user
+     *
+     * @param \DateTime $start Start date, inclusive
+     * @param \DateTime $end End date, exclusive
+     * @return int
+     */
+    public function statusEquipment(\DateTime $timeslot, int $markersRequest, int $laptopsRequest, int $projectorsRequest, int $cablesRequest)
+    {
+        //Count all equipment already being used
+		$markersCount = 0;
+		$projectorsCount = 0;
+		$laptopsCount = 0;
+		$cablesCount = 0;
+		
+		//Check all the equipment that is being used during that timeslot
+		$equipmentCount = $this->countEquipment($timeslot);
+		foreach($equipmentCount as $e)
+		{
+			$markersCount += $e->quantity_markers;
+			$projectorsCount += $e->quantity_projectors;
+			$laptopsCount += $e->quantity_laptops;
+			$cablesCount += $e->quantity_cables;
+		}			
+		
+		//Use a boolean to know if the status of the equipment is ok
+		//Start the boolean as true
+		$eStatus = true;
+		
+		//Check the markers
+		if($markersRequest > (3-$markersCount))
+		{
+			$eStatus = false;
+		}
+
+		//Check the laptops
+		if($laptopsRequest > (3-$laptopsCount))
+		{
+			$eStatus = false;
+		}
+
+		//Check the projectors
+		if($projectorsRequest > (3-$projectorsCount))
+		{
+			$eStatus = false;
+		}
+
+		//Check the cables
+		if($cablesRequest > (3-$cablesCount))
+		{
+			$eStatus = false;
+		}
+		
+		return $eStatus;
+    }	
+	
+	/**
+     * Method to update the Reservation of a user
+	 * 
+	 * @param int $id
      * @param string $description
      */
     public function set(int $id, string $description, int $markers, int $projectors, int $laptops, int $cables, string $timeslot, string $roomName)
@@ -279,7 +337,9 @@ class ReservationMapper extends Singleton
     }
 	
 	/**
-     * @param int $id
+     * Method to update the Waitlist Position of a user's Reservation
+	 * 
+	 * @param int $id
      * @param string $description
      */
     public function setNewWaitlist(int $id, int $newPosition)
@@ -293,6 +353,7 @@ class ReservationMapper extends Singleton
     }
 	
 	/**
+	* Method to move a user down in the Waitlist for a specific Timeslot
 	* @param int $id
 	* @param string $description
 	*/
@@ -307,6 +368,8 @@ class ReservationMapper extends Singleton
 	
 
     /**
+	 * Method to Delete a Reservation
+	 * 
      * @param int $id
      */
     public function delete(int $id)
@@ -320,7 +383,6 @@ class ReservationMapper extends Singleton
 
             // we want to delete this object from out DB, so we simply register it as deleted in the UoW
             ReservationUoW::getInstance()->registerDeleted($reservation);
-			
         }
     }
 
