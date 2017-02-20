@@ -578,10 +578,7 @@ class ReservationController extends Controller
 				$position = $w->getPosition();
 			}
 		}
-        
-        //Variable holds what position will become active reservation
-        $temp = 0;
-        
+   
         //If user cancelling has the active reservation
         if($position == 0)
         {   
@@ -604,22 +601,24 @@ class ReservationController extends Controller
                     $eStatus = $reservationMapper->statusEquipment($timeslot, $markersRequest, $laptopsRequest, $projectorsRequest, $cablesRequest);
                     
                     //Set valid candidate as new active reservation
-                    $w->setPosition(0);
+                    $reservationMapper->setNewWaitlist($w->getId(), 0);
+					
+					$eStatus = true;
 
                 //If no, keep iterating
                 } 
                 //Move position down on remaining entries once new active reservation has been set
                 else {
                     $x = $w->getPosition();
-                    $w->setPosition($x-1);
+                    $reservationMapper->setNewWaitlist($w->getId(), $x-1);
                 }                    
-                
             }
         }
             
              
         //If user cancelling is on waiting list
-        else {
+        else 
+		{
 		//For everyone in position after the Reservation to be deleted, move them down one
             foreach($waitingList as $w)
             {
