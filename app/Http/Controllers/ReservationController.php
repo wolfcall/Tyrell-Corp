@@ -601,14 +601,12 @@ class ReservationController extends Controller
                     $eStatus = $reservationMapper->statusEquipment($timeslot, $markersRequest, $laptopsRequest, $projectorsRequest, $cablesRequest);
                     
                     //Set valid candidate as new active reservation
-                    $reservationMapper->setNewWaitlist($w->getId(), 0);
-					
-					$eStatus = true;
+                    if($eStatus == true)
+                        $reservationMapper->setNewWaitlist($w->getId(), 0);
 
                 //If no, keep iterating
-                } 
-                //Move position down on remaining entries once new active reservation has been set
-                else {
+                } else {
+                    //Move position down on remaining entries once new active reservation has been set
                     $x = $w->getPosition();
                     $reservationMapper->setNewWaitlist($w->getId(), $x-1);
                 }                    
