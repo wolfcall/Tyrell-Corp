@@ -176,9 +176,19 @@ class ReservationController extends Controller
 				$temp2 = $this->requestReservation($request, $newRoom, $new);
 				if ( ($this->success2) == true )
 				{
+					$active = $reservationMapper->findForTimeslot($newRoom, $newTimeslot);
+					
+					foreach($active as $a)
+					{
+						if($a->getUserId() == Auth::id() )
+						{
+							$newID = $a->getId();
+						}
+					}
+					
 					$this->cancelReservation($request, $id, $OGRoom, $OG);
 					return redirect()
-						->route('reservation', ['id' => $reservation->getId()+1, 'back' => $request->input('back')]);
+						->route('reservation', ['id' => $newID, 'back' => $request->input('back')]);
 				}
 				else
 				{
@@ -592,6 +602,9 @@ class ReservationController extends Controller
 		//Keep tabs of Reservations that have become active
 		$added = [];
 		
+		//Keep tabs of Reservations that have been removed
+		$removed = [];
+		
 		//If user cancelling has the active reservation
         if($position == 0)
         {    
@@ -604,6 +617,11 @@ class ReservationController extends Controller
 				
 				//If the current Room has an active reservation, there is nothing to do
 				if( count($roomHasActive) )
+				{
+					continue;
+				}
+				//If its in the removed array, we skip it
+				elseif (in_array($e->getId(), $removed))
 				{
 					continue;
 				}
@@ -628,6 +646,7 @@ class ReservationController extends Controller
 						$reservationMapper->setNewWaitlist($e->getId(), 0);
 						$waitingList = $reservationMapper->findForTimeslot($curRoom, $timeslot);
 						
+						//Decrement everyone down
 						$pos = $e->getPosition();
 						foreach($waitingList as $w)
 						{
@@ -642,6 +661,20 @@ class ReservationController extends Controller
 						//Add to the list of modified
 						$added[] = $reservationMapper->find($e->getId());
 						
+						//Check if any waitlisted reservations in any other rooms would overlap with the recently added active reservation
+						$same = $reservationMapper->findAllTimeslotWaitlisted($timeslot, $e->getUserID(), $e->getRoomName());
+						
+						//If any waitlisted reservations in any parallel rooms exist for the winnning user, delete them
+						//For the same timeslot, to prevent the same person from getting 2 spots
+						if (count($same))
+						{
+							foreach($same as $s)
+							{
+								$reservationMapper->delete($s->id);
+								//If its in the list we are curerntly searching we must skip to prevent errors
+								$removed[] = $s->id;
+							}
+						}
 						$eStatus = false;
 					}
 				}             
@@ -702,6 +735,7 @@ class ReservationController extends Controller
 					}
 				}
 				//If any waitlisted reservations in any parallel rooms exist for the winnning user, delete them
+				//Not the same timeslot
 				elseif (count($overlap) && $a->getPosition() == 0) 
 				{
 					foreach($overlap as $o)
