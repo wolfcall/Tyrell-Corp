@@ -588,15 +588,7 @@ class ReservationController extends Controller
    
         //All Reservations for every room in the same Timeslot
 		$everything = $reservationMapper->findTimeslot($timeslot);		
-		/*
-		foreach($everything as $e)
-		{
-			var_dump($e);
-			echo '<br><br>';
-		}
-	
-		die();
-		*/
+
 		//Keep tabs of Reservations that have become active
 		$added = [];
 		
