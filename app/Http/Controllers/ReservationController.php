@@ -361,6 +361,7 @@ class ReservationController extends Controller
 			//And if there are already someone in the waitling list
 			//Iterate through all the reservations found
 			$count = 1;
+						
 			if($capstone && count($waitingList) > 1)
 			{
 				foreach($waitingList as $w)
@@ -567,8 +568,10 @@ class ReservationController extends Controller
         $reservation = $reservationMapper->find($id);
 		
 		$timeslot = Carbon::createFromFormat('Y-m-d\TH', $timeslot);
+		
+		//Waiting List for the same room the reservation is being deleted from
 		$waitingList = $reservationMapper->findForTimeslot($roomName, $timeslot);
-			
+						
 		//Find out the position in the waiting list of the Reservation we will be deleting
 		foreach($waitingList as $w)
 		{
@@ -579,43 +582,69 @@ class ReservationController extends Controller
 			}
 		}
 
-		// delete the reservation
+		// Delete the reservation & commit for DB update
         $reservationMapper->delete($reservation->getId());
         $reservationMapper->done();
    
-        //If user cancelling has the active reservation
+        //All Reservations for every room in the same Timeslot
+		$everything = $reservationMapper->findTimeslot($timeslot);		
+
+		//Keep tabs of Reservations that have become active
+		$added = [];
+		
+		//If user cancelling has the active reservation
         if($position == 0)
         {    
             $eStatus = false;
-            //Iterate through every user after position 0 
-            foreach($waitingList as $w)
+			
+            //Iterate through every Reservation
+			foreach($everything as $e)
             {   
-                if($w->getPosition() == 0) 
+                $roomHasActive = $reservationMapper->findTimeslotWinner($timeslot, $e->getRoomName());
+				
+				//If the current Room has an active reservation, there is nothing to do
+				if( count($roomHasActive) )
 				{
-                    //Do nothing on current active reservation    
-                } 
-				elseif(!$eStatus) 
+					continue;
+				}
+				//We have reached a new one, reset the variables
+				elseif(!$eStatus)
 				{
-                    //Get # of each equipment requests
-                    $markersRequest = $w->getMarkers();
-                    $laptopsRequest = $w->getLaptops();
-                    $projectorsRequest = $w->getProjectors();
-                    $cablesRequest = $w->getCables();
+					$roomHasActive = false;
+					$curRoom = $e->getRoomName();
+					
+					//Get # of each equipment requests
+					$markersRequest = $e->getMarkers();
+					$laptopsRequest = $e->getLaptops();
+					$projectorsRequest = $e->getProjectors();
+					$cablesRequest = $e->getCables();
 
-                    //Use statusEquipment(...) method on line 264 of ReservationMapper.php to see if reservation can be made active
-                    $eStatus = $reservationMapper->statusEquipment($timeslot, $markersRequest, $laptopsRequest, $projectorsRequest, $cablesRequest);
-                    
-                  	//Set valid candidate as new active reservation
-                    if($eStatus == true)
-                        $reservationMapper->setNewWaitlist($w->getId(), 0);
-                }
-				//If no, keep iterating
-				else 
-				{
-                    //Move position down on remaining entries once new active reservation has been set
-                    $x = $w->getPosition();
-                    $reservationMapper->setNewWaitlist($w->getId(), $x-1);
-                }                    
+					//Use statusEquipment(...) method on line 264 of ReservationMapper.php to see if reservation can be made active
+					$eStatus = $reservationMapper->statusEquipment($timeslot, $markersRequest, $laptopsRequest, $projectorsRequest, $cablesRequest);
+					
+					//Set valid candidate as new active reservation
+					if($eStatus == true)
+					{
+						$reservationMapper->setNewWaitlist($e->getId(), 0);
+						$waitingList = $reservationMapper->findForTimeslot($curRoom, $timeslot);
+						
+						$pos = $e->getPosition();
+						foreach($waitingList as $w)
+						{
+							$next = $w->getPosition();
+							if($pos < $next)
+							{
+								$reservationMapper->setNewWaitlist($w->getId(), $next-1);
+							}
+						}
+						$reservationMapper->done();
+						
+						//Add to the list of modified
+						$added[] = $reservationMapper->find($e->getId());
+						
+						$eStatus = false;
+					}
+				}             
             }
         }   
         //If user cancelling is on waiting list
@@ -643,54 +672,54 @@ class ReservationController extends Controller
 		* 	Post delete checks
 		*/
 		
-		//Find out who took the place of the user who deleted their reservation
-		$winner = $reservationMapper->findTimeslotWinner($timeslot, $reservation->getRoomName());
-		
-		if(count($winner))
+		//For all Reservations that were added as a result of the deletion, perform the following checks
+		if(count($added) > 0)
 		{
-			$winnerID = $winner[0]->user_id;
+			foreach($added as $a)			
+			{
+				$winnerID = $a->getUserId();
+							
+				// Check the current amount of active reservations for the winner
+				$active = $reservationMapper->countInRange($winnerID, $timeslot->copy()->startOfWeek(), $timeslot->copy()->startOfWeek()->addWeek());
+				
+				// Check the current waitlisted reservations
+				$waited = $reservationMapper->countAll($winnerID, $timeslot->copy()->startOfWeek(), $timeslot->copy()->startOfWeek()->addWeek());
+				
+				//Check if any waitlisted reservations in any other rooms would overlap with the recently added active reservation
+				$overlap = $reservationMapper->findAllTimeslotWaitlisted($timeslot, $winnerID, $reservation->getRoomName());
+			
+				//If the amount of active reservaitons is at 3, then delete all the ones on the waitlist from the current week
+				if(count($active) == 3)
+				{
+					foreach($waited as $w)
+					{
+						$temp = $reservationMapper->find($w->id);
+						$t2 = $temp->getTimeslot();
 						
-			// Check the current amount of active reservations for the winner
-			$active = $reservationMapper->countInRange($winnerID, $timeslot->copy()->startOfWeek(), $timeslot->copy()->startOfWeek()->addWeek());
-			
-			// Check the current waitlisted reservations
-			$waited = $reservationMapper->countAll($winnerID, $timeslot->copy()->startOfWeek(), $timeslot->copy()->startOfWeek()->addWeek());
-			
-			//Check if any waitlisted reservations in any other rooms would overlap with the recently added active reservation
-			$overlap = $reservationMapper->findAllTimeslotWaitlisted($timeslot, $winnerID, $reservation->getRoomName());
-		
-			//If the amount of active reservaitons is at 3, then delete all the ones on the waitlist from the current week
-			if(count($active) == 3)
-			{
-				foreach($waited as $w)
-				{
-					$temp = $reservationMapper->find($w->id);
-					$t2 = $temp->getTimeslot();
-					
-					$reservationMapper->delete($w->id);
-					//No need to display this information to the user
-					continue;
+						$reservationMapper->delete($w->id);
+						//No need to display this information to the user
+						continue;
+					}
 				}
-			}
-			//If any waitlisted reservations in any parallel rooms exist for the winnning user, delete them
-			elseif (count($overlap) && $winner[0]->wait_position == 0) 
-			{
-				foreach($overlap as $o)
+				//If any waitlisted reservations in any parallel rooms exist for the winnning user, delete them
+				elseif (count($overlap) && $a->getPosition() == 0) 
 				{
-					$temp = $reservationMapper->find($o->id);
-					$t2 = $temp->getTimeslot();
-					
-					$reservationMapper->delete($o->id);
-					//No need to display this information to the user
-					continue;
+					foreach($overlap as $o)
+					{
+						$temp = $reservationMapper->find($o->id);
+						$t2 = $temp->getTimeslot();
+						
+						$reservationMapper->delete($o->id);
+						//No need to display this information to the user
+						continue;
+					}
 				}
+				
+				//Commit once again
+				$reservationMapper->done();	
 			}
-			
-			//Commit once again
-			$reservationMapper->done();	
 		}
-		
-		
+				
         $response = redirect();
 
         // redirect to appropriate back page

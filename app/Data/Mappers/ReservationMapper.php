@@ -129,7 +129,8 @@ class ReservationMapper extends Singleton
 	/**
 	 * Returns a list of all waitlisted Reservations (if any) for a given timeslot by the user passed in
 	 * @param int $id
-     * @param \DateTime $timeslot
+	 * @param Room Name $roomName
+	 * @param \DateTime $timeslot
      * @return Reservation[]
      */
     public function findAllTimeslotWaitlisted(\DateTime $timeslot, $id, $roomName)
@@ -140,6 +141,7 @@ class ReservationMapper extends Singleton
 	/**
 	 * Returns who has the reservation for the timeslot
      * @param \DateTime $timeslot
+	 * @param Room Name $roomName
      * @return Reservation[]
      */
     public function findTimeslotWinner(\DateTime $timeslot, $roomName)
@@ -147,7 +149,33 @@ class ReservationMapper extends Singleton
         return  $this->tdg->findTimeslotWinner($timeslot, $roomName);
     }
 	
+	/**
+     * Returns a list of all Reservation for a given Timeslot other than the room passed in
+     * This is used to assign who gets the Equipment upon a Cancelation
+	 *
+     * @param \DateTime $timeslot
+	 * @param Room Name $roomName
+     * @return Reservation[]
+     */
+    public function findTimeslot(\DateTime $timeslot)
+    {
+        $results = $this->tdg->findTimeslot($timeslot);
+        $reservations = [];
 
+        foreach ($results as $result) {
+            if ($reservation = $this->identityMap->get($result->id)) {
+                $reservations[] = $reservation;
+            } else {
+                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id), $result->wait_position,
+					$result->quantity_markers, $result->quantity_projectors, $result->quantity_laptops, $result->quantity_cables);
+                $this->identityMap->add($reservation);
+                $reservations[] = $reservation;
+            }
+        }
+
+        return $reservations;
+    }
+	
     /**
      * @param Reservation $reservation
      * @return int
