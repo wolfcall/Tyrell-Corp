@@ -81,7 +81,7 @@ class ReservationTDG extends Singleton
     }
 
     /**
-     * SQL statement to update a new Reservation row
+     * SQL statement to update a Reservation in the Database
      *
      * @param Reservation $reservation
      */
@@ -103,7 +103,7 @@ class ReservationTDG extends Singleton
     }
 
     /**
-     * SQL statement to delete Reservation rows based on the Reservation id, or the recurrence id
+     * SQL statement to delete Reservation rows based on the Reservation id
      *
      * @param Reservation $reservation
      */
@@ -132,7 +132,7 @@ class ReservationTDG extends Singleton
     }
 
     /**
-     * Returns a list of all Reservations (waitlist and active) for a given Room and Timeslot, ordered by id
+     * Returns a list of all Reservations (Waitlist and Active) for a given Room and Timeslot, ordered by id
      *
      * @param string $roomName
      * @param \DateTime $timeslot
@@ -147,7 +147,7 @@ class ReservationTDG extends Singleton
     }
 	
 	/**
-     * Returns a list of all active Reservations (if any) for a given Timeslot by the user passed in
+     * Returns a list of all active Reservations (if any) for a given Timeslot by the User passed in
      *
 	 * @param int $id
      * @param \DateTime $timeslot
@@ -163,7 +163,6 @@ class ReservationTDG extends Singleton
 	
 	/**
      * Returns a list of all Reservation for a given Timeslot other than the room passed in
-     * This is used to assign who gets the Equipment upon a Cancelation
 	 *
      * @param \DateTime $timeslot
      * @return array
@@ -177,8 +176,7 @@ class ReservationTDG extends Singleton
     }
 	
 	/**
-     * Returns a list of all waitlisted Reservations (if any) for a given Timeslot by the user passed in
-     * This is used to remove any overlapping waitlists
+     * Returns a list of all waitlisted Reservations (if any) for a given Timeslot by the User passed in
 	 *
 	 * @param int $id
      * @param \DateTime $timeslot
@@ -193,7 +191,7 @@ class ReservationTDG extends Singleton
     }
 	
 	/**
-     * Returns who has the reservation for the timeslot
+     * Returns the User who has the Reservation for the Timeslot and Room passed in
      *
 	 * @param String $roomName
      * @param \DateTime $timeslot
@@ -208,7 +206,7 @@ class ReservationTDG extends Singleton
     }
 
     /**
-     * Returns a list of all active (eg. not waitlisted) reservations for a user
+     * Returns the active Reservations for the given Date
      *
      * @param \DateTime $date
      * @return array

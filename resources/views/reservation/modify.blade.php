@@ -32,7 +32,8 @@
                 <label for="inputTime" class="col-sm-3 col-form-label">Timeslot</label>
                 <div class = "col-sm-3">
                     <select class ="form-control" name ="timeslot">
-                        @if ($reserveDate > $ourDate)
+                        <!-- Display times in the Drop Down Menu -->
+						@if ($reserveDate > $ourDate)
                             @for ($i = 0; $i < 24; $i++) 
                                 @if ($i == $reserveTime)
                                     <option value = {{$i}} selected>{{$i}}:00</option>
@@ -40,7 +41,9 @@
                                     <option value = {{$i}}>{{$i}}:00</option>
                                 @endif
                             @endfor
-                        @else ($reserveDate == $ourDate)
+                        <!-- If the day is the same as Today, display times in the Drop Down Menu 
+						that are after the current time. -->
+						@else ($reserveDate == $ourDate)
                             @for ($i = $ourTime+1; $i < 24; $i++)
                                 @if ($i == $reserveTime)
                                     <option value = {{$i}} selected>{{$i}}:00</option>
@@ -52,7 +55,7 @@
                     </select>
                 </div>
             </div>
-
+			<!-- Find the Room of the reservation -->
             <div class="form-group row">
                 <label for="inputRoom" class="col-sm-3 col-form-label">Room</label>
                 <div class="col-sm-3">
@@ -67,7 +70,7 @@
                     </select>
                 </div>
             </div>
-
+			<!-- Auto Populate with Data pulled from the Database -->
             <div class = "form-group row">
                 <label for="inputMarkers" class="col-sm-3 col-form-label">Whiteboard Markers</label>
                 <div class = "col-sm-3">

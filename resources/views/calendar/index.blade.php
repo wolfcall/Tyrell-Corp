@@ -60,8 +60,12 @@
 					<tbody>
                     @foreach($rooms as $room)
 					<?php						
+						//Check if the Room is busy or not
+						//To be used in the Calendar Timeslot
 						$roomMapper = RoomMapper::getInstance();
 						$roomStatus = $roomMapper->getStatus($room->getName());
+						
+						//Populate the Rooms for the Morning
 					?>
 						<tr class="calendar-room-row">
 							<th class="align-middle text-xs-center">{{ $room->getName() }}</th>
@@ -81,9 +85,13 @@
                     </thead>
 					<tbody>
                     @foreach($rooms as $room)
-                    <?php						
+                    <?php
+						//Check if the Room is busy or not
+						//To be used in the Calendar Timeslot
 						$roomMapper = RoomMapper::getInstance();
 						$roomStatus = $roomMapper->getStatus($room->getName());
+						
+						//Populate the Rooms for the Afternoon and Evening
 					?>
 						<tr class="calendar-room-row">
                             <th class="align-middle text-xs-center">{{ $room->getName() }}</th>

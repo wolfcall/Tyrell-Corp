@@ -6,27 +6,31 @@
 	//If it was, continue the timer where it left off
 	if (performance.navigation.type == 1) 
 	{
-	  console.info( "This page is reloaded" );
 	  i = localStorage.left;
 	}
 	//If it was not, simply continue
 	else
 	{
-	  console.info( "This page is not reloaded");
+	  //Do nothing
 	}
 	
+	//Function to create the 60 second Timer
 	function onTimer() 
 	{
+	//Populate the inner HTML of the ID where the timer is placed
 	document.getElementById('timer').innerHTML = i;
 	i--;
+	//Keep the value in local storage in case the user tries to refresh the page
 	localStorage.left = i;	
 		if (i < 0) 
 		{
+			//When the timer runs out, remove the data from local storage and then re-direct the user back to the calendar
 			localStorage.removeItem("left");
 			window.location.href = '{{route("calendar")}}';
 		}
 		else 
 		{
+			//Recurse after 1 second has passed
 			setTimeout(onTimer, 1000);
 		}
 	}	
@@ -38,10 +42,11 @@
             Request a Reservation
             <small class="text-muted">for {{ $timeslot->format('l, F jS, Y') }} at {{ $timeslot->format('g a') }} in {{ $room->getName() }}</small>
         </h1>
-			
+		<!-- Show the user how much time they have left to make their Reservation -->
 		<div class = "timer" style="color:red;text-align: center;">Reservation Request closes in <span id="timer"></span> seconds!</div><br>
         <form method="post" action="{{ route('requestPost', ['room' => $room->getName(), 'date' => $timeslot->format('Y-m-d\TH')]) }}">
             {{ csrf_field() }}
+			<!-- Prompt the user to fill out all of the form entries required for the Reservation -->
 			<div class="form-group row{{ $errors->has('description') ? ' has-danger' : '' }}">
 				<label for="inputDescription" class="col-sm-2 col-form-label">Description</label>
 				<div class="col-sm-10">

@@ -11,9 +11,17 @@ use Illuminate\Support\Facades\Auth;
 
 class ReservationController extends Controller
 {
-    const MAX_PER_TIMESLOT = 4;
+    //Constant to signify Maximum # of users that can be associated to 1 timeslot
+	const MAX_PER_TIMESLOT = 4;
+	
+	//Constant to signify Maximum # of reservation that can be made by a user in 1 week
     const MAX_PER_USER = 3;
+	
+	//Signifies if the operation is to modify an existing reservation
 	private $modifying = false;
+	
+	//Used only if the operation is to modify
+	//Used to keep track if the constraints are followed before the modification is allowed to continue
 	private $success1 = true;
 	private $success2 = true;
 	
@@ -26,7 +34,9 @@ class ReservationController extends Controller
     }
 
     /**
-     * @param Request $request
+     * Returns the My Reservation List view for the given User
+	 * 
+	 * @param Request $request
      * @return \Illuminate\Http\Response
      */
     public function viewReservationList(Request $request)
@@ -43,7 +53,9 @@ class ReservationController extends Controller
     }
 
     /**
-     * @param Request $request
+     * Returns the Show Reservation view for the given User 
+	 * 
+	 * @param Request $request
      * @param $id
      * @return \Illuminate\Http\Response
      */
@@ -68,7 +80,9 @@ class ReservationController extends Controller
     }
 
     /**
-     * @param Request $request
+     * Returns the Modify Reservation view for the given user's Reservation
+	 *
+	 * @param Request $request
      * @param string $id
      * @return \Illuminate\Http\Response
      */
@@ -89,7 +103,9 @@ class ReservationController extends Controller
     }
 
     /**
-     * @param Request $request
+     * Modify the Reservation to the new Details entered
+	 * 
+	 * @param Request $request
      * @param $id
      * @return \Illuminate\Http\Response
      */
@@ -103,22 +119,29 @@ class ReservationController extends Controller
             return abort(404);
         }
 
+		//Get the Timeslot of the "old" Version of the Reservation
 		$date = substr($reservation->getTimeslot()->toDateTimeString(), 0, 10);
         $timeslot = $date." ".$request->input('timeslot', "").":00:00" ;
+		
+		//Get the Timeslot of the "new" Version of the Reservation
 		$newTimeslot = new Carbon ( $date." ".$request->input('timeslot', "").":00:00" );
 		$new = $newTimeslot->format('Y-m-d\TH');
 		
+		//Get the new Room of the "new" Version of the Reservation
 		$newRoom = $request->input('roomName', "");
 		
+		//Get the new Equipment of the "new" Version of the Reservation
 		$newLaptops = $request->input('laptops', "");
 		$newProjectors = $request->input('projectors', "");
 		$newCables = $request->input('cables', "");
 		$newMarkers = $request->input('markers', "");
 		
+		//Get the Timeslot of the "old" Version of the Reservation in the TH format
 		$OGTimeslot = $reservation->getTimeslot();
 		$OG = $reservation->getTimeslot()->format('Y-m-d\TH');
 		$OGRoom = $reservation->getRoomName();
 		
+		//Get the Equipment of the "old" Version of the Reservation
 		$OGLaptops = $reservation->getLaptops();
 		$OGProjectors = $reservation->getProjectors();
 		$OGCables = $reservation->getCables();
@@ -127,6 +150,7 @@ class ReservationController extends Controller
 		//Status to check if any of the info besides the description changed
 		$status = true;
 		
+		//If any of the New Data is not the same as the old data, state it
 		if($newTimeslot != $OGTimeslot)
 		{
 			$status = false;
@@ -152,10 +176,10 @@ class ReservationController extends Controller
 			$status = false;
 		}
 				
-		//Same Room and Timeslot means 
+		//Same Room, Timeslot and Equipment means.... 
 		if($status)
 		{
-			// update the description, and all equipment
+			// ...update the description only
 			$reservationMapper->set($reservation->getId(), $request->input('description', ""), $newMarkers,	$newProjectors, $newLaptops, $newCables,
 				$request->input('timeslot', ""), $newRoom);
 				
@@ -165,44 +189,71 @@ class ReservationController extends Controller
 				->route('reservation', ['id' => $reservation->getId(), 'back' => $request->input('back')])
 				->with('success', 'Successfully modified reservation!');
 		}
+		//If any of the New Data is not the same as the old data, change it
 		else
 		{
+			//Set the variable to true, to let other components of the system know that a Reservation is being modified
 			$this->modifying = true;
 			
+			//Go through the constraints outlined in the Show Request Form Method
 			$temp1 = $this->showRequestForm($request, $newRoom, $new);
-			
 			if( ($this->success1) == true )
 			{
+				//Go through the constraints outlined in the Request Reservation Method
+				//Add the modified Reservation to the database
 				$temp2 = $this->requestReservation($request, $newRoom, $new);
 				if ( ($this->success2) == true )
 				{
+					//Now that the Reservation has been added
+					//Find the new ID of the reservation so that we can redirect to that page
+					$active = $reservationMapper->findForTimeslot($newRoom, $newTimeslot);
+					foreach($active as $a)
+					{
+						if($a->getUserId() == Auth::id() )
+						{
+							$newID = $a->getId();
+						}
+					}
+					
+					//Remove the old version of the Reservation from the Database
+					//Return to the Reservation page with the details of the modified Reservation
 					$this->cancelReservation($request, $id, $OGRoom, $OG);
+					$this->modifying = false;
 					return redirect()
-						->route('reservation', ['id' => $reservation->getId()+1, 'back' => $request->input('back')]);
+						->route('reservation', ['id' => $newID, 'back' => $request->input('back')]);
 				}
 				else
 				{
+					//Return the error caught by the Request Reservation method
+					//Reaching here signifies that the modification did not go through
 					$this->success2 = true;
+					$this->modifying = false;
 					return $temp2;
 				}
 			}
 			else
 			{
+				//Return the error caught by the Show Request Form Method
+				//Reaching here signifies that the modification did not go through
 				$this->success1 = true;
+				$this->modifying = false;
 				return $temp1;
 			}
 		}
     }
 
     /**
-     * @param Request $request
+     * Initiates the check to see if a User is allowed to Request a Reservation
+	 * 
+	 * @param Request $request
      * @param string $roomName
      * @param string $timeslot
      * @return \Illuminate\Http\Response
      */
     public function showRequestForm(Request $request, $roomName, $timeslot)
     {
-        $timeslot = Carbon::createFromFormat('Y-m-d\TH', $timeslot);
+        //Format the Timeslot passed in
+		$timeslot = Carbon::createFromFormat('Y-m-d\TH', $timeslot);
     
 		// validate room exists
         $roomMapper = RoomMapper::getInstance();
@@ -215,15 +266,17 @@ class ReservationController extends Controller
 		//Check to see who is currently using the room
 		$roomStatus = $roomMapper->getStatus($roomName);
 
+		//If the room is busy with someone else, return error
 		if (($roomStatus[0]->busy) != 0 && $roomStatus[0]->busy != Auth::id()) {
-            if( ($this->modifying) == true)
+            //If we are modifiying, then tell the Modification component that the room is busy
+			if( ($this->modifying) == true)
 			{
 				$this->success1 = false;
 			}
 			return redirect()->route('calendar', ['date' => $timeslot->toDateString()])
                 ->with('error', sprintf("The room %s is currently busy! Please try again later. We apologize for any inconvenience.", $roomName));
         }
-		//If its not busy, then set it to busy
+		//If its not busy, then set it to busy with the user's ID
 		else
 		{
 			$roomStatus = $roomMapper->setBusy($roomName, Auth::id());
@@ -231,11 +284,13 @@ class ReservationController extends Controller
 		
         $reservationMapper = ReservationMapper::getInstance();
 			
-        // check if user exceeded maximum amount of reservations
+        //Check if user exceeded maximum amount of reservations
         $reservationCount = count($reservationMapper->countInRange(Auth::id(), $timeslot->copy()->startOfWeek(), $timeslot->copy()->startOfWeek()->addWeek()));
 
+		//If the user went over, return an error
 		if ($reservationCount >= static::MAX_PER_USER) {
-            if( ($this->modifying) == true)
+            //If we are modifiying, then tell the Modification component that the user went over
+			if( ($this->modifying) == true)
 			{
 				$this->success1 = false;
 			}
@@ -244,10 +299,12 @@ class ReservationController extends Controller
 				Please try reserving next week or remove a reservation from this week to be eligible.", static::MAX_PER_USER));
         }
 
-        // check if waiting list for timeslot is full
+        //Check if the timeslot is full
         $reservations = $reservationMapper->findForTimeslot($roomName, $timeslot);
 
-        if (count($reservations) >= static::MAX_PER_TIMESLOT) {
+        //If the Timeslot is full, return an error
+		if (count($reservations) >= static::MAX_PER_TIMESLOT) {
+			//If we are modifiying, then tell the Modification component that the Timeslot is full
 			if( ($this->modifying) == true)
 			{
 				$this->success1 = false;
@@ -256,10 +313,13 @@ class ReservationController extends Controller
                 ->with('error', 'The waiting list for that time slot is full.');
         }
 	
-        if( ($this->modifying) == true)
+        //If we are modifying, we do not want to change the View
+		//The method is simply being used for the constraints in place
+		if( ($this->modifying) == true)
 		{
 			//Do nothing
 		}
+		//Proceed to the Request Form
 		else
 		{
 			return view('reservation.request', [
@@ -282,12 +342,12 @@ class ReservationController extends Controller
 		
 		$this->validate($request, [
             'description' => 'required',
-			//'recur' => 'required|integer|min:1|max:'.static::MAX_PER_USER,
         ]);
 		
+		//Format the timeslot
         $timeslot = Carbon::createFromFormat('Y-m-d\TH', $timeslot);
 
-        // validate room exists
+        //Validate the room passed in exists
         $roomMapper = RoomMapper::getInstance();
         $room = $roomMapper->find($roomName);
 
@@ -295,26 +355,30 @@ class ReservationController extends Controller
             return abort(404);
         }
 
-        // generate a UUID for this reservation session, which will link recurring reservations together
+        //Generate a UUID for this reservation session, which will link recurring reservations together
         $uuid = \Uuid::generate();
         $reservations = [];
 
-        $recur = intval($request->input('recur', 1));
-        // status message arrays
+        //Get the  # of times the user wants the Reservation to recur for
+		$recur = intval($request->input('recur', 1));
+        
+		//Status message arrays
         $successful = [];
 		$waitlisted = [];
         $errored = [];
 
-        // loop over every recurring week and independently request the reservation for that week
+        //Loop over every recurring week and independently request the reservation for that week
         for ($t = $timeslot->copy(), $i = 0; $i < $recur; $t->addWeek(), ++$i) 
 		{
             /*
              * Pre-insert checks
              */
-            // check if user exceeded maximum amount of reservations
+            //Check if user exceeded maximum amount of reservations
+			//This is done after every loop because future reservation (from Recursion) are not initially checked with the Show Request Form method
             $reservationCount = count($reservationMapper->countInRange(Auth::id(), $t->copy()->startOfWeek(), $t->copy()->startOfWeek()->addWeek()));
             if ($reservationCount >= static::MAX_PER_USER) {
-                if( ($this->modifying) == true)
+                //If we are modifiying, then tell the Modification component that the user went over
+				if( ($this->modifying) == true)
 				{
 					$this->success2 = false;
 				}
@@ -322,11 +386,13 @@ class ReservationController extends Controller
 				continue;
             }
 
-            // check if waiting list for timeslot is full
+            //Check if waiting list for timeslot is full
+			//This is done after every loop because future reservation (from Recursion) are not initially checked with the Show Request Form method
            	$waitingList = $reservationMapper->findForTimeslot($roomName, $t);
             
 			if (count($waitingList) >= static::MAX_PER_TIMESLOT) {
-                if( ($this->modifying) == true)
+                //If we are modifiying, then tell the Modification component that the Timeslot is full
+				if( ($this->modifying) == true)
 				{
 					$this->success2 = false;
 				}
@@ -338,7 +404,8 @@ class ReservationController extends Controller
 			$overlap = $reservationMapper->findAllTimeslotActive($t, Auth::id());
 						
 			if (count($overlap)) {
-                if( ($this->modifying) == true)
+                //If we are modifiying, then tell the Modification component that the user has an overlapping Reservation
+				if( ($this->modifying) == true)
 				{
 					$this->success2 = false;
 				}
@@ -352,6 +419,7 @@ class ReservationController extends Controller
 			$projectorsRequest = intval($request->input('projectors', 1));
 			$cablesRequest = intval($request->input('cables', 1));
 			
+			//Check if the equipment request is available for that Timeslot
 			$eStatus = $reservationMapper->statusEquipment($t, $markersRequest, $laptopsRequest, $projectorsRequest, $cablesRequest);
 			
 			//Check if the student is in capstone, so we can know to give him priority or not
@@ -360,12 +428,12 @@ class ReservationController extends Controller
 			//Only execute if the student is a Capstone student
 			//And if there are already someone in the waitling list
 			//Iterate through all the reservations found
-			$count = 1;
-						
+			$count = 1;		
 			if($capstone && count($waitingList) > 1)
 			{
 				foreach($waitingList as $w)
 				{
+					//Find the students that are waiting as well as their Reservaiton Positions and if they are part of capstone
 					$student = $w->getUserId();
 					$position = $w->getPosition();
 					$status = $userMapper->capstone($student);
@@ -380,7 +448,7 @@ class ReservationController extends Controller
 					{
 						continue;
 					}
-					//Move them down by incrementing their position on the waitlist
+					//Move non-capstone students on the waiting list down by incrementing (increasing their rank) their position on the waitlist
 					else
 					{
 						//Increment waitlist position
@@ -392,21 +460,36 @@ class ReservationController extends Controller
 				*/
 				$reservations[] = $reservationMapper->create(intval(Auth::id()), $room->getName(), $t->copy(), $request->input('description', ''), $uuid, $count, $markersRequest, $projectorsRequest, $laptopsRequest, $cablesRequest);
 			}
-			//If no one is in the room, then execute as if it was a regular student
+			//For Capstone, if no one is in the room, then execute as if it was a regular student
+			//For all Regular students, follow here
 			else
 			{
+				$roomHasActive = $reservationMapper->findTimeslotWinner($timeslot, $room->getName());
 				/*
 				* Insert
+				* If you are a regular student, no one is in the room (Active or Waiting), but your equipment is not available, then you are placed 1 on the Waiting List
 				*/
 				if(!$eStatus && count($waitingList) == 0)
 				{
 					$reservations[] = $reservationMapper->create(intval(Auth::id()), $room->getName(), $t->copy(), $request->input('description', ''), $uuid, 1, $markersRequest, $projectorsRequest, $laptopsRequest, $cablesRequest);
 				}
+				//If you are a regular student, no one is Active in the room, someone is on the waiting list, and your equipment is available
+				//They get the Reservation
+				elseif( $eStatus && count($roomHasActive) == 0 && count($waitingList) != 0 )
+				{
+					$reservations[] = $reservationMapper->create(intval(Auth::id()), $room->getName(), $t->copy(), $request->input('description', ''), $uuid, 0, $markersRequest, $projectorsRequest, $laptopsRequest, $cablesRequest);
+				}
+				//If you are a regular student, no one is Active in the room, someone is on the waiting list, and your equipment is not available
+				//They get last in the last
+				elseif( !$eStatus && count($roomHasActive) == 0 && count($waitingList) != 0 )
+				{
+					$reservations[] = $reservationMapper->create(intval(Auth::id()), $room->getName(), $t->copy(), $request->input('description', ''), $uuid, count($waitingList)+1, $markersRequest, $projectorsRequest, $laptopsRequest, $cablesRequest);
+				}
+				//All other cases you are placed behind the current users in the List
 				else
 				{
 					$reservations[] = $reservationMapper->create(intval(Auth::id()), $room->getName(), $t->copy(), $request->input('description', ''), $uuid, count($waitingList), $markersRequest, $projectorsRequest, $laptopsRequest, $cablesRequest);
 				}
-				
 			}	
 		}
 
@@ -592,6 +675,9 @@ class ReservationController extends Controller
 		//Keep tabs of Reservations that have become active
 		$added = [];
 		
+		//Keep tabs of Reservations that have been removed
+		$removed = [];
+		
 		//If user cancelling has the active reservation
         if($position == 0)
         {    
@@ -604,6 +690,11 @@ class ReservationController extends Controller
 				
 				//If the current Room has an active reservation, there is nothing to do
 				if( count($roomHasActive) )
+				{
+					continue;
+				}
+				//If its in the removed array, we skip it
+				elseif (in_array($e->getId(), $removed))
 				{
 					continue;
 				}
@@ -628,6 +719,7 @@ class ReservationController extends Controller
 						$reservationMapper->setNewWaitlist($e->getId(), 0);
 						$waitingList = $reservationMapper->findForTimeslot($curRoom, $timeslot);
 						
+						//Decrement everyone down
 						$pos = $e->getPosition();
 						foreach($waitingList as $w)
 						{
@@ -642,6 +734,20 @@ class ReservationController extends Controller
 						//Add to the list of modified
 						$added[] = $reservationMapper->find($e->getId());
 						
+						//Check if any waitlisted reservations in any other rooms would overlap with the recently added active reservation
+						$same = $reservationMapper->findAllTimeslotWaitlisted($timeslot, $e->getUserID(), $e->getRoomName());
+						
+						//If any waitlisted reservations in any parallel rooms exist for the winnning user, delete them
+						//For the same timeslot, to prevent the same person from getting 2 spots
+						if (count($same))
+						{
+							foreach($same as $s)
+							{
+								$reservationMapper->delete($s->id);
+								//If its in the list we are curerntly searching we must skip to prevent errors
+								$removed[] = $s->id;
+							}
+						}
 						$eStatus = false;
 					}
 				}             
@@ -702,6 +808,7 @@ class ReservationController extends Controller
 					}
 				}
 				//If any waitlisted reservations in any parallel rooms exist for the winnning user, delete them
+				//Not the same timeslot
 				elseif (count($overlap) && $a->getPosition() == 0) 
 				{
 					foreach($overlap as $o)
