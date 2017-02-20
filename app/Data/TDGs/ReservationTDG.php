@@ -132,7 +132,7 @@ class ReservationTDG extends Singleton
     }
 
     /**
-     * Returns a list of all Reservations (waitlist and active) for a given room-timeslot, ordered by id
+     * Returns a list of all Reservations (waitlist and active) for a given Room and Timeslot, ordered by id
      *
      * @param string $roomName
      * @param \DateTime $timeslot
@@ -147,7 +147,7 @@ class ReservationTDG extends Singleton
     }
 	
 	/**
-     * Returns a list of all active Reservations (if any) for a given timeslot by the user passed in
+     * Returns a list of all active Reservations (if any) for a given Timeslot by the user passed in
      *
 	 * @param int $id
      * @param \DateTime $timeslot
@@ -159,6 +159,37 @@ class ReservationTDG extends Singleton
             FROM reservations
             WHERE timeslot = :timeslot AND user_id = :id AND wait_position = 0
             ORDER BY id', ['timeslot' => $timeslot, 'id' => $id]);
+    }
+	
+	/**
+     * Returns a list of all Reservation for a given Timeslot other than the room passed in
+     * This is used to assign who gets the Equipment upon a Cancelation
+	 *
+     * @param \DateTime $timeslot
+     * @return array
+     */
+    public function findTimeslot(\DateTime $timeslot)
+    {
+        return DB::select('SELECT *
+            FROM reservations
+            WHERE timeslot = :timeslot
+            ORDER BY wait_position,id', ['timeslot' => $timeslot]);
+    }
+	
+	/**
+     * Returns a list of all waitlisted Reservations (if any) for a given Timeslot by the user passed in
+     * This is used to remove any overlapping waitlists
+	 *
+	 * @param int $id
+     * @param \DateTime $timeslot
+     * @return array
+     */
+    public function findAllTimeslotWaitlisted(\DateTime $timeslot, $id, $roomName)
+    {
+        return DB::select('SELECT *
+            FROM reservations
+            WHERE timeslot = :timeslot AND user_id = :id AND wait_position != 0 AND room_name != :roomName
+            ORDER BY id', ['timeslot' => $timeslot, 'id' => $id, 'roomName' => $roomName]);
     }
 	
 	/**
@@ -174,21 +205,6 @@ class ReservationTDG extends Singleton
             FROM reservations
             WHERE timeslot = :timeslot AND room_name = :room AND wait_position = 0
             ORDER BY id', ['timeslot' => $timeslot, 'room' => $roomName]);
-    }
-	
-	/**
-     * Returns a list of all waitlisted Reservations (if any) for a given timeslot by the user passed in
-     *
-	 * @param int $id
-     * @param \DateTime $timeslot
-     * @return array
-     */
-    public function findAllTimeslotWaitlisted(\DateTime $timeslot, $id, $roomName)
-    {
-        return DB::select('SELECT *
-            FROM reservations
-            WHERE timeslot = :timeslot AND user_id = :id AND wait_position != 0 AND room_name != :roomName
-            ORDER BY id', ['timeslot' => $timeslot, 'id' => $id, 'roomName' => $roomName]);
     }
 
     /**
