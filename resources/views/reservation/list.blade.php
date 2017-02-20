@@ -28,7 +28,7 @@
             <tbody>
             @foreach ($reservations as $r)
                 <?php
-				
+				//Obtaining the current Date and Time
 				date_default_timezone_set('US/Eastern');
 				$ourTime = date('H');	
 				$ourDate = date('Y-m-d');

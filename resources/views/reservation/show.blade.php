@@ -11,7 +11,9 @@
 @endphp
 
 @section('content')
-    <div class="container">
+    
+	<!-- Display all the Data for the Reservation that the user has selected to view. Pulled from the Database -->
+	<div class="container">
         <h1 class="pb-1">
             Your Reservation
             <small class="text-muted">for {{ $reservation->getTimeslot()->format('l, F jS, Y') }} at {{ $reservation->getTimeslot()->format('g a') }} in {{ $reservation->getRoomName() }}</small>
@@ -42,7 +44,7 @@
                 @endif
             </dd>
         </dl>
-
+		<!-- Allow for re-direction based ont the users click -->
         <div class="row">
             <div class="col-md-10 offset-sm-2">
                 @if ($back === 'list')

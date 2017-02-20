@@ -1,4 +1,5 @@
 	<?php
+	//Obtaining the current Date and Time
 	date_default_timezone_set('US/Eastern');
 	$ourTime = date('H');	
 	$ourDate = date('Y-m-d');
@@ -21,8 +22,8 @@
 			{{-- Active reservation --}}
 			<td class="table-success calendar-timeslot-selectable align-middle text-xs-center" title="Show reservation" data-href="{{ route('reservation', ['id' => $r[0]->getId()]) }}">
 			</td>
-		@else
-			{{-- On the waiting list --}}
+		{{-- On the waiting list --}}
+		@else			
 			<td class="table-warning calendar-timeslot-selectable align-middle text-xs-center" title="Show reservation" data-href="{{ route('reservation', ['id' => $r[0]->getId()]) }}">
 				Waiting #{{ $r[0]->getPosition() }}
 			</td>
@@ -31,11 +32,11 @@
 	@elseif (($roomStatus[0]->busy) != 0)
 		<td class="table-info align-middle text-xs-center" title="Reserve">
 		</td>
+	{{-- Room has been booked by someone else --}}
 	@elseif ($r = $activeReservations->first(function ($r) use ($room, $timeslot) { return $r->getRoomName() === $room->getName() && $r->getTimeslot()->eq($timeslot); }))
-		{{-- Room has been booked by someone else --}}
 		<td class="table-danger calendar-timeslot-selectable align-middle text-xs-center" title="Reserve" data-href="{{ route('request', ['room' => $room->getName(), 'timeslot' => $timeslot->format('Y-m-d\TH') ]) }}">
 		</td>
-	@else
-		{{-- Room is free --}}
+	{{-- Room is free --}}
+	@else		
 		<td class="calendar-timeslot-selectable align-middle text-xs-center" title="Reserve" data-href="{{ route('request', ['room' => $room->getName(), 'timeslot' => $timeslot->format('Y-m-d\TH') ]) }}"></td>
 	@endif
