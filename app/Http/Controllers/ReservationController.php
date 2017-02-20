@@ -562,7 +562,7 @@ class ReservationController extends Controller
      */
     public function cancelReservation(Request $request, $id, $roomName, $timeslot)
     {
-		// valiadte reservation exists and is owned by user
+		// validate reservation exists and is owned by user
         $reservationMapper = ReservationMapper::getInstance();
         $reservation = $reservationMapper->find($id);
 		
@@ -578,16 +578,58 @@ class ReservationController extends Controller
 				$position = $w->getPosition();
 			}
 		}
-		
+        
+        //Variable holds what position will become active reservation
+        $temp = 0;
+        
+        //If user cancelling has the active reservation
+        if($position == 0)
+        {   
+            
+            $eStatus = false;
+            
+            //Iterate through every user after position 0 
+            foreach($waitingList as $w)
+            {   
+                //If yes, set user as 0 and break function to move down all other users
+                if(!$eStatus)
+                {
+                    //Get # of each equipment requests
+                    $markersRequest = $w->getMarkers();
+                    $laptopsRequest = $w->getLaptops();
+                    $projectorsRequest = $w->getProjectors();
+                    $cablesRequest = $w->getCables();
+
+                    //Use statusEquipment(...) method on line 264 of ReservationMapper.php to see if reservation can be made active
+                    $eStatus = $reservationMapper->statusEquipment($timeslot, $markersRequest, $laptopsRequest, $projectorsRequest, $cablesRequest);
+                    
+                    //Set valid candidate as new active reservation
+                    $w->setPosition(0);
+
+                //If no, keep iterating
+                } 
+                //Move position down on remaining entries once new active reservation has been set
+                else {
+                    $x = $w->getPosition();
+                    $w->setPosition($x-1);
+                }                    
+                
+            }
+        }
+            
+             
+        //If user cancelling is on waiting list
+        else {
 		//For everyone in position after the Reservation to be deleted, move them down one
-		foreach($waitingList as $w)
-		{
-			$next = $w->getPosition();
-			if($position < $next)
-			{
-				$reservationMapper->setNewWaitlist($w->getId(), $next-1);
-			}
-		}
+            foreach($waitingList as $w)
+            {
+                $next = $w->getPosition();
+                if($position < $next)
+                {
+                    $reservationMapper->setNewWaitlist($w->getId(), $next-1);
+                }
+            }
+        }
 				
         if ($reservation === null || $reservation->getUserId() !== Auth::id()) {
             return abort(404);
