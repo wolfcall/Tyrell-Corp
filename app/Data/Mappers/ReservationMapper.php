@@ -106,7 +106,7 @@ class ReservationMapper extends Singleton
                 $reservations[] = $reservation;
             } else {
                 $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id), $result->wait_position,
-					$result->wait_position, $result->quantity_markers, $result->quantity_projectors, $result->quantity_laptops, $result->quantity_cables);
+					$result->quantity_markers, $result->quantity_projectors, $result->quantity_laptops, $result->quantity_cables);
                 $this->identityMap->add($reservation);
                 $reservations[] = $reservation;
             }
@@ -278,7 +278,7 @@ class ReservationMapper extends Singleton
 			$laptopsCount += $e->quantity_laptops;
 			$cablesCount += $e->quantity_cables;
 		}			
-		
+
 		//Use a boolean to know if the status of the equipment is ok
 		//Start the boolean as true
 		$eStatus = true;
