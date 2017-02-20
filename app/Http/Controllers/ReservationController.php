@@ -588,9 +588,9 @@ class ReservationController extends Controller
             //Iterate through every user after position 0 
             foreach($waitingList as $w)
             {   
-                //If yes, set user as 0 and break function to move down all other users
-                if(!$eStatus)
-                {
+                if($w->getPosition == 0) {
+                    //Do nothing on current active reservation    
+                } elseif(!$eStatus) {
                     //Get # of each equipment requests
                     $markersRequest = $w->getMarkers();
                     $laptopsRequest = $w->getLaptops();
