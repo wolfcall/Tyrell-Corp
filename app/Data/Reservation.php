@@ -67,6 +67,11 @@ class Reservation
      * @param string $description
      * @param null $recurId
      * @param int $id
+	 * @param int $position
+	 * @param int $markers
+	 * @param int $projectors
+	 * @param int $cables
+	 * @param int $laptops
      */
     public function __construct(int $userId, string $roomName, \DateTime $timeslot, string $description = null, $recurId = null, $id = null, int $position, int $markers, int $projectors, int $laptops, int $cables)
     {

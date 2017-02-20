@@ -36,6 +36,8 @@ class User extends Authenticatable
      * @param int $id
      * @param string $name
      * @param string $password
+	 * @param int $attempt
+	 * @param int $capstone
      */
     public function __construct(int $id, string $name, string $password, int $attempt, int $capstone)
     {

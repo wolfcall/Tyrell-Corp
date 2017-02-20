@@ -44,6 +44,11 @@ class ReservationMapper extends Singleton
      * @param \DateTime $timeslot
      * @param string $description
      * @param string $uuid
+	 * @param string $position
+	 * @param string $projectors
+	 * @param string $laptops
+	 * @param string $cables
+	 * @param int $markers
      * @return Reservation
      */
     public function create(int $userId, string $roomName, \DateTime $timeslot, string $description, string $uuid, int $position, int $markers, int $projectors, int $laptops, int $cables): Reservation
@@ -91,8 +96,9 @@ class ReservationMapper extends Singleton
     }
 
     /**
-	 * Returns a list of all Reservations for a given room-timeslot, ordered by id
-     * @param string $roomName
+	 * Returns a list of all Reservations for a given Room and Timeslot, ordered by id
+     * 
+	 * @param string $roomName
      * @param \DateTime $timeslot
      * @return Reservation[]
      */
@@ -116,7 +122,8 @@ class ReservationMapper extends Singleton
     }
 	
 	/**
-	 * Returns a list of all active Reservations (if any) for a given timeslot by the user passed in
+	 * Returns a list of all active Reservations (if any) for a given Timeslot by the User passed in
+	 * 
 	 * @param int $id
      * @param \DateTime $timeslot
      * @return Reservation[]
@@ -127,7 +134,8 @@ class ReservationMapper extends Singleton
     }
 	
 	/**
-	 * Returns a list of all waitlisted Reservations (if any) for a given timeslot by the user passed in
+	 * Returns a list of all waitlisted Reservations (if any) for a given Timeslot by the User passed in
+	 * 
 	 * @param int $id
 	 * @param Room Name $roomName
 	 * @param \DateTime $timeslot
@@ -139,8 +147,9 @@ class ReservationMapper extends Singleton
     }
 	
 	/**
-	 * Returns who has the reservation for the timeslot
-     * @param \DateTime $timeslot
+	 * Returns the User who has the Reservation for the Timeslot and Room passed in
+     * 
+	 * @param \DateTime $timeslot
 	 * @param Room Name $roomName
      * @return Reservation[]
      */
@@ -151,7 +160,6 @@ class ReservationMapper extends Singleton
 	
 	/**
      * Returns a list of all Reservation for a given Timeslot other than the room passed in
-     * This is used to assign who gets the Equipment upon a Cancelation
 	 *
      * @param \DateTime $timeslot
 	 * @param Room Name $roomName
@@ -177,7 +185,9 @@ class ReservationMapper extends Singleton
     }
 	
     /**
-     * @param Reservation $reservation
+     * Returns the position of the User for the Reservation
+	 *
+	 * @param Reservation $reservation
      * @return int
      */
     public function findPosition(Reservation $reservation): int
@@ -191,15 +201,15 @@ class ReservationMapper extends Singleton
             if ($r->getId() === $reservation->getId()) {
                 break;
             }
-
             ++$position;
         }
-
         return $position;
     }
 
     /**
-     * @param \DateTime $date
+     * Returns the active Reservations for the given Date
+	 * 
+	 * @param \DateTime $date
      * @return Reservation[]|array
      */
     public function findAllActive(\DateTime $date): array
@@ -222,7 +232,9 @@ class ReservationMapper extends Singleton
     }
 
     /**
-     * @param int $user_id
+     * Returns the Position for the User passed in
+	 * 
+	 * @param int $user_id
      * @return array[]
      */
     public function findPositionsForUser(int $user_id): array
