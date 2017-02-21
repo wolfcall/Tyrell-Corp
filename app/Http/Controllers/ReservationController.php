@@ -148,36 +148,35 @@ class ReservationController extends Controller
 		$OGMarkers = $reservation->getMarkers();
 		
 		//Status to check if any of the info besides the description changed
-		$status = true;
+		$sameEquip = true;
+		$sameTime = false;
 		
-		//If any of the New Data is not the same as the old data, state it
-		if($newTimeslot != $OGTimeslot)
+		//Check if the Timeslot and Room are the same
+		if($newTimeslot == $OGTimeslot && $newRoom == $OGRoom)
 		{
-			$status = false;
+			$sameTime = true;
 		}
-		elseif($newRoom != $OGRoom)
+		
+		//Check if the Equipment is the Same
+		if($newLaptops != $OGLaptops)
 		{
-			$status = false;
-		}
-		elseif($newLaptops != $OGLaptops)
-		{
-			$status = false;
+			$sameEquip = false;
 		}
 		elseif($newProjectors != $OGProjectors)
 		{
-			$status = false;
+			$sameEquip = false;
 		}
 		elseif($newCables != $OGCables)
 		{
-			$status = false;
+			$sameEquip = false;
 		}
 		elseif($newMarkers != $OGMarkers)
 		{
-			$status = false;
+			$sameEquip = false;
 		}
-				
+			
 		//Same Room, Timeslot and Equipment means.... 
-		if($status)
+		if($sameTime && $sameEquip)
 		{
 			// ...update the description only
 			$reservationMapper->set($reservation->getId(), $request->input('description', ""), $newMarkers,	$newProjectors, $newLaptops, $newCables,
@@ -188,6 +187,43 @@ class ReservationController extends Controller
 			return redirect()
 				->route('reservation', ['id' => $reservation->getId(), 'back' => $request->input('back')])
 				->with('success', 'Successfully modified reservation!');
+		}
+		//Same Room, Timeslot but different Equipment
+		elseif($sameTime && !$sameEquip)
+		{
+			//Check if the equipment requested is available for that Timeslot, excluding the current Reservation's equipment count
+			$eStatus = $reservationMapper->statusEquipmentExclude($newTimeslot, $reservation->getId(), $newMarkers, $newLaptops, $newProjectors, $newCables);
+			if($eStatus)
+			{
+				//Check if no one is in the Room
+				$roomHasActive = $reservationMapper->findTimeslotWinner($newTimeslot, $newRoom);
+				
+				//If no one is in the Room and my equipment status is ok upon modification, become the active user.
+				if(!$roomHasActive)
+				{
+					$reservationMapper->setNewWaitlist($reservation->getId(), 0);
+					$reservationMapper->done();
+				}
+				
+				//Update the quantities of the equipment
+				$reservationMapper->set($reservation->getId(), $request->input('description', ""), $newMarkers,	$newProjectors, $newLaptops, $newCables,
+				$request->input('timeslot', ""), $newRoom);
+				
+				$reservationMapper->done();
+				
+				//Return Status message
+				return redirect()
+					->route('reservation', ['id' => $reservation->getId(), 'back' => $request->input('back')])
+					->with('success', 'Successfully modified reservation!');
+			}
+			else
+			{
+				//Inform the user that the equipment is not available
+				return redirect()
+					->route('reservation', ['id' => $reservation->getId(), 'back' => $request->input('back')])
+					->with('error', 'The Equipement is not Available. Your reservation has been kept.<br>
+					If you require more equipment than what is available, you must give up your Reservation and create a new one with the specifications!');
+			}
 		}
 		//If any of the New Data is not the same as the old data, change it
 		else
@@ -492,7 +528,7 @@ class ReservationController extends Controller
 				}
 			}	
 		}
-
+		
         // run the reservation operations now, as we need to process the results
         $reservationMapper->done();
 
