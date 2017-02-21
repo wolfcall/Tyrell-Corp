@@ -295,6 +295,18 @@ class ReservationMapper extends Singleton
     }
 	
 	/**
+     * SQL statement to count all Equipment in active reservations excluding a certain user's reservation within a date range
+     *
+     * @param \DateTime $start Start date, inclusive
+     * @param \DateTime $end End date, exclusive
+     * @return int
+     */
+    public function countEquipmentExclude(\DateTime $timeslot, $id)
+    {
+        return $this->tdg->countEquipmentExclude($timeslot, $id);
+    }
+	
+	/**
      * Confirm the status of all the equipment that is requested by the user
      *
      * @param \DateTime $start Start date, inclusive
@@ -349,6 +361,63 @@ class ReservationMapper extends Singleton
 		
 		return $eStatus;
     }	
+	
+	/**
+     * Confirm the status of all the equipment that is requested by the user, excluding counting equipment part of their reservation
+     *
+     * @param \DateTime $start Start date, inclusive
+     * @param \DateTime $end End date, exclusive
+     * @return int
+     */
+    public function statusEquipmentExclude(\DateTime $timeslot, int $id, int $markersRequest, int $laptopsRequest, int $projectorsRequest, int $cablesRequest)
+    {
+        //Count all equipment already being used
+		$markersCount = 0;
+		$projectorsCount = 0;
+		$laptopsCount = 0;
+		$cablesCount = 0;
+		
+		//Check all the equipment that is being used during that timeslot
+		$equipmentCount = $this->countEquipmentExclude($timeslot, $id);
+		
+		foreach($equipmentCount as $e)
+		{
+			$markersCount += $e->quantity_markers;
+			$projectorsCount += $e->quantity_projectors;
+			$laptopsCount += $e->quantity_laptops;
+			$cablesCount += $e->quantity_cables;
+		}			
+
+		//Use a boolean to know if the status of the equipment is ok
+		//Start the boolean as true
+		$eStatus = true;
+		
+		//Check the markers
+		if($markersRequest > (3-$markersCount))
+		{
+			$eStatus = false;
+		}
+
+		//Check the laptops
+		if($laptopsRequest > (3-$laptopsCount))
+		{
+			$eStatus = false;
+		}
+
+		//Check the projectors
+		if($projectorsRequest > (3-$projectorsCount))
+		{
+			$eStatus = false;
+		}
+
+		//Check the cables
+		if($cablesRequest > (3-$cablesCount))
+		{
+			$eStatus = false;
+		}
+		
+		return $eStatus;
+    }
 	
 	/**
      * Method to update the Reservation of a user

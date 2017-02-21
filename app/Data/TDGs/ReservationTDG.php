@@ -59,24 +59,25 @@ class ReservationTDG extends Singleton
     public function create(Reservation $reservation)
     {
         $id = null;
-
+		
         try {
             $id = DB::table('reservations')->insertGetId([
-                'user_id' => $reservation->getUserId(),
+                'quantity_markers' => $reservation->getMarkers(),
+				'quantity_projectors' => $reservation->getProjectors(),
+				'quantity_laptops' => $reservation->getLaptops(),
+				'quantity_cables' => $reservation->getCables(),
+				'user_id' => $reservation->getUserId(),
                 'wait_position' => $reservation->getPosition(),
 				'room_name' => $reservation->getRoomName(),
                 'timeslot' => $reservation->getTimeslot(),
                 'description' => $reservation->getDescription(),
-                'recur_id' => $reservation->getRecurId(),
-				'quantity_markers' => $reservation->getMarkers(),
-				'quantity_projectors' => $reservation->getProjectors(),
-				'quantity_laptops' => $reservation->getLaptops(),
-				'quantity_cables' => $reservation->getCables()
+                'recur_id' => $reservation->getRecurId()
+				
             ]);
         } catch (QueryException $e) {
             // error inserting, duplicate row
         }
-
+		
         return $id;
     }
 
@@ -288,5 +289,20 @@ class ReservationTDG extends Singleton
             FROM reservations
             WHERE timeslot = :time AND wait_position = 0', 
 			['time' => $timeslot]);
+    }
+	
+	/**
+     * SQL statement to count all Equipment in active excluding a certain user's reservation within a date range
+     *
+     * @param \DateTime $start Start date, inclusive
+     * @param \DateTime $end End date, exclusive
+     * @return int
+     */
+    public function countEquipmentExclude(\DateTime $timeslot, $id)
+    {
+        return DB::select('SELECT quantity_markers, quantity_projectors, quantity_laptops, quantity_cables
+            FROM reservations
+            WHERE timeslot = :time AND id != :id AND wait_position = 0', 
+			['time' => $timeslot, 'id' => $id]);
     }
 }
