@@ -10,3 +10,4 @@ Homestead.yaml
 sami.phar
 /.sami
 /nbproject/*
+composer.lock
