@@ -211,6 +211,10 @@ class ReservationController extends Controller
 				
 				$reservationMapper->done();
 				
+				//Check if anyone needed the equipment
+				//If they do, then give it to them
+				$this->cleanup($reservation->getId(), $newTimeslot);
+				
 				//Return Status message
 				return redirect()
 					->route('reservation', ['id' => $reservation->getId(), 'back' => $request->input('back')])
@@ -882,4 +886,153 @@ class ReservationController extends Controller
 			return $response->with('success', 'Successfully cancelled reservation!');
 		}
     }
+	
+	/**
+     * @param Reservation ID $id
+     * @param string $timeslot
+     * @return \Illuminate\Http\Response
+     */
+	public function cleanup($id, $timeslot)
+	{
+		// validate reservation exists and is owned by user
+        $reservationMapper = ReservationMapper::getInstance();
+        $reservation = $reservationMapper->find($id);
+		
+		//All Reservations for every room in the same Timeslot
+		$everything = $reservationMapper->findTimeslot($timeslot);		
+
+		//Keep tabs of Reservations that have become active
+		$added = [];
+		
+		//Keep tabs of Reservations that have been removed
+		$removed = [];
+		
+		$eStatus = false;
+			
+		//Iterate through every Reservation
+		foreach($everything as $e)
+		{   
+			$roomHasActive = $reservationMapper->findTimeslotWinner($timeslot, $e->getRoomName());
+			
+			//If the current Room has an active reservation, there is nothing to do
+			if( count($roomHasActive) )
+			{
+				continue;
+			}
+			//If its in the removed array, we skip it
+			elseif (in_array($e->getId(), $removed))
+			{
+				continue;
+			}
+			//We have reached a new one, reset the variables
+			elseif(!$eStatus)
+			{
+				$roomHasActive = false;
+				$curRoom = $e->getRoomName();
+				
+				//Get # of each equipment requests
+				$markersRequest = $e->getMarkers();
+				$laptopsRequest = $e->getLaptops();
+				$projectorsRequest = $e->getProjectors();
+				$cablesRequest = $e->getCables();
+
+				//Use statusEquipment(...) method on line 264 of ReservationMapper.php to see if reservation can be made active
+				$eStatus = $reservationMapper->statusEquipment($timeslot, $markersRequest, $laptopsRequest, $projectorsRequest, $cablesRequest);
+				
+				//Set valid candidate as new active reservation
+				if($eStatus == true)
+				{
+					$reservationMapper->setNewWaitlist($e->getId(), 0);
+					$waitingList = $reservationMapper->findForTimeslot($curRoom, $timeslot);
+					
+					//Decrement everyone down
+					$pos = $e->getPosition();
+					foreach($waitingList as $w)
+					{
+						$next = $w->getPosition();
+						if($pos < $next)
+						{
+							$reservationMapper->setNewWaitlist($w->getId(), $next-1);
+						}
+					}
+					$reservationMapper->done();
+					
+					//Add to the list of modified
+					$added[] = $reservationMapper->find($e->getId());
+					
+					//Check if any waitlisted reservations in any other rooms would overlap with the recently added active reservation
+					$same = $reservationMapper->findAllTimeslotWaitlisted($timeslot, $e->getUserID(), $e->getRoomName());
+					
+					//If any waitlisted reservations in any parallel rooms exist for the winnning user, delete them
+					//For the same timeslot, to prevent the same person from getting 2 spots
+					if (count($same))
+					{
+						foreach($same as $s)
+						{
+							$reservationMapper->delete($s->id);
+							//If its in the list we are curerntly searching we must skip to prevent errors
+							$removed[] = $s->id;
+						}
+					}
+					$eStatus = false;
+				}
+			}             
+		}
+
+        // Commit all of the Edits to the reservations
+        $reservationMapper->done();
+		
+		/**
+		* 	Post delete checks
+		*/
+		
+		//For all Reservations that were added as a result of the deletion, perform the following checks
+		if(count($added) > 0)
+		{
+			foreach($added as $a)			
+			{
+				$winnerID = $a->getUserId();
+							
+				// Check the current amount of active reservations for the winner
+				$active = $reservationMapper->countInRange($winnerID, $timeslot->copy()->startOfWeek(), $timeslot->copy()->startOfWeek()->addWeek());
+				
+				// Check the current waitlisted reservations
+				$waited = $reservationMapper->countAll($winnerID, $timeslot->copy()->startOfWeek(), $timeslot->copy()->startOfWeek()->addWeek());
+				
+				//Check if any waitlisted reservations in any other rooms would overlap with the recently added active reservation
+				$overlap = $reservationMapper->findAllTimeslotWaitlisted($timeslot, $winnerID, $reservation->getRoomName());
+			
+				//If the amount of active reservaitons is at 3, then delete all the ones on the waitlist from the current week
+				if(count($active) == 3)
+				{
+					foreach($waited as $w)
+					{
+						$temp = $reservationMapper->find($w->id);
+						$t2 = $temp->getTimeslot();
+						
+						$reservationMapper->delete($w->id);
+						//No need to display this information to the user
+						continue;
+					}
+				}
+				//If any waitlisted reservations in any parallel rooms exist for the winnning user, delete them
+				//Not the same timeslot
+				elseif (count($overlap) && $a->getPosition() == 0) 
+				{
+					foreach($overlap as $o)
+					{
+						$temp = $reservationMapper->find($o->id);
+						$t2 = $temp->getTimeslot();
+						
+						$reservationMapper->delete($o->id);
+						//No need to display this information to the user
+						continue;
+					}
+				}
+				
+				//Commit once again
+				$reservationMapper->done();	
+			}
+		}
+	}
 }
