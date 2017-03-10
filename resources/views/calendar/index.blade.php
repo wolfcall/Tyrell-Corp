@@ -35,12 +35,15 @@
 			$lock = (30 - $result[5]);
 		}
 	}
+	else
+	{
+		$lock = 0;
+	}
 ?>
 @section('content')
     
 	<?php
-	
-	if ($lock != 0)
+	if ($lock > 0)
 	{
 		echo "<body onload = 'onTimer()'>";
 		//Show the user how much time they have left to make their Reservation
@@ -51,7 +54,6 @@
 		echo "<body>";
 	}
 	?>
-		
 	<div class="container">
         <h1 class="pb-1">
             Room Calendar
@@ -166,9 +168,9 @@
             window.document.location = $(this).data("href");
         });
     });
-	
-	var i = <?php echo(json_encode($lock)); ?>;
 		
+	var i = "<?php echo $lock; ?>" ;
+	
 	//Function to create the 30 second wait Timer
 	function onTimer() 
 	{
@@ -179,7 +181,6 @@
 		if (i < 0) 
 		{
 			//When the timer runs out, remove the data from local storage and then re-direct the user back to the calendar
-			localStorage.removeItem("left");
 			window.location.href = '{{route("calendar")}}';
 		}
 		else 
