@@ -323,10 +323,18 @@ class ReservationController extends Controller
 		}
 		
         $reservationMapper = ReservationMapper::getInstance();
-			
-        //Check if user exceeded maximum amount of reservations
-        $reservationCount = count($reservationMapper->countInRange(Auth::id(), $timeslot->copy()->startOfWeek(), $timeslot->copy()->startOfWeek()->addWeek()));
-
+		
+		if(($this->modifying) == true)
+		{
+			//since you are modifying an active reservation, the count should not matter
+			$reservationCount = 0;
+		}
+		else
+		{       
+			//Check if user exceeded maximum amount of reservations
+			$reservationCount = count($reservationMapper->countInRange(Auth::id(), $timeslot->copy()->startOfWeek(), $timeslot->copy()->startOfWeek()->addWeek()));
+		}
+		
 		//If the user went over, return an error
 		if ($reservationCount >= static::MAX_PER_USER) {
             //If we are modifiying, then tell the Modification component that the user went over
@@ -415,8 +423,19 @@ class ReservationController extends Controller
              */
             //Check if user exceeded maximum amount of reservations
 			//This is done after every loop because future reservation (from Recursion) are not initially checked with the Show Request Form method
-            $reservationCount = count($reservationMapper->countInRange(Auth::id(), $t->copy()->startOfWeek(), $t->copy()->startOfWeek()->addWeek()));
-            if ($reservationCount >= static::MAX_PER_USER) {
+            
+			if(($this->modifying) == true)
+			{
+				//since you are modifying an active reservation, the count should not matter
+				$reservationCount = 0;
+			}
+			else
+			{       
+				//Check if user exceeded maximum amount of reservations
+				$reservationCount = count($reservationMapper->countInRange(Auth::id(), $t->copy()->startOfWeek(), $t->copy()->startOfWeek()->addWeek()));
+			}
+			
+			if ($reservationCount >= static::MAX_PER_USER) {
                 //If we are modifiying, then tell the Modification component that the user went over
 				if( ($this->modifying) == true)
 				{
@@ -544,9 +563,17 @@ class ReservationController extends Controller
 		{
             $t = $reservation->getTimeslot();
 			
-			// Check the current active reservations
-			$active = $reservationMapper->countInRange(Auth::id(), $t->copy()->startOfWeek(), $t->copy()->startOfWeek()->addWeek());
-
+			if(($this->modifying) == true)
+			{
+				//since you are modifying an active reservation, the amount of active should not matter
+				$active = 0;
+			}
+			else
+			{
+				// Check the current active reservations
+				$active = $reservationMapper->countInRange(Auth::id(), $t->copy()->startOfWeek(), $t->copy()->startOfWeek()->addWeek());
+			}
+			
 			// Check the current waitlisted reservations
 			$waited = $reservationMapper->countAll(Auth::id(), $t->copy()->startOfWeek(), $t->copy()->startOfWeek()->addWeek());
 
@@ -615,6 +642,8 @@ class ReservationController extends Controller
          * Format the status messages
          */
         if (count($successful)) {
+			$_SESSION["timestamp"] = date("Y-m-d G:i:s");
+			
 			if(count($active) == 3)
 			{
 				$response = $response->with('success', sprintf('You have reached the maximum reservations for the week! Removing all waitlists.<br> The following reservations have been successfully created for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
@@ -630,7 +659,9 @@ class ReservationController extends Controller
         }
 
         if (count($waitlisted)) {
-            if(!$eStatus)
+            $_SESSION["timestamp"] = date("Y-m-d G:i:s");
+			
+			if(!$eStatus)
 			{
 				$response = $response->with('warning', sprintf('Equipment is not available for your Reservation. You have been put on a waiting list for the following: %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
                 return sprintf("<li><strong>%s</strong>: Position #%d</li>", $m[0]->format('l, F jS, Y'), $m[1]);
@@ -657,8 +688,6 @@ class ReservationController extends Controller
 		{
 			$roomMapper->setFree($roomName);
 		}
-		
-		$_SESSION["timestamp"] = date("Y-m-d G:i:s");
 		
         return $response;
     }
