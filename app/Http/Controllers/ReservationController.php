@@ -658,6 +658,8 @@ class ReservationController extends Controller
 			$roomMapper->setFree($roomName);
 		}
 		
+		$_SESSION["timestamp"] = date("Y-m-d G:i:s");
+		
         return $response;
     }
 
