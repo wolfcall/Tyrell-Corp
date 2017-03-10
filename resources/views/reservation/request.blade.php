@@ -17,11 +17,12 @@
 	//Function to create the 60 second Timer
 	function onTimer() 
 	{
-	//Populate the inner HTML of the ID where the timer is placed
-	document.getElementById('timer').innerHTML = i;
-	i--;
-	//Keep the value in local storage in case the user tries to refresh the page
-	localStorage.left = i;	
+		//Populate the inner HTML of the ID where the timer is placed
+		document.getElementById('timer').innerHTML = i;
+		i--;
+		//Keep the value in local storage in case the user tries to refresh the page
+		localStorage.left = i;	
+		
 		if (i < 0) 
 		{
 			//When the timer runs out, remove the data from local storage and then re-direct the user back to the calendar

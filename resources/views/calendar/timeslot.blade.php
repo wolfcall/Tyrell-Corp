@@ -36,7 +36,10 @@
 	@elseif ($r = $activeReservations->first(function ($r) use ($room, $timeslot) { return $r->getRoomName() === $room->getName() && $r->getTimeslot()->eq($timeslot); }))
 		<td class="table-danger calendar-timeslot-selectable align-middle text-xs-center" title="Reserve" data-href="{{ route('request', ['room' => $room->getName(), 'timeslot' => $timeslot->format('Y-m-d\TH') ]) }}">
 		</td>
-	{{-- Room is free --}}
+	{{-- Room is free but user must wait 30 seconds because they just made a request--}}
+	@elseif (isset($lock)&&$lock > 0)
+		<td class="table-active align-middle text-xs-center unlock" title="Reserve" data-href="{{ route('request', ['room' => $room->getName(), 'timeslot' => $timeslot->format('Y-m-d\TH') ]) }}"></td>
+  	{{-- Room is free --}}
 	@else		
 		<td class="calendar-timeslot-selectable align-middle text-xs-center" title="Reserve" data-href="{{ route('request', ['room' => $room->getName(), 'timeslot' => $timeslot->format('Y-m-d\TH') ]) }}"></td>
 	@endif
