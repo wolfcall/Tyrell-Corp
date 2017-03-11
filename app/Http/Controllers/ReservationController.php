@@ -123,6 +123,17 @@ class ReservationController extends Controller
 		$date = substr($reservation->getTimeslot()->toDateTimeString(), 0, 10);
         $timeslot = $date." ".$request->input('timeslot', "").":00:00" ;
 		
+		//Set the variable to true, to let other components of the system know that a Reservation is being modified
+		$this->modifying = true;
+
+		//For when the user is waiting, but can still click on the reservations they have made
+		if(isset($_SESSION["timestamp"]))
+		{
+			return redirect()->route('calendar')
+			->with('error', sprintf("You must wait your turn! Please try again later. We apologize for any inconvenience."));
+		}
+		
+		
 		//Get the Timeslot of the "new" Version of the Reservation
 		$newTimeslot = new Carbon ( $date." ".$request->input('timeslot', "").":00:00" );
 		$new = $newTimeslot->format('Y-m-d\TH');
@@ -231,10 +242,7 @@ class ReservationController extends Controller
 		}
 		//If any of the New Data is not the same as the old data, change it
 		else
-		{
-			//Set the variable to true, to let other components of the system know that a Reservation is being modified
-			$this->modifying = true;
-			
+		{	
 			//Go through the constraints outlined in the Show Request Form Method
 			$temp1 = $this->showRequestForm($request, $newRoom, $new);
 			if( ($this->success1) == true )
@@ -292,9 +300,9 @@ class ReservationController extends Controller
      */
     public function showRequestForm(Request $request, $roomName, $timeslot)
     {
-        //Format the Timeslot passed in
+    	//Format the Timeslot passed in
 		$timeslot = Carbon::createFromFormat('Y-m-d\TH', $timeslot);
-    
+
 		// validate room exists
         $roomMapper = RoomMapper::getInstance();
         $room = $roomMapper->find($roomName);
@@ -705,6 +713,8 @@ class ReservationController extends Controller
 		
 		$response = redirect()
             ->route('calendar');
+		
+		$_SESSION["timestamp"] = date("Y-m-d G:i:s");
 		
 		return $response;
 	}
