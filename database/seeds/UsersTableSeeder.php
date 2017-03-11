@@ -11,9 +11,10 @@ class UsersTableSeeder extends Seeder
      */
     public function run()
     {
-        for ($i = 1, $userId = 10000000; $i <= 5; ++$i) {
+        for ($i = 1; $i <= 5; $i++) {
+            
             DB::table('users')->insert([
-                'id' => $userId + $i,
+                'id' => $i,
                 'name' => 'Test User ' . $i,
                 'password' => bcrypt('password'),
             ]);
