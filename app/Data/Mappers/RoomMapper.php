@@ -11,8 +11,7 @@ use App\Singleton;
 /**
  * @method static RoomMapper getInstance()
  */
-class RoomMapper extends Singleton
-{
+class RoomMapper extends Singleton {
 
     /**
      * @var RoomTDG
@@ -27,43 +26,38 @@ class RoomMapper extends Singleton
     /**
      * UserMapper constructor.
      */
-    protected function __construct()
-    {
+    protected function __construct() {
         parent::__construct();
 
         $this->tdg = RoomTDG::getInstance();
         $this->identityMap = RoomIdentityMap::getInstance();
     }
-	
-	/**
+
+    /**
      * Set the Room to busy when it is busy
      */
-    public function setBusy(string $roomName, $student)
-    {
-        $this->tdg->setBusy($roomName, $student);
+    public function setBusy(string $roomName, $student, $timestamp) {
+        $this->tdg->setBusy($roomName, $student, $timestamp);
     }
-	
-	/**
+
+    /**
      * Set the Room to free when it is free
      */
-    public function setFree(string $roomName)
-    {
+    public function setFree(string $roomName) {
         $this->tdg->setFree($roomName);
     }
-	
-	/**
+
+    /**
      * Set the Room to free when it is free
      */
-    public function clearStudent($student)
-    {
+    public function clearStudent($student) {
         $this->tdg->clearStudent($student);
     }
-	
-	/**
+
+    /**
      * Set the Room to busy when it is busy
      */
-    public function getStatus($roomName)
-    {
+    public function getStatus($roomName) {
         return $this->tdg->getStatus($roomName);
     }
 
@@ -73,8 +67,7 @@ class RoomMapper extends Singleton
      * @param string $name
      * @return Room
      */
-    public function find(string $name): Room
-    {
+    public function find(string $name): Room {
         $room = $this->identityMap->get($name);
         $result = null;
 
@@ -86,7 +79,7 @@ class RoomMapper extends Singleton
         // If TDG doesn't have it then it doens't exist.
         if ($result !== null) {
             //We got the client from the TDG who got it from the DB and now the mapper must add it to the ClientIdentityMap
-            $room = new Room((string)$result->name);
+            $room = new Room((string) $result->name);
             $this->identityMap->add($room);
         }
 
@@ -96,8 +89,7 @@ class RoomMapper extends Singleton
     /**
      * @return array
      */
-    public function findAll(): array
-    {
+    public function findAll(): array {
         $results = $this->tdg->findAll();
         $rooms = [];
 
@@ -105,7 +97,7 @@ class RoomMapper extends Singleton
             if ($room = $this->identityMap->get($result->name)) {
                 $rooms[] = $room;
             } else {
-                $room = new Room((string)$result->name);
+                $room = new Room((string) $result->name);
                 $this->identityMap->add($room);
                 $rooms[] = $room;
             }
@@ -113,4 +105,5 @@ class RoomMapper extends Singleton
 
         return $rooms;
     }
+
 }

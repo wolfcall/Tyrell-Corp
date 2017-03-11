@@ -5,7 +5,7 @@
 	$ourDate = date('Y-m-d');
 	$passedDate = $date->toDateString();
 	?>
-	
+
 	{{-- Room cannot be selected. Time has past --}}
 	@if ( ($timeslot->hour) <= $ourTime && $passedDate <= $ourDate )
 		<td class="table-active align-middle text-xs-center">
@@ -28,10 +28,6 @@
 				Waiting #{{ $r[0]->getPosition() }}
 			</td>
 		@endif
-	{{-- Room is being used --}}
-	@elseif (($roomStatus[0]->busy) != 0)
-		<td class="table-info align-middle text-xs-center" title="Reserve">
-		</td>
 	{{-- Room has been booked by someone else --}}
 	@elseif ($r = $activeReservations->first(function ($r) use ($room, $timeslot) { return $r->getRoomName() === $room->getName() && $r->getTimeslot()->eq($timeslot); }))
 		<td class="table-danger calendar-timeslot-selectable align-middle text-xs-center" title="Reserve" data-href="{{ route('request', ['room' => $room->getName(), 'timeslot' => $timeslot->format('Y-m-d\TH') ]) }}">
@@ -40,6 +36,15 @@
 	@elseif (isset($lock)&&$lock > 0)
 		<td class="table-active align-middle text-xs-center unlock" title="Reserve" data-href="{{ route('request', ['room' => $room->getName(), 'timeslot' => $timeslot->format('Y-m-d\TH') ]) }}"></td>
   	{{-- Room is free --}}
-	@else		
+	{{-- Room is being used --}}
+	@elseif (($roomStatus[0]->busy) != 0)
+            @if($unlockTime > $compare)
+                <td class="table-info align-middle text-xs-center" title="Reserve">
+		</td>
+            @else
+                <?php $roomMapper->setFree($room->getName()); ?>
+                <td class="calendar-timeslot-selectable align-middle text-xs-center" title="Reserve" data-href="{{ route('request', ['room' => $room->getName(), 'timeslot' => $timeslot->format('Y-m-d\TH') ]) }}"></td>
+            @endif
+        @else		
 		<td class="calendar-timeslot-selectable align-middle text-xs-center" title="Reserve" data-href="{{ route('request', ['room' => $room->getName(), 'timeslot' => $timeslot->format('Y-m-d\TH') ]) }}"></td>
 	@endif

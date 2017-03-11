@@ -11,9 +11,12 @@ class RoomsTableSeeder extends Seeder
      */
     public function run()
     {
+        $now = date("Y-m-d G:i:s");
+        
         for ($i = 1, $roomNumber = 900; $i <= 5; ++$i) {
             DB::table('rooms')->insert([
-                'name' => 'H-' . ($roomNumber + $i)
+                'name' => 'H-' . ($roomNumber + $i),
+                'dateTime' => $now
             ]);
         }
     }
