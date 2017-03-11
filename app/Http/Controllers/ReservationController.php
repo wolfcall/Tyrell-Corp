@@ -119,6 +119,13 @@ class ReservationController extends Controller
             return abort(404);
         }
 
+		//For when the user is waiting, but can still click on the reservations they have made
+		if(isset($_SESSION["timestamp"]))
+		{
+			return redirect()->route('calendar')
+				->with('error', sprintf("You must wait your turn! Please try again later. We apologize for any inconvenience."));
+		}
+		
 		//Get the Timeslot of the "old" Version of the Reservation
 		$date = substr($reservation->getTimeslot()->toDateTimeString(), 0, 10);
         $timeslot = $date." ".$request->input('timeslot', "").":00:00" ;
@@ -183,10 +190,12 @@ class ReservationController extends Controller
 				$request->input('timeslot', ""), $newRoom);
 				
 			$reservationMapper->done();
-
+			
+			$_SESSION["timestamp"] = date("Y-m-d G:i:s");
+			
 			return redirect()
 				->route('reservation', ['id' => $reservation->getId(), 'back' => $request->input('back')])
-				->with('success', 'Successfully modified reservation!');
+				->with('success', 'Successfully updated reservation description!');
 		}
 		//Same Room, Timeslot but different Equipment
 		elseif($sameTime && !$sameEquip)
@@ -215,10 +224,12 @@ class ReservationController extends Controller
 				//If they do, then give it to them
 				$this->cleanup($reservation->getId(), $newTimeslot);
 				
+				$_SESSION["timestamp"] = date("Y-m-d G:i:s");
+				
 				//Return Status message
 				return redirect()
 					->route('reservation', ['id' => $reservation->getId(), 'back' => $request->input('back')])
-					->with('success', 'Successfully modified reservation!');
+					->with('success', 'Successfully modified reservation equipment!');
 			}
 			else
 			{
@@ -259,6 +270,9 @@ class ReservationController extends Controller
 					//Return to the Reservation page with the details of the modified Reservation
 					$this->cancelReservation($request, $id, $OGRoom, $OG);
 					$this->modifying = false;
+					
+					$_SESSION["timestamp"] = date("Y-m-d G:i:s");
+					
 					return redirect()
 						->route('reservation', ['id' => $newID, 'back' => $request->input('back')]);
 				}
@@ -292,9 +306,9 @@ class ReservationController extends Controller
      */
     public function showRequestForm(Request $request, $roomName, $timeslot)
     {
-        //Format the Timeslot passed in
+    	//Format the Timeslot passed in
 		$timeslot = Carbon::createFromFormat('Y-m-d\TH', $timeslot);
-    
+
 		// validate room exists
         $roomMapper = RoomMapper::getInstance();
         $room = $roomMapper->find($roomName);
@@ -705,6 +719,8 @@ class ReservationController extends Controller
 		
 		$response = redirect()
             ->route('calendar');
+		
+		$_SESSION["timestamp"] = date("Y-m-d G:i:s");
 		
 		return $response;
 	}
