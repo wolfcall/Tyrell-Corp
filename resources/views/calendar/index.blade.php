@@ -29,8 +29,7 @@ if (isset($_SESSION["timestamp"])) {
         $lock = 0;
         unset($_SESSION["timestamp"]);
     } else {
-        $lock = 0;
-        //$lock = (30 - $result[5]);
+        $lock = (30 - $result[5]);
     }
 } else {
     $lock = 0;
