@@ -637,7 +637,7 @@ class ReservationController extends Controller {
     public function requestCancel($roomName) {
         //Now that the user is done with the room, open it up again
         $roomMapper = RoomMapper::getInstance();
-        $roomStatus = $roomMapper->setFree($roomName);
+        $roomMapper->setFree($roomName);
 
         $response = redirect()
                 ->route('calendar');

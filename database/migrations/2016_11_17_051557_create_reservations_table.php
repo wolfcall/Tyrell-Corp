@@ -19,12 +19,11 @@ class CreateReservationsTable extends Migration
             $table->string('room_name');
             $table->dateTime('timeslot');
             $table->text('description');
-			$table->integer('quantity_markers');
+			$table->integer('wait_position')->unsigned();
+                        $table->integer('quantity_markers');
 			$table->integer('quantity_projectors');
 			$table->integer('quantity_laptops');
-			$table->integer('quantity_cables');
-			//$table->string('recur_id');
-			$table->integer('wait_position')->unsigned();
+			$table->integer('quantity_cables');			
             $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('room_name')->references('name')->on('rooms');
             $table->unique(['user_id', 'room_name', 'timeslot']);
