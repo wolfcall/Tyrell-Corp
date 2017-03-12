@@ -349,6 +349,7 @@ class ReservationController extends Controller {
     }
 
     /**
+     * Initiates the request of a Reservation
      * @param Request $request
      * @param string $roomName
      * @param string $timeslot
