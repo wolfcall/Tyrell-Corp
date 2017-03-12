@@ -9,8 +9,8 @@ use App\Singleton;
 /**
  * @method static ReservationUoW getInstance()
  */
-class ReservationUoW extends Singleton
-{
+class ReservationUoW extends Singleton {
+
     private $newList = [];
     private $changedList = [];
     private $deletedList = [];
@@ -20,30 +20,25 @@ class ReservationUoW extends Singleton
      */
     private $mapper;
 
-    protected function __construct()
-    {
+    protected function __construct() {
         parent::__construct();
 
         $this->mapper = ReservationMapper::getInstance();
     }
 
-    public function registerNew(Reservation $reservation)
-    {
+    public function registerNew(Reservation $reservation) {
         $this->newList[] = $reservation;
     }
 
-    public function registerDirty(Reservation $reservation)
-    {
+    public function registerDirty(Reservation $reservation) {
         $this->changedList[] = $reservation;
     }
 
-    public function registerDeleted(Reservation $reservation)
-    {
+    public function registerDeleted(Reservation $reservation) {
         $this->deletedList[] = $reservation;
     }
 
-    public function commit()
-    {
+    public function commit() {
         $this->mapper->addMany($this->newList);
         $this->mapper->updateMany($this->changedList);
         $this->mapper->deleteMany($this->deletedList);
@@ -53,4 +48,5 @@ class ReservationUoW extends Singleton
         $this->changedList = [];
         $this->deletedList = [];
     }
+
 }
