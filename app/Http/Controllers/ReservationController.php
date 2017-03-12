@@ -212,7 +212,7 @@ class ReservationController extends Controller {
                 //Inform the user that the equipment is not available
                 return redirect()
                                 ->route('reservation', ['id' => $reservation->getId(), 'back' => $request->input('back')])
-                                ->with('error', 'The Equipement is not Available. Your reservation has been kept.<br>
+                                ->with('error', 'The Equipment is not Available. Your reservation has been kept.<br>
 					If you require more equipment than what is available, you must give up your Reservation and create a new one with the specifications!');
             }
         }
