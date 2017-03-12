@@ -2,8 +2,8 @@
 
 namespace App;
 
-abstract class Singleton
-{
+abstract class Singleton {
+
     /**
      * @ignore Internal
      *
@@ -16,8 +16,7 @@ abstract class Singleton
      *
      * @return static The *Singleton* instance.
      */
-    public static function getInstance()
-    {
+    public static function getInstance() {
         if (!isset(self::$instances[static::class])) {
             self::$instances[static::class] = new static();
         }
@@ -29,8 +28,8 @@ abstract class Singleton
      * Protected constructor to prevent creating a new instance of the
      * *Singleton* via the `new` operator from outside of this class.
      */
-    protected function __construct()
-    {
+    protected function __construct() {
+        
     }
 
     /**
@@ -41,8 +40,8 @@ abstract class Singleton
      *
      * @return void
      */
-    private function __clone()
-    {
+    private function __clone() {
+        
     }
 
     /**
@@ -53,7 +52,8 @@ abstract class Singleton
      *
      * @return void
      */
-    private function __wakeup()
-    {
+    private function __wakeup() {
+        
     }
+
 }
