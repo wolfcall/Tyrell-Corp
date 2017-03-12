@@ -8,13 +8,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
-class CalendarController extends Controller
-{
+class CalendarController extends Controller {
+
     /**
      * Create a new controller instance.
      */
-    public function __construct()
-    {
+    public function __construct() {
         $this->middleware('auth');
     }
 
@@ -24,8 +23,7 @@ class CalendarController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function viewCalendar(Request $request)
-    {
+    public function viewCalendar(Request $request) {
         $this->validate($request, [
             'date' => 'date_format:Y-m-d'
         ]);
@@ -43,11 +41,11 @@ class CalendarController extends Controller
         // fetch all rooms to display
         $roomMapper = RoomMapper::getInstance();
         $rooms = $roomMapper->findAll();
-		
-		// Clear student from any room that they were keeping busy
-		$roomMapper->clearStudent(Auth::id());
-        
-		$reservationMapper = ReservationMapper::getInstance();
+
+        // Clear student from any room that they were keeping busy
+        $roomMapper->clearStudent(Auth::id());
+
+        $reservationMapper = ReservationMapper::getInstance();
 
         // find all of today's active (ie. not wait listed) reservations
         $activeReservations = $reservationMapper->findAllActive($date);
@@ -62,4 +60,5 @@ class CalendarController extends Controller
             'userReservations' => collect($userReservations)
         ]);
     }
+
 }

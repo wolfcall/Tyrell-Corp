@@ -285,7 +285,7 @@ class ReservationController extends Controller {
 
         //Check to see who is currently using the room
         $roomStatus = $roomMapper->getStatus($roomName);
-        
+
         //If the room is busy with someone else, return error
         if (($roomStatus[0]->busy) != 0 && $roomStatus[0]->busy != Auth::id()) {
             //If we are modifiying, then tell the Modification component that the room is busy
@@ -349,6 +349,7 @@ class ReservationController extends Controller {
     }
 
     /**
+     * Initiates the request of a Reservation
      * @param Request $request
      * @param string $roomName
      * @param string $timeslot

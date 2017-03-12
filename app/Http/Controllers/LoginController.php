@@ -7,8 +7,8 @@ use App\Data\Mappers\RoomMapper;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Auth;
 
-class LoginController extends Controller
-{
+class LoginController extends Controller {
+
     /**
      * Where to redirect users after login.
      *
@@ -19,8 +19,7 @@ class LoginController extends Controller
     /**
      * Create a new controller instance.
      */
-    public function __construct()
-    {
+    public function __construct() {
         $this->middleware('guest', ['except' => 'logout']);
     }
 
@@ -29,8 +28,7 @@ class LoginController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function showLoginForm()
-    {
+    public function showLoginForm() {
         return view('login');
     }
 
@@ -40,8 +38,7 @@ class LoginController extends Controller
      * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function login(Request $request)
-    {
+    public function login(Request $request) {
         $this->validate($request, [
             'id' => 'required', 'password' => 'required',
         ]);
@@ -52,10 +49,10 @@ class LoginController extends Controller
         }
 
         return redirect()->back()
-            ->withInput($request->only('id', 'remember'))
-            ->withErrors([
-                'id' => Lang::get('auth.failed'),
-            ]);
+                        ->withInput($request->only('id', 'remember'))
+                        ->withErrors([
+                            'id' => Lang::get('auth.failed'),
+        ]);
     }
 
     /**
@@ -64,12 +61,11 @@ class LoginController extends Controller
      * @param  Request $request
      * @return \Illuminate\Http\Response
      */
-    public function logout(Request $request)
-    {
+    public function logout(Request $request) {
         $roomMapper = RoomMapper::getInstance();
-		$roomMapper->clearStudent(Auth::id());
-		
-		$this->guard()->logout();
+        $roomMapper->clearStudent(Auth::id());
+
+        $this->guard()->logout();
         $request->session()->flush();
         $request->session()->regenerate();
 
@@ -81,8 +77,8 @@ class LoginController extends Controller
      *
      * @return \Illuminate\Contracts\Auth\StatefulGuard
      */
-    protected function guard()
-    {
+    protected function guard() {
         return Auth::guard();
     }
+
 }
