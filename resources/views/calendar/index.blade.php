@@ -71,23 +71,23 @@ if ($lock > 0) {
         </div>
 
         @if($lock == 0)
-        
-            <div class="col-md-4 col-sm-12 ">
-                <form class="form-inline">
-                    @if (\Carbon\Carbon::today()->ne($date))
-                    <a href="{{ route('calendar') }}" class="btn btn-secondary">Return to today</a>
-                    @endif
-                    @if ($date->isFuture())
-                    <a href="{{ route('calendar', ['date' => $date->copy()->subDay()->toDateString() ]) }}" class="btn btn-secondary"><i class="fa fa-step-backward" aria-hidden="true"></i></a>
-                    @endif
-                    <a href="{{ route('calendar', ['date' => $date->copy()->addDay()->toDateString() ]) }}" class="btn btn-secondary"><i class="fa fa-step-forward" aria-hidden="true"></i></a>
-                    <div class="form-group">
-                        <input class="form-control" type="date" name="date" min="{{ \Carbon\Carbon::today()->toDateString() }}" value="{{ $date->toDateString() }}" title="Date">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Jump to date</button>
-                </form>
-            </div>
-       
+
+        <div class="col-md-4 col-sm-12 ">
+            <form class="form-inline">
+                @if (\Carbon\Carbon::today()->ne($date))
+                <a href="{{ route('calendar') }}" class="btn btn-secondary">Return to today</a>
+                @endif
+                @if ($date->isFuture())
+                <a href="{{ route('calendar', ['date' => $date->copy()->subDay()->toDateString() ]) }}" class="btn btn-secondary"><i class="fa fa-step-backward" aria-hidden="true"></i></a>
+                @endif
+                <a href="{{ route('calendar', ['date' => $date->copy()->addDay()->toDateString() ]) }}" class="btn btn-secondary"><i class="fa fa-step-forward" aria-hidden="true"></i></a>
+                <div class="form-group">
+                    <input class="form-control" type="date" name="date" min="{{ \Carbon\Carbon::today()->toDateString() }}" value="{{ $date->toDateString() }}" title="Date">
+                </div>
+                <button type="submit" class="btn btn-primary">Jump to date</button>
+            </form>
+        </div>
+
         @endif
     </div>
 </div>
@@ -107,14 +107,14 @@ if ($lock > 0) {
                 <tbody>
                     @foreach($rooms as $room)
                     <?php
-                        //Check if the Room is busy or not
-                        //To be used in the Calendar Timeslot
-                        $roomMapper = RoomMapper::getInstance();
-                        $roomStatus = $roomMapper->getStatus($room->getName());
+                    //Check if the Room is busy or not
+                    //To be used in the Calendar Timeslot
+                    $roomMapper = RoomMapper::getInstance();
+                    $roomStatus = $roomMapper->getStatus($room->getName());
 
-                        $unlockTime = strtotime($roomStatus[0]->dateTime) + 60;
-                        $compare = strtotime($now);
-                        
+                    $unlockTime = strtotime($roomStatus[0]->dateTime) + 60;
+                    $compare = strtotime($now);
+
                     //Populate the Rooms for the Morning
                     ?>
                     <tr class="calendar-room-row">
@@ -136,13 +136,13 @@ if ($lock > 0) {
                 <tbody>
                     @foreach($rooms as $room)
                     <?php
-                        //Check if the Room is busy or not
-                        //To be used in the Calendar Timeslot
-                        $roomMapper = RoomMapper::getInstance();
-                        $roomStatus = $roomMapper->getStatus($room->getName());
+                    //Check if the Room is busy or not
+                    //To be used in the Calendar Timeslot
+                    $roomMapper = RoomMapper::getInstance();
+                    $roomStatus = $roomMapper->getStatus($room->getName());
 
-                        $unlockTime = strtotime($roomStatus[0]->dateTime) + 60;
-                        $compare = strtotime($now);
+                    $unlockTime = strtotime($roomStatus[0]->dateTime) + 60;
+                    $compare = strtotime($now);
 
                     //Populate the Rooms for the Afternoon and Evening
                     ?>

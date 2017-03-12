@@ -1,120 +1,119 @@
 @extends('layouts.app')
 <script>
-	var i = 60;
-	var left = localStorage.left;
-	//Check to see if the page was reloaded
-	//If it was, continue the timer where it left off
-	if (performance.navigation.type == 1) 
-	{
-	  i = localStorage.left;
-	}
-	//If it was not, simply continue
-	else
-	{
-	  //Do nothing
-	}
-	
-	//Function to create the 60 second Timer
-	function onTimer() 
-	{
-		//Populate the inner HTML of the ID where the timer is placed
-		document.getElementById('timer').innerHTML = i;
-		i--;
-		//Keep the value in local storage in case the user tries to refresh the page
-		localStorage.left = i;	
-		
-		if (i < 0) 
-		{
-			//When the timer runs out, remove the data from local storage and then re-direct the user back to the calendar
-			localStorage.removeItem("left");
-			window.location.href = '{{route("calendar")}}';
-		}
-		else 
-		{
-			//Recurse after 1 second has passed
-			setTimeout(onTimer, 1000);
-		}
-	}	
+    var i = 60;
+    var left = localStorage.left;
+    //Check to see if the page was reloaded
+    //If it was, continue the timer where it left off
+    if (performance.navigation.type == 1)
+    {
+        i = localStorage.left;
+    }
+    //If it was not, simply continue
+    else
+    {
+        //Do nothing
+    }
+
+    //Function to create the 60 second Timer
+    function onTimer()
+    {
+        //Populate the inner HTML of the ID where the timer is placed
+        document.getElementById('timer').innerHTML = i;
+        i--;
+        //Keep the value in local storage in case the user tries to refresh the page
+        localStorage.left = i;
+
+        if (i < 0)
+        {
+            //When the timer runs out, remove the data from local storage and then re-direct the user back to the calendar
+            localStorage.removeItem("left");
+            window.location.href = '{{route("calendar")}}';
+        } else
+        {
+            //Recurse after 1 second has passed
+            setTimeout(onTimer, 1000);
+        }
+    }
 </script>
 @section('content')
-	<body onload="onTimer()">
-	<div class="container" >
+<body onload="onTimer()">
+    <div class="container" >
         <h1 class="pb-1">
             Request a Reservation
             <small class="text-muted">for {{ $timeslot->format('l, F jS, Y') }} at {{ $timeslot->format('g a') }} in {{ $room->getName() }}</small>
         </h1>
-		<!-- Show the user how much time they have left to make their Reservation -->
-		<div class = "timer" style="color:red;text-align: center;">Reservation Request closes in <span id="timer"></span> seconds!</div><br>
+        <!-- Show the user how much time they have left to make their Reservation -->
+        <div class = "timer" style="color:red;text-align: center;">Reservation Request closes in <span id="timer"></span> seconds!</div><br>
         <form method="post" action="{{ route('requestPost', ['room' => $room->getName(), 'date' => $timeslot->format('Y-m-d\TH')]) }}">
             {{ csrf_field() }}
-			<!-- Prompt the user to fill out all of the form entries required for the Reservation -->
-			<div class="form-group row{{ $errors->has('description') ? ' has-danger' : '' }}">
-				<label for="inputDescription" class="col-sm-2 col-form-label">Description</label>
-				<div class="col-sm-10">
-					<textarea class="form-control{{ $errors->has('description') ? ' form-control-danger' : '' }}" id="inputDescription" name="description" rows="3" placeholder="A brief description of the purpose of the reservation" required autofocus>{{ old('description') }}</textarea>
-					@if ($errors->has('description'))
-						<div class="form-control-feedback">
-							{{ $errors->first('description') }}
-						</div>
-					@endif
-				</div>
-			</div>
-			<div class="form-group row{{ $errors->has('equipment') ? ' has-danger' : '' }}">
-				<label for="inputMarkers" class="col-xs-3 col-sm-2 col-form-label">White Board Markers</label>
-				<div class="col-xs-9 col-md-3">
-					<div class="input-group">
-						<input name="markers" class="form-control{{ $errors->has('quantity') ? ' form-control-danger' : '' }}" type="number" min="0" max="3" value="0" id="quantity">
-						<span class="input-group-addon">Quantity</span>
-					</div>
-					@if ($errors->has('markers'))
-						<div class="form-control-feedback">
-							{{ $errors->first('markers') }}
-						</div>
-					@endif
-				</div>
-			</div>
-			<div class="form-group row{{ $errors->has('equipment') ? ' has-danger' : '' }}">
-				<label for="inputMarkers" class="col-xs-3 col-sm-2 col-form-label">Projectors</label>
-				<div class="col-xs-9 col-md-3">
-					<div class="input-group">
-						<input name="projectors" class="form-control{{ $errors->has('quantity') ? ' form-control-danger' : '' }}" type="number" min="0" max="3" value="0" id="quantity">
-						<span class="input-group-addon">Quantity</span>
-					</div>
-					@if ($errors->has('projectors'))
-						<div class="form-control-feedback">
-							{{ $errors->first('projectors') }}
-						</div>
-					@endif
-				</div>
-			</div>
-			<div class="form-group row{{ $errors->has('equipment') ? ' has-danger' : '' }}">
-				<label for="inputMarkers" class="col-xs-3 col-sm-2 col-form-label">Laptops</label>
-				<div class="col-xs-9 col-md-3">
-					<div class="input-group">
-						<input name="laptops" class="form-control{{ $errors->has('quantity') ? ' form-control-danger' : '' }}" type="number" min="0" max="3" value="0" id="quantity">
-						<span class="input-group-addon">Quantity</span>
-					</div>
-					@if ($errors->has('laptops'))
-						<div class="form-control-feedback">
-							{{ $errors->first('laptops') }}
-						</div>
-					@endif
-				</div>
-			</div>
-			<div class="form-group row{{ $errors->has('equipment') ? ' has-danger' : '' }}">
-				<label for="inputMarkers" class="col-xs-3 col-sm-2 col-form-label">Display Cables</label>
-				<div class="col-xs-9 col-md-3">
-					<div class="input-group">
-						<input name="cables" class="form-control{{ $errors->has('quantity') ? ' form-control-danger' : '' }}" type="number" min="0" max="3" value="0" id="quantity">
-						<span class="input-group-addon">Quantity</span>
-					</div>
-					@if ($errors->has('cables'))
-						<div class="form-control-feedback">
-							{{ $errors->first('cables') }}
-						</div>
-					@endif
-				</div>
-			</div>
+            <!-- Prompt the user to fill out all of the form entries required for the Reservation -->
+            <div class="form-group row{{ $errors->has('description') ? ' has-danger' : '' }}">
+                <label for="inputDescription" class="col-sm-2 col-form-label">Description</label>
+                <div class="col-sm-10">
+                    <textarea class="form-control{{ $errors->has('description') ? ' form-control-danger' : '' }}" id="inputDescription" name="description" rows="3" placeholder="A brief description of the purpose of the reservation" required autofocus>{{ old('description') }}</textarea>
+                    @if ($errors->has('description'))
+                    <div class="form-control-feedback">
+                        {{ $errors->first('description') }}
+                    </div>
+                    @endif
+                </div>
+            </div>
+            <div class="form-group row{{ $errors->has('equipment') ? ' has-danger' : '' }}">
+                <label for="inputMarkers" class="col-xs-3 col-sm-2 col-form-label">White Board Markers</label>
+                <div class="col-xs-9 col-md-3">
+                    <div class="input-group">
+                        <input name="markers" class="form-control{{ $errors->has('quantity') ? ' form-control-danger' : '' }}" type="number" min="0" max="3" value="0" id="quantity">
+                        <span class="input-group-addon">Quantity</span>
+                    </div>
+                    @if ($errors->has('markers'))
+                    <div class="form-control-feedback">
+                        {{ $errors->first('markers') }}
+                    </div>
+                    @endif
+                </div>
+            </div>
+            <div class="form-group row{{ $errors->has('equipment') ? ' has-danger' : '' }}">
+                <label for="inputMarkers" class="col-xs-3 col-sm-2 col-form-label">Projectors</label>
+                <div class="col-xs-9 col-md-3">
+                    <div class="input-group">
+                        <input name="projectors" class="form-control{{ $errors->has('quantity') ? ' form-control-danger' : '' }}" type="number" min="0" max="3" value="0" id="quantity">
+                        <span class="input-group-addon">Quantity</span>
+                    </div>
+                    @if ($errors->has('projectors'))
+                    <div class="form-control-feedback">
+                        {{ $errors->first('projectors') }}
+                    </div>
+                    @endif
+                </div>
+            </div>
+            <div class="form-group row{{ $errors->has('equipment') ? ' has-danger' : '' }}">
+                <label for="inputMarkers" class="col-xs-3 col-sm-2 col-form-label">Laptops</label>
+                <div class="col-xs-9 col-md-3">
+                    <div class="input-group">
+                        <input name="laptops" class="form-control{{ $errors->has('quantity') ? ' form-control-danger' : '' }}" type="number" min="0" max="3" value="0" id="quantity">
+                        <span class="input-group-addon">Quantity</span>
+                    </div>
+                    @if ($errors->has('laptops'))
+                    <div class="form-control-feedback">
+                        {{ $errors->first('laptops') }}
+                    </div>
+                    @endif
+                </div>
+            </div>
+            <div class="form-group row{{ $errors->has('equipment') ? ' has-danger' : '' }}">
+                <label for="inputMarkers" class="col-xs-3 col-sm-2 col-form-label">Display Cables</label>
+                <div class="col-xs-9 col-md-3">
+                    <div class="input-group">
+                        <input name="cables" class="form-control{{ $errors->has('quantity') ? ' form-control-danger' : '' }}" type="number" min="0" max="3" value="0" id="quantity">
+                        <span class="input-group-addon">Quantity</span>
+                    </div>
+                    @if ($errors->has('cables'))
+                    <div class="form-control-feedback">
+                        {{ $errors->first('cables') }}
+                    </div>
+                    @endif
+                </div>
+            </div>
             <div class="form-group row{{ $errors->has('recur') ? ' has-danger' : '' }}">
                 <label for="inputRecur" class="col-xs-3 col-sm-2 col-form-label">Recur for</label>
                 <div class="col-xs-9 col-md-3">
@@ -123,9 +122,9 @@
                         <span class="input-group-addon">week(s)</span>
                     </div>
                     @if ($errors->has('recur'))
-                        <div class="form-control-feedback">
-                            {{ $errors->first('recur') }}
-                        </div>
+                    <div class="form-control-feedback">
+                        {{ $errors->first('recur') }}
+                    </div>
                     @endif
                 </div>
             </div>
@@ -137,5 +136,5 @@
             </div>
         </form>
     </div>
-	</body>
+</body>
 @endsection
