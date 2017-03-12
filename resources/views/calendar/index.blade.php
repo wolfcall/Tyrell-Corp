@@ -4,7 +4,7 @@
 use App\Data\Mappers\RoomMapper;
 
 $now = date("Y-m-d G:i:s");
-if (isset($_SESSION["timestamp"])) {
+if (isset($_SESSION["timestamp"]) && isset($_SESSION["user"]) && ($_SESSION["user"] == (Auth::id()) ) ) {
     $time = $_SESSION["timestamp"];
     $times = array();
     $times["past"][0][0] = explode("-", explode(" ", $time)[0])[0];
@@ -28,6 +28,7 @@ if (isset($_SESSION["timestamp"])) {
     if ($result[0] + $result[1] + $result[2] + $result[3] + $result[4] > 0 || $result[5] >= 30) {
         $lock = 0;
         unset($_SESSION["timestamp"]);
+        unset($_SESSION["user"]);
     } else {
         $lock = (30 - $result[5]);
     }
