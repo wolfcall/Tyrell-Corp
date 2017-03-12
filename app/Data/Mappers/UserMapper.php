@@ -11,8 +11,7 @@ use App\Singleton;
 /**
  * @method static UserMapper getInstance()
  */
-class UserMapper extends Singleton
-{
+class UserMapper extends Singleton {
 
     /**
      * @var UserTDG
@@ -27,8 +26,7 @@ class UserMapper extends Singleton
     /**
      * UserMapper constructor.
      */
-    protected function __construct()
-    {
+    protected function __construct() {
         parent::__construct();
 
         $this->tdg = UserTDG::getInstance();
@@ -45,8 +43,7 @@ class UserMapper extends Singleton
      * @param string $password
      * @return User
      */
-    public function create(int $id, string $name, string $password): User
-    {
+    public function create(int $id, string $name, string $password): User {
         $user = new User($id, $name, $password);
 
         //Add the new Client to the list of existing objects in Live memory
@@ -64,8 +61,7 @@ class UserMapper extends Singleton
      * @param int $id
      * @return User
      */
-    public function find(int $id): User
-    {
+    public function find(int $id): User {
         $user = $this->identityMap->get($id);
         $result = null;
 
@@ -77,7 +73,7 @@ class UserMapper extends Singleton
         // If TDG doesn't have it then it doens't exist.
         if ($result !== null) {
             //We got the client from the TDG who got it from the DB and now the mapper must add it to the ClientIdentityMap
-            $user = new User((int)$result[0], (string)$result[1], (string)$result[2], (double)$result[3]);
+            $user = new User((int) $result[0], (string) $result[1], (string) $result[2], (double) $result[3]);
             $this->identityMap->add($user);
         }
 
@@ -90,8 +86,7 @@ class UserMapper extends Singleton
      * @param int $id
      * @param string $name
      */
-    public function set(int $id, string $name)
-    {
+    public function set(int $id, string $name) {
         // First we fetch the client || We could have passed the Client as a Param. But this assumes you might not have
         // access to the instance of the desired object.
         $user = $this->find($id);
@@ -102,36 +97,33 @@ class UserMapper extends Singleton
         // We've modified something in the object so we Register the instance as Dirty in the UoW.
         UserUoW::getInstance()->registerDirty($user);
     }
-	
-	/**
+
+    /**
      * Used to update that a user has attemped to make a reservation
      *
      * @param int $id
      * @param int $status
      */
-    public function setAttempt($userId, $status)
-    {
+    public function setAttempt($userId, $status) {
         $this->tdg->setAttempt($userId, $status);
     }
-	
-	/**
+
+    /**
      * Used to check that a user has attemped to make a reservation
      *
      * @param int $id
      */
-    public function getAttempt($userId)
-    {
+    public function getAttempt($userId) {
         return $this->tdg->getAttempt($userId);
     }
-	
-	/**
+
+    /**
      * Returns the check to see if a student is part of Capstone or not
      *
      * @param int $userId
      * @return int
      */
-    public function capstone(int $userId): int
-    {
+    public function capstone(int $userId): int {
         return $this->tdg->capstone($userId);
     }
 
@@ -140,8 +132,7 @@ class UserMapper extends Singleton
      *
      * @param int $id
      */
-    public function delete(int $id)
-    {
+    public function delete(int $id) {
         //Fire we fetch the client by checking the identity map
         $user = $this->identityMap->get($id);
 
@@ -159,8 +150,7 @@ class UserMapper extends Singleton
      *
      * Finalize changes
      */
-    public function done()
-    {
+    public function done() {
         UserUoW::getInstance()->commit();
     }
 
@@ -171,8 +161,7 @@ class UserMapper extends Singleton
      *
      * @param array $newList
      */
-    public function addMany(array $newList)
-    {
+    public function addMany(array $newList) {
         $this->tdg->addMany($newList);
     }
 
@@ -183,8 +172,7 @@ class UserMapper extends Singleton
      *
      * @param array $updateList
      */
-    public function updateMany(array $updateList)
-    {
+    public function updateMany(array $updateList) {
         $this->tdg->updateMany($updateList);
     }
 
@@ -195,8 +183,8 @@ class UserMapper extends Singleton
      *
      * @param array $deleteList
      */
-    public function deleteMany(array $deleteList)
-    {
+    public function deleteMany(array $deleteList) {
         $this->tdg->deleteMany($deleteList);
     }
+
 }

@@ -12,8 +12,7 @@ use Carbon\Carbon;
 /**
  * @method static ReservationMapper getInstance()
  */
-class ReservationMapper extends Singleton
-{
+class ReservationMapper extends Singleton {
 
     /**
      * @var ReservationTDG
@@ -28,8 +27,7 @@ class ReservationMapper extends Singleton
     /**
      * ReservationMapper constructor.
      */
-    protected function __construct()
-    {
+    protected function __construct() {
         parent::__construct();
 
         $this->tdg = ReservationTDG::getInstance();
@@ -44,15 +42,14 @@ class ReservationMapper extends Singleton
      * @param \DateTime $timeslot
      * @param string $description
      * @param string $uuid
-	 * @param string $position
-	 * @param string $projectors
-	 * @param string $laptops
-	 * @param string $cables
-	 * @param int $markers
+     * @param string $position
+     * @param string $projectors
+     * @param string $laptops
+     * @param string $cables
+     * @param int $markers
      * @return Reservation
      */
-    public function create(int $userId, string $roomName, \DateTime $timeslot, string $description, string $uuid, int $position, int $markers, int $projectors, int $laptops, int $cables): Reservation
-    {
+    public function create(int $userId, string $roomName, \DateTime $timeslot, string $description, string $uuid, int $position, int $markers, int $projectors, int $laptops, int $cables): Reservation {
         $reservation = new Reservation($userId, $roomName, $timeslot, $description, $uuid, null, $position, $markers, $projectors, $laptops, $cables);
 
         // add the new Reservation to the list of existing objects in live memory
@@ -70,8 +67,7 @@ class ReservationMapper extends Singleton
      * @param int $id
      * @return Reservation|null
      */
-    public function find(int $id)
-    {
+    public function find(int $id) {
         $reservation = $this->identityMap->get($id);
         $result = null;
 
@@ -79,31 +75,29 @@ class ReservationMapper extends Singleton
         if ($reservation === null) {
             $result = $this->tdg->find($id);
         }
-		
-		$markers = $result->quantity_markers;
-		$projectors = $result->quantity_projectors;
-		$laptops = $result->quantity_laptops;
-		$cables = $result->quantity_cables;
-		
+
+        $markers = $result->quantity_markers;
+        $projectors = $result->quantity_projectors;
+        $laptops = $result->quantity_laptops;
+        $cables = $result->quantity_cables;
+
         // if TDG doesn't have it, it doesn't exist
         if ($result !== null) {
             // we got the Reservation from the TDG who got it from the DB and now the mapper must add it to the ReservationIdentityMap
-            $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id), $result->wait_position,
-				$markers,$projectors,$laptops,$cables);
+            $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id), $result->wait_position, $markers, $projectors, $laptops, $cables);
             $this->identityMap->add($reservation);
         }
         return $reservation;
     }
 
     /**
-	 * Returns a list of all Reservations for a given Room and Timeslot, ordered by id
+     * Returns a list of all Reservations for a given Room and Timeslot, ordered by id
      * 
-	 * @param string $roomName
+     * @param string $roomName
      * @param \DateTime $timeslot
      * @return Reservation[]
      */
-    public function findForTimeslot(string $roomName, \DateTime $timeslot): array
-    {
+    public function findForTimeslot(string $roomName, \DateTime $timeslot): array {
         $results = $this->tdg->findForTimeslot($roomName, $timeslot);
         $reservations = [];
 
@@ -111,8 +105,7 @@ class ReservationMapper extends Singleton
             if ($reservation = $this->identityMap->get($result->id)) {
                 $reservations[] = $reservation;
             } else {
-                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id), $result->wait_position,
-					$result->quantity_markers, $result->quantity_projectors, $result->quantity_laptops, $result->quantity_cables);
+                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id), $result->wait_position, $result->quantity_markers, $result->quantity_projectors, $result->quantity_laptops, $result->quantity_cables);
                 $this->identityMap->add($reservation);
                 $reservations[] = $reservation;
             }
@@ -120,53 +113,49 @@ class ReservationMapper extends Singleton
 
         return $reservations;
     }
-	
-	/**
-	 * Returns a list of all active Reservations (if any) for a given Timeslot by the User passed in
-	 * 
-	 * @param int $id
-     * @param \DateTime $timeslot
-     * @return Reservation[]
-     */
-    public function findAllTimeslotActive(\DateTime $timeslot, $id)
-    {
-        return  $this->tdg->findAllTimeslotActive($timeslot, $id);
-    }
-	
-	/**
-	 * Returns a list of all waitlisted Reservations (if any) for a given Timeslot by the User passed in
-	 * 
-	 * @param int $id
-	 * @param Room Name $roomName
-	 * @param \DateTime $timeslot
-     * @return Reservation[]
-     */
-    public function findAllTimeslotWaitlisted(\DateTime $timeslot, $id, $roomName)
-    {
-        return  $this->tdg->findAllTimeslotWaitlisted($timeslot, $id, $roomName);
-    }
-	
-	/**
-	 * Returns the User who has the Reservation for the Timeslot and Room passed in
+
+    /**
+     * Returns a list of all active Reservations (if any) for a given Timeslot by the User passed in
      * 
-	 * @param \DateTime $timeslot
-	 * @param Room Name $roomName
-     * @return Reservation[]
-     */
-    public function findTimeslotWinner(\DateTime $timeslot, $roomName)
-    {
-        return  $this->tdg->findTimeslotWinner($timeslot, $roomName);
-    }
-	
-	/**
-     * Returns a list of all Reservation for a given Timeslot other than the room passed in
-	 *
+     * @param int $id
      * @param \DateTime $timeslot
-	 * @param Room Name $roomName
      * @return Reservation[]
      */
-    public function findTimeslot(\DateTime $timeslot)
-    {
+    public function findAllTimeslotActive(\DateTime $timeslot, $id) {
+        return $this->tdg->findAllTimeslotActive($timeslot, $id);
+    }
+
+    /**
+     * Returns a list of all waitlisted Reservations (if any) for a given Timeslot by the User passed in
+     * 
+     * @param int $id
+     * @param Room Name $roomName
+     * @param \DateTime $timeslot
+     * @return Reservation[]
+     */
+    public function findAllTimeslotWaitlisted(\DateTime $timeslot, $id, $roomName) {
+        return $this->tdg->findAllTimeslotWaitlisted($timeslot, $id, $roomName);
+    }
+
+    /**
+     * Returns the User who has the Reservation for the Timeslot and Room passed in
+     * 
+     * @param \DateTime $timeslot
+     * @param Room Name $roomName
+     * @return Reservation[]
+     */
+    public function findTimeslotWinner(\DateTime $timeslot, $roomName) {
+        return $this->tdg->findTimeslotWinner($timeslot, $roomName);
+    }
+
+    /**
+     * Returns a list of all Reservation for a given Timeslot other than the room passed in
+     *
+     * @param \DateTime $timeslot
+     * @param Room Name $roomName
+     * @return Reservation[]
+     */
+    public function findTimeslot(\DateTime $timeslot) {
         $results = $this->tdg->findTimeslot($timeslot);
         $reservations = [];
 
@@ -174,8 +163,7 @@ class ReservationMapper extends Singleton
             if ($reservation = $this->identityMap->get($result->id)) {
                 $reservations[] = $reservation;
             } else {
-                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id), $result->wait_position,
-					$result->quantity_markers, $result->quantity_projectors, $result->quantity_laptops, $result->quantity_cables);
+                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id), $result->wait_position, $result->quantity_markers, $result->quantity_projectors, $result->quantity_laptops, $result->quantity_cables);
                 $this->identityMap->add($reservation);
                 $reservations[] = $reservation;
             }
@@ -183,15 +171,14 @@ class ReservationMapper extends Singleton
 
         return $reservations;
     }
-	
+
     /**
      * Returns the position of the User for the Reservation
-	 *
-	 * @param Reservation $reservation
+     *
+     * @param Reservation $reservation
      * @return int
      */
-    public function findPosition(Reservation $reservation): int
-    {
+    public function findPosition(Reservation $reservation): int {
         // get a list of all the other reservations for the same room-timeslot
         $reservations = $this->findForTimeslot($reservation->getRoomName(), $reservation->getTimeslot());
 
@@ -208,12 +195,11 @@ class ReservationMapper extends Singleton
 
     /**
      * Returns the active Reservations for the given Date
-	 * 
-	 * @param \DateTime $date
+     * 
+     * @param \DateTime $date
      * @return Reservation[]|array
      */
-    public function findAllActive(\DateTime $date): array
-    {
+    public function findAllActive(\DateTime $date): array {
         $results = $this->tdg->findAllActive($date);
         $reservations = [];
 
@@ -221,8 +207,7 @@ class ReservationMapper extends Singleton
             if ($reservation = $this->identityMap->get($result->id)) {
                 $reservations[] = $reservation;
             } else {
-                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id),
-					$result->wait_position, $result->quantity_markers, $result->quantity_projectors, $result->quantity_laptops, $result->quantity_cables);
+                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id), $result->wait_position, $result->quantity_markers, $result->quantity_projectors, $result->quantity_laptops, $result->quantity_cables);
                 $this->identityMap->add($reservation);
                 $reservations[] = $reservation;
             }
@@ -233,12 +218,11 @@ class ReservationMapper extends Singleton
 
     /**
      * Returns the Position for the User passed in
-	 * 
-	 * @param int $user_id
+     * 
+     * @param int $user_id
      * @return array[]
      */
-    public function findPositionsForUser(int $user_id): array
-    {
+    public function findPositionsForUser(int $user_id): array {
         $results = $this->tdg->findPositionsForUser($user_id);
         $reservations = [];
 
@@ -246,8 +230,7 @@ class ReservationMapper extends Singleton
             if ($reservation = $this->identityMap->get($result->id)) {
                 $reservations[] = [$reservation, $result->position];
             } else {
-                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id), $result->wait_position,
-					$result->wait_position, $result->quantity_markers, $result->quantity_projectors, $result->quantity_laptops, $result->quantity_cables);
+                $reservation = new Reservation(intval($result->user_id), $result->room_name, new Carbon($result->timeslot), $result->description, $result->recur_id, intval($result->id), $result->wait_position, $result->wait_position, $result->quantity_markers, $result->quantity_projectors, $result->quantity_laptops, $result->quantity_cables);
                 $this->identityMap->add($reservation);
                 $reservations[] = [$reservation, intval($result->position)];
             }
@@ -264,12 +247,11 @@ class ReservationMapper extends Singleton
      * @param \DateTime $end End date, exclusive
      * @return int
      */
-    public function countInRange(int $userId, \DateTime $start, \DateTime $end)
-    {
+    public function countInRange(int $userId, \DateTime $start, \DateTime $end) {
         return $this->tdg->countInRange($userId, $start, $end);
     }
-	
-	/**
+
+    /**
      * SQL statement to count all wait-listed reservations for a certain user within a date range
      *
      * @param int $userId
@@ -277,156 +259,140 @@ class ReservationMapper extends Singleton
      * @param \DateTime $end End date, exclusive
      * @return int
      */
-    public function countAll(int $userId, \DateTime $start, \DateTime $end)
-    {
+    public function countAll(int $userId, \DateTime $start, \DateTime $end) {
         return $this->tdg->countAll($userId, $start, $end);
     }
-	
-	/**
+
+    /**
      * SQL statement to count all Equipment in active reservations for a certain user within a date range
      *
      * @param \DateTime $start Start date, inclusive
      * @param \DateTime $end End date, exclusive
      * @return int
      */
-    public function countEquipment(\DateTime $timeslot)
-    {
+    public function countEquipment(\DateTime $timeslot) {
         return $this->tdg->countEquipment($timeslot);
     }
-	
-	/**
+
+    /**
      * SQL statement to count all Equipment in active reservations excluding a certain user's reservation within a date range
      *
      * @param \DateTime $start Start date, inclusive
      * @param \DateTime $end End date, exclusive
      * @return int
      */
-    public function countEquipmentExclude(\DateTime $timeslot, $id)
-    {
+    public function countEquipmentExclude(\DateTime $timeslot, $id) {
         return $this->tdg->countEquipmentExclude($timeslot, $id);
     }
-	
-	/**
+
+    /**
      * Confirm the status of all the equipment that is requested by the user
      *
      * @param \DateTime $start Start date, inclusive
      * @param \DateTime $end End date, exclusive
      * @return int
      */
-    public function statusEquipment(\DateTime $timeslot, int $markersRequest, int $laptopsRequest, int $projectorsRequest, int $cablesRequest)
-    {
+    public function statusEquipment(\DateTime $timeslot, int $markersRequest, int $laptopsRequest, int $projectorsRequest, int $cablesRequest) {
         //Count all equipment already being used
-		$markersCount = 0;
-		$projectorsCount = 0;
-		$laptopsCount = 0;
-		$cablesCount = 0;
-		
-		//Check all the equipment that is being used during that timeslot
-		$equipmentCount = $this->countEquipment($timeslot);
-		foreach($equipmentCount as $e)
-		{
-			$markersCount += $e->quantity_markers;
-			$projectorsCount += $e->quantity_projectors;
-			$laptopsCount += $e->quantity_laptops;
-			$cablesCount += $e->quantity_cables;
-		}			
+        $markersCount = 0;
+        $projectorsCount = 0;
+        $laptopsCount = 0;
+        $cablesCount = 0;
 
-		//Use a boolean to know if the status of the equipment is ok
-		//Start the boolean as true
-		$eStatus = true;
-		
-		//Check the markers
-		if($markersRequest > (3-$markersCount))
-		{
-			$eStatus = false;
-		}
+        //Check all the equipment that is being used during that timeslot
+        $equipmentCount = $this->countEquipment($timeslot);
+        foreach ($equipmentCount as $e) {
+            $markersCount += $e->quantity_markers;
+            $projectorsCount += $e->quantity_projectors;
+            $laptopsCount += $e->quantity_laptops;
+            $cablesCount += $e->quantity_cables;
+        }
 
-		//Check the laptops
-		if($laptopsRequest > (3-$laptopsCount))
-		{
-			$eStatus = false;
-		}
+        //Use a boolean to know if the status of the equipment is ok
+        //Start the boolean as true
+        $eStatus = true;
 
-		//Check the projectors
-		if($projectorsRequest > (3-$projectorsCount))
-		{
-			$eStatus = false;
-		}
+        //Check the markers
+        if ($markersRequest > (3 - $markersCount)) {
+            $eStatus = false;
+        }
 
-		//Check the cables
-		if($cablesRequest > (3-$cablesCount))
-		{
-			$eStatus = false;
-		}
-		
-		return $eStatus;
-    }	
-	
-	/**
+        //Check the laptops
+        if ($laptopsRequest > (3 - $laptopsCount)) {
+            $eStatus = false;
+        }
+
+        //Check the projectors
+        if ($projectorsRequest > (3 - $projectorsCount)) {
+            $eStatus = false;
+        }
+
+        //Check the cables
+        if ($cablesRequest > (3 - $cablesCount)) {
+            $eStatus = false;
+        }
+
+        return $eStatus;
+    }
+
+    /**
      * Confirm the status of all the equipment that is requested by the user, excluding counting equipment part of their reservation
      *
      * @param \DateTime $start Start date, inclusive
      * @param \DateTime $end End date, exclusive
      * @return int
      */
-    public function statusEquipmentExclude(\DateTime $timeslot, int $id, int $markersRequest, int $laptopsRequest, int $projectorsRequest, int $cablesRequest)
-    {
+    public function statusEquipmentExclude(\DateTime $timeslot, int $id, int $markersRequest, int $laptopsRequest, int $projectorsRequest, int $cablesRequest) {
         //Count all equipment already being used
-		$markersCount = 0;
-		$projectorsCount = 0;
-		$laptopsCount = 0;
-		$cablesCount = 0;
-		
-		//Check all the equipment that is being used during that timeslot
-		$equipmentCount = $this->countEquipmentExclude($timeslot, $id);
-		
-		foreach($equipmentCount as $e)
-		{
-			$markersCount += $e->quantity_markers;
-			$projectorsCount += $e->quantity_projectors;
-			$laptopsCount += $e->quantity_laptops;
-			$cablesCount += $e->quantity_cables;
-		}			
+        $markersCount = 0;
+        $projectorsCount = 0;
+        $laptopsCount = 0;
+        $cablesCount = 0;
 
-		//Use a boolean to know if the status of the equipment is ok
-		//Start the boolean as true
-		$eStatus = true;
-		
-		//Check the markers
-		if($markersRequest > (3-$markersCount))
-		{
-			$eStatus = false;
-		}
+        //Check all the equipment that is being used during that timeslot
+        $equipmentCount = $this->countEquipmentExclude($timeslot, $id);
 
-		//Check the laptops
-		if($laptopsRequest > (3-$laptopsCount))
-		{
-			$eStatus = false;
-		}
+        foreach ($equipmentCount as $e) {
+            $markersCount += $e->quantity_markers;
+            $projectorsCount += $e->quantity_projectors;
+            $laptopsCount += $e->quantity_laptops;
+            $cablesCount += $e->quantity_cables;
+        }
 
-		//Check the projectors
-		if($projectorsRequest > (3-$projectorsCount))
-		{
-			$eStatus = false;
-		}
+        //Use a boolean to know if the status of the equipment is ok
+        //Start the boolean as true
+        $eStatus = true;
 
-		//Check the cables
-		if($cablesRequest > (3-$cablesCount))
-		{
-			$eStatus = false;
-		}
-		
-		return $eStatus;
+        //Check the markers
+        if ($markersRequest > (3 - $markersCount)) {
+            $eStatus = false;
+        }
+
+        //Check the laptops
+        if ($laptopsRequest > (3 - $laptopsCount)) {
+            $eStatus = false;
+        }
+
+        //Check the projectors
+        if ($projectorsRequest > (3 - $projectorsCount)) {
+            $eStatus = false;
+        }
+
+        //Check the cables
+        if ($cablesRequest > (3 - $cablesCount)) {
+            $eStatus = false;
+        }
+
+        return $eStatus;
     }
-	
-	/**
+
+    /**
      * Method to update the Reservation of a user
-	 * 
-	 * @param int $id
+     * 
+     * @param int $id
      * @param string $description
      */
-    public function set(int $id, string $description, int $markers, int $projectors, int $laptops, int $cables, string $timeslot, string $roomName)
-    {
+    public function set(int $id, string $description, int $markers, int $projectors, int $laptops, int $cables, string $timeslot, string $roomName) {
         $reservation = $this->find($id);
 
         $reservation->setDescription($description);
@@ -436,23 +402,22 @@ class ReservationMapper extends Singleton
         $reservation->setCables($cables);
 
         $date = substr($reservation->getTimeslot()->toDateTimeString(), 0, 10);
-        $newTimeslot = $date." ".$timeslot.":00:00";
-        
+        $newTimeslot = $date . " " . $timeslot . ":00:00";
+
         $reservation->setTimeslot(new Carbon($newTimeslot));
         $reservation->setRoomName($roomName);
 
         // we've modified something in the object so we register the instance as dirty in the UoW
         ReservationUoW::getInstance()->registerDirty($reservation);
     }
-	
-	/**
+
+    /**
      * Method to update the Waitlist Position of a user's Reservation
-	 * 
-	 * @param int $id
+     * 
+     * @param int $id
      * @param string $description
      */
-    public function setNewWaitlist(int $id, int $newPosition)
-    {
+    public function setNewWaitlist(int $id, int $newPosition) {
         $reservation = $this->find($id);
 
         $reservation->setPosition($newPosition);
@@ -460,29 +425,26 @@ class ReservationMapper extends Singleton
         // we've modified something in the object so we register the instance as dirty in the UoW
         ReservationUoW::getInstance()->registerDirty($reservation);
     }
-	
-	/**
-	* Method to move a user down in the Waitlist for a specific Timeslot
-	* @param int $id
-	* @param string $description
-	*/
-    public function moveDown(Reservation $reservation)
-    {
+
+    /**
+     * Method to move a user down in the Waitlist for a specific Timeslot
+     * @param int $id
+     * @param string $description
+     */
+    public function moveDown(Reservation $reservation) {
         $old = $reservation->getPosition();
-		$reservation->setPosition($old+1);
+        $reservation->setPosition($old + 1);
 
         // we've modified something in the object so we register the instance as dirty in the UoW
         ReservationUoW::getInstance()->registerDirty($reservation);
     }
-	
 
     /**
-	 * Method to Delete a Reservation
-	 * 
+     * Method to Delete a Reservation
+     * 
      * @param int $id
      */
-    public function delete(int $id)
-    {
+    public function delete(int $id) {
         // first we fetch the client by checking the identity map
         $reservation = $this->find($id);
 
@@ -498,8 +460,7 @@ class ReservationMapper extends Singleton
     /**
      * Finalize changes
      */
-    public function done()
-    {
+    public function done() {
         ReservationUoW::getInstance()->commit();
     }
 
@@ -508,8 +469,7 @@ class ReservationMapper extends Singleton
      *
      * @param array $newList
      */
-    public function addMany(array $newList)
-    {
+    public function addMany(array $newList) {
         $this->tdg->addMany($newList);
     }
 
@@ -518,8 +478,7 @@ class ReservationMapper extends Singleton
      *
      * @param array $updateList
      */
-    public function updateMany(array $updateList)
-    {
+    public function updateMany(array $updateList) {
         $this->tdg->updateMany($updateList);
     }
 
@@ -528,8 +487,8 @@ class ReservationMapper extends Singleton
      *
      * @param array $deleteList
      */
-    public function deleteMany(array $deleteList)
-    {
+    public function deleteMany(array $deleteList) {
         $this->tdg->deleteMany($deleteList);
     }
+
 }
