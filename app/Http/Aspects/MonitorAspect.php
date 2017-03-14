@@ -27,9 +27,10 @@ class MonitorAspect implements Aspect {
      * Method that will be called before real method
      *
      * @param MethodInvocation $invocation Invocation
-     * @Before("execution(public App\Http\Controllers\CalendarController->*(*))")
+     * @Before("execution(public App\Http\Controllers\CalendarController->viewCalendar(*))")
      */
     public function beforeMethodExecution(MethodInvocation $invocation) {
+        /*
         $obj = $invocation->getThis();
         echo 'Calling Before Interceptor for method: ',
         is_object($obj) ? get_class($obj) : $obj,
@@ -39,6 +40,10 @@ class MonitorAspect implements Aspect {
         ' with arguments: ',
         json_encode($invocation->getArguments()),
         "<br>\n";
+         * 
+         */
+        $passing['request'] = $invocation->getArguments();
+        var_dump($passing->input('date'));
     }
 
 }
