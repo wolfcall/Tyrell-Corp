@@ -17,7 +17,7 @@ use App\Http\Aspects\MonitorAspect;
  *
  * @author Georges
  */
-class applicationAspectKernel extends AspectKernel {
+class ApplicationAspectKernel extends AspectKernel {
 
     /**
      * Configure an AspectContainer with advisors, aspects and pointcuts

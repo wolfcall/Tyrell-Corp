@@ -45,7 +45,7 @@ $app = require_once __DIR__ . '/../bootstrap/app.php';
 |
 */
 // Initialize an application aspect container
-$applicationAspectKernel = App\Http\applicationAspectKernel::getInstance();
+$applicationAspectKernel = App\Http\ApplicationAspectKernel::getInstance();
 $applicationAspectKernel->init(array(
         'debug' => true, // use 'false' for production mode
         // Cache directory
