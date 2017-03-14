@@ -11,8 +11,8 @@ use App\Singleton;
  *
  * @method static UserUoW getInstance()
  */
-class UserUoW extends Singleton
-{
+class UserUoW extends Singleton {
+
     private $newList = [];
     private $changedList = [];
     private $deletedList = [];
@@ -22,30 +22,25 @@ class UserUoW extends Singleton
      */
     private $mapper;
 
-    protected function __construct()
-    {
+    protected function __construct() {
         parent::__construct();
 
         $this->mapper = UserMapper::getInstance();
     }
 
-    public function registerNew(User $user)
-    {
+    public function registerNew(User $user) {
         $this->newList[] = $user;
     }
 
-    public function registerDirty(User $user)
-    {
+    public function registerDirty(User $user) {
         $this->changedList[] = $user;
     }
 
-    public function registerDeleted(User $user)
-    {
+    public function registerDeleted(User $user) {
         $this->deletedList[] = $user;
     }
 
-    public function commit()
-    {
+    public function commit() {
         $this->mapper->addMany($this->newList);
         $this->mapper->updateMany($this->changedList);
         $this->mapper->deleteMany($this->deletedList);
@@ -55,4 +50,5 @@ class UserUoW extends Singleton
         $this->changedList = [];
         $this->deletedList = [];
     }
+
 }

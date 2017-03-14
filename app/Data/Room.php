@@ -2,8 +2,8 @@
 
 namespace App\Data;
 
-class Room
-{
+class Room {
+
     /**
      * @var string
      */
@@ -13,16 +13,14 @@ class Room
      * Room constructor.
      * @param string $name
      */
-    public function __construct(string $name)
-    {
+    public function __construct(string $name) {
         $this->name = $name;
     }
 
     /**
      * @return string
      */
-    public function getName(): string
-    {
+    public function getName(): string {
         return $this->name;
     }
 
@@ -31,8 +29,8 @@ class Room
      *
      * @param string $name
      */
-    public function setName(string $name)
-    {
+    public function setName(string $name) {
         $this->name = $name;
     }
+
 }

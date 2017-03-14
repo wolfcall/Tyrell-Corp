@@ -12,3 +12,4 @@ sami.phar
 /nbproject/*
 composer.lock
 composer.json
+composer.lock

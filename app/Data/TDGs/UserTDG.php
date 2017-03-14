@@ -9,8 +9,8 @@ use DB;
 /**
  * @method static UserTDG getInstance()
  */
-class UserTDG extends Singleton
-{
+class UserTDG extends Singleton {
+
     /**
      * Adds a list of Users to the database
      *
@@ -18,8 +18,7 @@ class UserTDG extends Singleton
      *
      * @param array $newList
      */
-    public function addMany(array $newList)
-    {
+    public function addMany(array $newList) {
         foreach ($newList as $user) {
             $this->create($user);
         }
@@ -32,8 +31,7 @@ class UserTDG extends Singleton
      *
      * @param array $updateList
      */
-    public function updateMany(array $updateList)
-    {
+    public function updateMany(array $updateList) {
         foreach ($updateList as $user) {
             $this->update($user);
         }
@@ -46,8 +44,7 @@ class UserTDG extends Singleton
      *
      * @param array $deleteList
      */
-    public function deleteMany(array $deleteList)
-    {
+    public function deleteMany(array $deleteList) {
         foreach ($deleteList as $user) {
             $this->remove($user);
         }
@@ -60,8 +57,7 @@ class UserTDG extends Singleton
      *
      * @param User $user
      */
-    public function create(User $user)
-    {
+    public function create(User $user) {
         DB::insert('INSERT INTO users (id, name, password) VALUES (:id, :name, :password)', [
             'id' => $user->getId(),
             'name' => $user->getName(),
@@ -76,36 +72,33 @@ class UserTDG extends Singleton
      *
      * @param User $user
      */
-    public function update(User $user)
-    {
+    public function update(User $user) {
         DB::update('UPDATE users SET name = :name WHERE id = :id', [
             'id' => $user->getId(),
             'name' => $user->getName()
         ]);
     }
-	
-	/**
+
+    /**
      * SQL statement to update that a user has attemped to make a reservation
      * @param User $user
      */
-    public function setAttempt($userId, $status)
-    {
+    public function setAttempt($userId, $status) {
         DB::update('UPDATE users SET attempt = :status WHERE id = :id', [
             'id' => $userId,
             'status' => $status
         ]);
     }
-	
-	/**
+
+    /**
      * SQL statement to check that a user has attempted to make a reservation
      *
      * @param int $id
      * @return \stdClass|null
      */
-    public function getAttempt($userId)
-    {
+    public function getAttempt($userId) {
         $users = DB::select('SELECT attempt FROM users WHERE id = ?', [$userId]);
-		
+
         return $users[0]->attempt;
     }
 
@@ -116,8 +109,7 @@ class UserTDG extends Singleton
      *
      * @param User $user
      */
-    public function remove(User $user)
-    {
+    public function remove(User $user) {
         DB::delete('DELETE FROM users WHERE id = :id', [
             'id' => $user->getId()
         ]);
@@ -129,8 +121,7 @@ class UserTDG extends Singleton
      * @param int $id
      * @return \stdClass|null
      */
-    public function find(int $id)
-    {
+    public function find(int $id) {
         $users = DB::select('SELECT * FROM users WHERE id = ?', [$id]);
 
         if (empty($users)) {
@@ -139,17 +130,17 @@ class UserTDG extends Singleton
 
         return $users[0];
     }
-	
-	/**
+
+    /**
      * Returns the check to see if a student is part of Capstone or not
      *
      * @param int $userId
      * @return int
      */
-    public function capstone(int $user_id): int
-    {
+    public function capstone(int $user_id): int {
         $status = DB::select('SELECT capstone FROM users WHERE id = ?', [$user_id]);
-        
+
         return $status[0]->capstone;
     }
+
 }

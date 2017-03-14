@@ -8,8 +8,8 @@ use App\Singleton;
 /**
  * @method static ReservationIdentityMap getInstance()
  */
-class ReservationIdentityMap extends Singleton
-{
+class ReservationIdentityMap extends Singleton {
+
     /**
      * @var Reservation[]
      */
@@ -19,8 +19,7 @@ class ReservationIdentityMap extends Singleton
      * @param int $id
      * @return Reservation|null
      */
-    public function get(int $id)
-    {
+    public function get(int $id) {
         foreach ($this->memory as $r) {
             if ($r->getId() === $id) {
                 return $r;
@@ -33,20 +32,19 @@ class ReservationIdentityMap extends Singleton
     /**
      * @param Reservation $reservation
      */
-    public function add(Reservation $reservation)
-    {
+    public function add(Reservation $reservation) {
         $memory[spl_object_hash($reservation)] = $reservation;
     }
 
     /**
      * @param Reservation $reservation
      */
-    public function delete(Reservation $reservation)
-    {
+    public function delete(Reservation $reservation) {
         $key = spl_object_hash($reservation);
 
         if (isset($this->memory[$key])) {
             unset($this->memory[$key]);
         }
     }
+
 }

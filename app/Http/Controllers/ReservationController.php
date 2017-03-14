@@ -174,6 +174,7 @@ class ReservationController extends Controller {
             $reservationMapper->done();
 
             $_SESSION["timestamp"] = date("Y-m-d G:i:s");
+            $_SESSION["user"] = Auth::id();
 
             return redirect()
                             ->route('reservation', ['id' => $reservation->getId(), 'back' => $request->input('back')])
@@ -203,7 +204,8 @@ class ReservationController extends Controller {
                 $this->cleanup($reservation->getId(), $newTimeslot);
 
                 $_SESSION["timestamp"] = date("Y-m-d G:i:s");
-
+                $_SESSION["user"] = Auth::id();
+                
                 //Return Status message
                 return redirect()
                                 ->route('reservation', ['id' => $reservation->getId(), 'back' => $request->input('back')])
@@ -212,7 +214,7 @@ class ReservationController extends Controller {
                 //Inform the user that the equipment is not available
                 return redirect()
                                 ->route('reservation', ['id' => $reservation->getId(), 'back' => $request->input('back')])
-                                ->with('error', 'The Equipement is not Available. Your reservation has been kept.<br>
+                                ->with('error', 'The Equipment is not Available. Your reservation has been kept.<br>
 					If you require more equipment than what is available, you must give up your Reservation and create a new one with the specifications!');
             }
         }
@@ -243,7 +245,8 @@ class ReservationController extends Controller {
                     $this->modifying = false;
 
                     $_SESSION["timestamp"] = date("Y-m-d G:i:s");
-
+                    $_SESSION["user"] = Auth::id();
+                    
                     return redirect()
                                     ->route('reservation', ['id' => $newID, 'back' => $request->input('back')]);
                 } else {
@@ -588,6 +591,7 @@ class ReservationController extends Controller {
          */
         if (count($successful)) {
             $_SESSION["timestamp"] = date("Y-m-d G:i:s");
+            $_SESSION["user"] = Auth::id();
 
             if (count($active) == 3) {
                 $response = $response->with('success', sprintf('You have reached the maximum reservations for the week! Removing all waitlists.<br> The following reservations have been successfully created for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
@@ -602,6 +606,7 @@ class ReservationController extends Controller {
 
         if (count($waitlisted)) {
             $_SESSION["timestamp"] = date("Y-m-d G:i:s");
+            $_SESSION["user"] = Auth::id();
 
             if (!$eStatus) {
                 $response = $response->with('warning', sprintf('Equipment is not available for your Reservation. You have been put on a waiting list for the following: %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
@@ -644,6 +649,7 @@ class ReservationController extends Controller {
                 ->route('calendar');
 
         $_SESSION["timestamp"] = date("Y-m-d G:i:s");
+        $_SESSION["user"] = Auth::id();
 
         return $response;
     }

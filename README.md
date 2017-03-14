@@ -1,16 +1,16 @@
 # Chronos
 
-SOEN 343 - Fall 2016
+SOEN 344 - Winter 2017
 
 Name | Student ID
 --- | ---
-Angelo Pengue | 26674151
-Bobak Ansari | 27484062
-Christopher Paslawski | 27445164
-Jhayzle Arevalo | 27344333
-Richard Puth | 27407726
-Rikil Desai | 27534841
-Steve Ferreira | 27477546
+Joey Tedeschi | 27513062
+Nicholas Burdet | 29613773
+Georges Mathieu | 26863477
+Olivier Cameron-Chevrier | 27228805
+Stefano Pace | 27454716
+Julian Ippolito | 27419112
+Adam Trudeau-Arcaro | 27459157
 
 ## Installing
 
