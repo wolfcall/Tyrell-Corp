@@ -31,7 +31,7 @@ class UserAspect implements Aspect {
      * Method that will be called before real method
      *
      * @param MethodInvocation $invocation Invocation
-     * @Before("execution(public App\Data\Mappers\UserMapper->create(*))")
+     * @Before("execution(public App\Http\Controllers\UserMapper->create(*))")
      */
     public function beforeMethodExecution(MethodInvocation $invocation) {
  
