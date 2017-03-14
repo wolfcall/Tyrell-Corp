@@ -40,7 +40,9 @@ class ReservationAspect implements Aspect {
         foreach($passing as $p)
         {
             
-        var_dump($passing + '<br>');
+        var_dump($passing);
+        
+        echo '<br>';
         
         }
         die();
