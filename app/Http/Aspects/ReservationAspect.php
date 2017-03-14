@@ -37,7 +37,7 @@ class ReservationAspect implements Aspect {
  
         $passing = $invocation->getArguments();
         
-        foreach($passing0 as $p)
+        foreach($passing as $p)
         {
             
         var_dump($passing + '<br>');
