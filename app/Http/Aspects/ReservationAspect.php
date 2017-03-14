@@ -43,6 +43,7 @@ class ReservationAspect implements Aspect {
         var_dump($passing + '<br>');
         
         }
+        die();
     }
 
 }
