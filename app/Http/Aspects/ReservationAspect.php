@@ -31,20 +31,13 @@ class ReservationAspect implements Aspect {
      * Method that will be called before real method
      *
      * @param MethodInvocation $invocation Invocation
-     * @Before("execution(public App\Http\Controllers\ReservationController->create(*))")
+     * @Before("execution(public App\Data\Mappers\ReservationMapper->create(*))")
      */
     public function beforeMethodExecution(MethodInvocation $invocation) {
  
         $passing = $invocation->getArguments();
-        
-        foreach($passing as $p)
-        {
-            
         var_dump($passing);
         
-        echo '<br>';
-        
-        }
         die();
     }
 
