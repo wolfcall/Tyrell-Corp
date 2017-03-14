@@ -49,10 +49,10 @@ $applicationAspectKernel = App\Http\applicationAspectKernel::getInstance();
 $applicationAspectKernel->init(array(
         'debug' => true, // use 'false' for production mode
         // Cache directory
-        'cacheDir'  => __DIR__ . '/path/to/cache/for/aop',
+        //'cacheDir'  => __DIR__ . '/path/to/cache/for/aop',
         // Include paths restricts the directories where aspects should be applied, or empty for all source files
         'includePaths' => array(
-            __DIR__ . '/../src/'
+            __DIR__ . '/../app/Http/Controllers'
         )
 ));
 
