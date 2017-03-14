@@ -31,6 +31,14 @@ class CalendarController extends Controller {
         // parse requested date from input
         $date = $request->input('date');
 
+        if (isset($_SESSION["view"]) && $_SESSION["view"] == true) {
+
+            $_SESSION["timestamp"] = date("Y-m-d G:i:s");
+            $_SESSION["user"] = Auth::id();
+            unset($_SESSION["view"]);
+        }
+
+
         if ($date === null) {
             // default to today
             $date = Carbon::today();
