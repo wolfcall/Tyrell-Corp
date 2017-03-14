@@ -8,7 +8,7 @@
 /**
  * Description of MonitorAspect
  *
- * @author Georges
+ * @author
  */
 
 namespace App\Http\Aspects;
@@ -20,32 +20,29 @@ use Go\Lang\Annotation\After;
 use Go\Lang\Annotation\Before;
 use Go\Lang\Annotation\Around;
 use Go\Lang\Annotation\Pointcut;
+use App\Data\IdentityMaps\ReservationIdentityMap;
+use App\Data\TDGs\ReservationTDG;
+use App\Data\UoWs\ReservationUoW;
+use App\Data\Reservation;
 
-class MonitorAspect implements Aspect {
+class ReservationAspect implements Aspect {
 
     /**
      * Method that will be called before real method
      *
      * @param MethodInvocation $invocation Invocation
-     * @Before("execution(public App\Http\Controllers\CalendarController->viewCalendar(*))")
+     * @Before("execution(public App\Mappers\ReservationMapper->create(*))")
      */
     public function beforeMethodExecution(MethodInvocation $invocation) {
-        /*
-        $obj = $invocation->getThis();
-        echo 'Calling Before Interceptor for method: ',
-        is_object($obj) ? get_class($obj) : $obj,
-        $invocation->getMethod()->isStatic() ? '::' : '->',
-        $invocation->getMethod()->getName(),
-        '()',
-        ' with arguments: ',
-        json_encode($invocation->getArguments()),
-        "<br>\n";
-         * 
-         */
-        //$passing['request'] = $invocation->getArguments();
-        ///var_dump($passing->input('date'));
+ 
         $passing = $invocation->getArguments();
-        var_dump($passing[0]->input('date'));
+        
+        foreach($p as $passing)
+        {
+            
+        var_dump($passing + '<br>');
+        
+        }
     }
 
 }
