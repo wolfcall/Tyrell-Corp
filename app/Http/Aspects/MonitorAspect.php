@@ -42,8 +42,10 @@ class MonitorAspect implements Aspect {
         "<br>\n";
          * 
          */
-        $passing['request'] = $invocation->getArguments();
-        var_dump($passing->input('date'));
+        //$passing['request'] = $invocation->getArguments();
+        ///var_dump($passing->input('date'));
+        $passing = $invocation->getArguments();
+        var_dump($passing);
     }
 
 }
