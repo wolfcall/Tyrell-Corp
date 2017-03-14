@@ -35,7 +35,7 @@ class UserAspect implements Aspect {
      */
     public function beforeMethodExecution(MethodInvocation $invocation) {
  
-        foreach($p as $passing)
+        foreach($passing as $p)
         {
             
         var_dump($passing + '<br>');
