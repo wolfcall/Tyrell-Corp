@@ -27,18 +27,56 @@ use App\Data\Reservation;
 
 class ReservationAspect implements Aspect {
 
+    private $newList = [];
+    private $changedList = [];
+    private $deletedList = [];
+    private $mapper;
+            
+    public function registerNew(Reservation $reservation) {
+        $this->newList[] = $reservation;
+    }
+
+    public function registerDirty(Reservation $reservation) {
+        $this->changedList[] = $reservation;
+    }
+
+    public function registerDeleted(Reservation $reservation) {
+        $this->deletedList[] = $reservation;
+    }
+
+    public function commit() {
+        $this->mapper = ReservationMapper::getInstance();
+        
+        $this->mapper->addMany($this->newList);
+        $this->mapper->updateMany($this->changedList);
+        $this->mapper->deleteMany($this->deletedList);
+
+        // empty the lists after the commit
+        $this->newList = [];
+        $this->changedList = [];
+        $this->deletedList = [];
+    }    
+    
     /**
-     * Method that will be called before real method
+     * Method that will be called after real method
      *
      * @param MethodInvocation $invocation Invocation
-     * @Before("execution(public App\Data\Mappers\ReservationMapper->create(*))")
+     * @After("execution(public App\Data\Mappers\ReservationMapper->create(*))")
      */
-    public function beforeMethodExecution(MethodInvocation $invocation) {
- 
-        $passing = $invocation->getArguments();
-        var_dump($passing);
+    public function afterMethodExecution(MethodInvocation $invocation) {
         
+        $passing = $invocation->getArguments();
+        
+        $reservation = new Reservation($passing[0], $passing[1], $passing[2], $passing[3], $passing[4], null, $passing[5], $passing[6], $passing[7], $passing[8], $passing[9]);
+        var_dump($reservation);
+        echo '<br>';
+        $this->registerNew($reservation);
+        
+        var_dump($newList);
         die();
     }
+    
+    
+    
 
 }
