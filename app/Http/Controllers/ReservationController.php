@@ -43,6 +43,13 @@ class ReservationController extends Controller {
         $reservationMapper = ReservationMapper::getInstance();
         $reservations = $reservationMapper->findPositionsForUser(Auth::id());
 
+        if (isset($_SESSION["view"]) && $_SESSION["view"] == true) {
+
+            $_SESSION["timestamp"] = date("Y-m-d G:i:s");
+            $_SESSION["user"] = Auth::id();
+            unset($_SESSION["view"]);
+        }
+
         return view('reservation.list', [
             'reservations' => $reservations,
         ]);
@@ -205,7 +212,7 @@ class ReservationController extends Controller {
 
                 $_SESSION["timestamp"] = date("Y-m-d G:i:s");
                 $_SESSION["user"] = Auth::id();
-                
+
                 //Return Status message
                 return redirect()
                                 ->route('reservation', ['id' => $reservation->getId(), 'back' => $request->input('back')])
@@ -246,7 +253,7 @@ class ReservationController extends Controller {
 
                     $_SESSION["timestamp"] = date("Y-m-d G:i:s");
                     $_SESSION["user"] = Auth::id();
-                    
+
                     return redirect()
                                     ->route('reservation', ['id' => $newID, 'back' => $request->input('back')]);
                 } else {
@@ -284,6 +291,13 @@ class ReservationController extends Controller {
 
         if ($room === null) {
             return abort(404);
+        }
+
+        //Initialize this variable in case the user just viewed the page and did not request anything
+        //They still entered the room
+        //This is to prevent people from entering the room, then clicking Calendar and trying to avoid a time penalty
+        if (!isset($_SESSION['view'])) {
+            $_SESSION['view'] = true;
         }
 
         //Check to see who is currently using the room
@@ -592,7 +606,7 @@ class ReservationController extends Controller {
         if (count($successful)) {
             $_SESSION["timestamp"] = date("Y-m-d G:i:s");
             $_SESSION["user"] = Auth::id();
-
+            unset($_SESSION['view']);
             if (count($active) == 3) {
                 $response = $response->with('success', sprintf('You have reached the maximum reservations for the week! Removing all waitlists.<br> The following reservations have been successfully created for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
                                             return sprintf("<li><strong>%s</strong></li>", $m->format('l, F jS, Y'));
@@ -607,7 +621,7 @@ class ReservationController extends Controller {
         if (count($waitlisted)) {
             $_SESSION["timestamp"] = date("Y-m-d G:i:s");
             $_SESSION["user"] = Auth::id();
-
+            unset($_SESSION['view']);
             if (!$eStatus) {
                 $response = $response->with('warning', sprintf('Equipment is not available for your Reservation. You have been put on a waiting list for the following: %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
                                             return sprintf("<li><strong>%s</strong>: Position #%d</li>", $m[0]->format('l, F jS, Y'), $m[1]);
@@ -650,7 +664,7 @@ class ReservationController extends Controller {
 
         $_SESSION["timestamp"] = date("Y-m-d G:i:s");
         $_SESSION["user"] = Auth::id();
-
+        unset($_SESSION['view']);
         return $response;
     }
 

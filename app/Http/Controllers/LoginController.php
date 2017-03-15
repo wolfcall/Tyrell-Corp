@@ -65,6 +65,13 @@ class LoginController extends Controller {
         $roomMapper = RoomMapper::getInstance();
         $roomMapper->clearStudent(Auth::id());
 
+        if (isset($_SESSION["view"]) && $_SESSION["view"] == true) {
+
+            $_SESSION["timestamp"] = date("Y-m-d G:i:s");
+            $_SESSION["user"] = Auth::id();
+            unset($_SESSION["view"]);
+        }
+
         $this->guard()->logout();
         $request->session()->flush();
         $request->session()->regenerate();
