@@ -309,6 +309,7 @@ class ReservationController extends Controller {
             if (($this->modifying) == true) {
                 $this->success1 = false;
             }
+            unset($_SESSION['view']);
             return redirect()->route('calendar', ['date' => $timeslot->toDateString()])
                             ->with('error', sprintf("The room %s is currently busy! Please try again later. We apologize for any inconvenience.", $roomName));
         }
@@ -333,6 +334,7 @@ class ReservationController extends Controller {
             if (($this->modifying) == true) {
                 $this->success1 = false;
             }
+            unset($_SESSION['view']);
             return redirect()->route('calendar', ['date' => $timeslot->toDateString()])
                             ->with('error', sprintf("You've exceeded your reservation request limit of (%d) for this week.<br> 
                     Please try reserving next week or remove a reservation from this week to be eligible.", static::MAX_PER_USER));
@@ -347,6 +349,7 @@ class ReservationController extends Controller {
             if (($this->modifying) == true) {
                 $this->success1 = false;
             }
+            unset($_SESSION['view']);
             return redirect()->route('calendar', ['date' => $timeslot->toDateString()])
                             ->with('error', 'The waiting list for that time slot is full.');
         }
@@ -634,6 +637,7 @@ class ReservationController extends Controller {
         }
 
         if (count($errored)) {
+            unset($_SESSION['view']);
             $response = $response->with('error', sprintf('The following requests were unsuccessful for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
                                         return sprintf("<li><strong>%s</strong>: %s</li>", $m[0]->format('l, F jS, Y'), $m[1]);
                                     }, $errored))));
