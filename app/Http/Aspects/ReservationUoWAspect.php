@@ -76,6 +76,12 @@ class ReservationUoWAspect implements Aspect {
         $this->commit();
     }
 
+    /**
+     * 
+     * Commit all the changes by passing the lists to the Reservation mapper
+     * 
+     */
+    
     public function commit() {
         $this->mapper = ReservationMapper::getInstance();
 
