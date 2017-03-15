@@ -23,7 +23,7 @@ use Go\Lang\Annotation\Pointcut;
 use App\Data\Mappers\ReservationMapper;
 use App\Data\Reservation;
 
-class ReservationAspect implements Aspect {
+class ReservationUoWAspect implements Aspect {
 
     private $newList = [];
     private $changedList = [];

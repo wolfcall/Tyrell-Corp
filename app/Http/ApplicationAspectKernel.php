@@ -27,8 +27,8 @@ class ApplicationAspectKernel extends AspectKernel {
      * @return void
      */
     protected function configureAop(AspectContainer $container) {
-        $container->registerAspect(new Aspects\ReservationAspect());
-        $container->registerAspect(new Aspects\UserAspect());
+        $container->registerAspect(new Aspects\ReservationUoWAspect() );
+        $container->registerAspect(new Aspects\UserUoWAspect() );
     }
 
 }
