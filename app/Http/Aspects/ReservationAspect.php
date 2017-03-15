@@ -39,7 +39,13 @@ class ReservationAspect implements Aspect {
     public function aroundRegisterNewExecution(MethodInvocation $invocation) {
         $passing = $invocation->getArguments();
         
+        var_dump($passing[0]);
+        
         $this->newList[] = $passing[0];
+        
+        var_dump($newList);
+        
+        die();
     }
     
     /**
@@ -50,6 +56,8 @@ class ReservationAspect implements Aspect {
      */
     public function aroundRegisterDirtyExecution(MethodInvocation $invocation) {
         $passing = $invocation->getArguments();
+        
+        var_dump($passing[0]);
         
         $this->changedList[] = $passing[0];
     }
@@ -62,6 +70,8 @@ class ReservationAspect implements Aspect {
      */
     public function aroundRegisterDeletedExecution(MethodInvocation $invocation) {
         $passing = $invocation->getArguments();
+        
+        var_dump($passing[0]);
         
         $this->deletedList[] = $passing[0];
     }
