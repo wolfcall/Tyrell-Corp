@@ -58,7 +58,7 @@ class ReservationAspect implements Aspect {
     }    
     
     /**
-     * Method that will be called after real method
+     * Method that will be called after real method create
      *
      * @param MethodInvocation $invocation Invocation
      * @After("execution(public App\Data\Mappers\ReservationMapper->create(*))")
@@ -72,7 +72,7 @@ class ReservationAspect implements Aspect {
         echo '<br>';
         $this->registerNew($reservation);
         
-        var_dump($newList);
+        var_dump($this->newList);
         die();
     }
     
