@@ -26,7 +26,7 @@ class UserTDG extends Singleton {
 
         return $users[0];
     }
-    
+
     /**
      * Returns the check to see if a student is part of Capstone or not
      *

@@ -37,24 +37,24 @@ require __DIR__ . '/../bootstrap/autoload.php';
 $app = require_once __DIR__ . '/../bootstrap/app.php';
 
 /*
-|--------------------------------------------------------------------------
-| Turn On The Aspects
-|--------------------------------------------------------------------------
-|
-| 
-|
-*/
+  |--------------------------------------------------------------------------
+  | Turn On The Aspects
+  |--------------------------------------------------------------------------
+  |
+  |
+  |
+ */
 // Initialize an application aspect container
 $applicationAspectKernel = App\Http\ApplicationAspectKernel::getInstance();
 $applicationAspectKernel->init(array(
-        'debug' => true, // use 'false' for production mode
-        // Cache directory
-        'cacheDir'  => __DIR__ . '/../aopCache',
-        // Include paths restricts the directories where aspects should be applied, or empty for all source files
-        'includePaths' => array(
-            __DIR__ . '/../app/Data/Mappers',
-            __DIR__ . '/../app/Data/UoWs'
-        )
+    'debug' => true, // use 'false' for production mode
+    // Cache directory
+    'cacheDir' => __DIR__ . '/../aopCache',
+    // Include paths restricts the directories where aspects should be applied, or empty for all source files
+    'includePaths' => array(
+        __DIR__ . '/../app/Data/Mappers',
+        __DIR__ . '/../app/Data/UoWs'
+    )
 ));
 
 /*
