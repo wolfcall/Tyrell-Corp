@@ -120,7 +120,7 @@ class ReservationController extends Controller {
         }
 
         //For when the user is waiting, but can still click on the reservations they have made
-        if (isset($_SESSION["timestamp"])) {
+        if (isset($_SESSION["timestamp"]) && $_SESSION["user"] == Auth::id() ) {
             return redirect()->route('calendar')
                             ->with('error', sprintf("You must wait your turn! Please try again later. We apologize for any inconvenience."));
         }
@@ -296,7 +296,7 @@ class ReservationController extends Controller {
         //Initialize this variable in case the user just viewed the page and did not request anything
         //They still entered the room
         //This is to prevent people from entering the room, then clicking Calendar and trying to avoid a time penalty
-        if (!isset($_SESSION['view'])) {
+        if (!isset($_SESSION['view']) && $this->modifying == false) {
             $_SESSION['view'] = true;
         }
 

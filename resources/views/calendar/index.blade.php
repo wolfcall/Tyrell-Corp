@@ -34,6 +34,8 @@ if (isset($_SESSION["timestamp"]) && isset($_SESSION["user"]) && ($_SESSION["use
     }
 } else {
     $lock = 0;
+    unset($_SESSION["timestamp"]);
+    unset($_SESSION["user"]);
 }
 ?>
 @section('content')
