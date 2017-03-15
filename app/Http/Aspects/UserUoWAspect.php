@@ -83,9 +83,17 @@ class UserUoWAspect implements Aspect {
         $this->mapper->updateMany($this->changedList);
         $this->mapper->deleteMany($this->deletedList);
 
+        var_dump($this->newList);
+        var_dump($this->changedList);
+        var_dump($this->deletedList);
+        
+        var_dump("I get here");
+        
         // empty the lists after the commit
         $this->newList = [];
         $this->changedList = [];
         $this->deletedList = [];
+        
+        die();
     }
 }
