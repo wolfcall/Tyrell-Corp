@@ -45,7 +45,7 @@ class ReservationAspect implements Aspect {
     }
 
     public function commit() {
-        $this->mapper = ReservationMapper::getInstance();
+        $this->mapper = new \App\Data\Mappers\ReservationMapper();
 
         $this->mapper->addMany($this->newList);
         $this->mapper->updateMany($this->changedList);
@@ -77,7 +77,7 @@ class ReservationAspect implements Aspect {
      * @Around("execution(public App\Data\Mappers\ReservationMapper->set(*))")
      */
     public function aroundSetExecution(MethodInvocation $invocation) {
-        $this->mapper = ReservationMapper::getInstance();
+        $this->mapper = new \App\Data\Mappers\ReservationMapper();
         
         $passing = $invocation->getArguments();
         
@@ -106,7 +106,7 @@ class ReservationAspect implements Aspect {
      * @Around("execution(public App\Data\Mappers\ReservationMapper->setNewWaitlist(*))")
      */
     public function aroundSetNewWaitlistExecution(MethodInvocation $invocation) {
-        $this->mapper = ReservationMapper::getInstance();
+        $this->mapper = new \App\Data\Mappers\ReservationMapper();
         
         $passing = $invocation->getArguments();
         
@@ -141,7 +141,7 @@ class ReservationAspect implements Aspect {
      * @After("execution(public App\Data\Mappers\ReservationMapper->delete(*))")
      */
     public function afterDeleteExecution(MethodInvocation $invocation) {
-        $this->mapper = ReservationMapper::getInstance();
+        $this->mapper = new \App\Data\Mappers\ReservationMapper();
         
         $passing = $invocation->getArguments();        
 
