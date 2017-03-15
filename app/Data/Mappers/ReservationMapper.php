@@ -408,7 +408,7 @@ class ReservationMapper extends Singleton {
         $reservation->setRoomName($roomName);
 
         // we've modified something in the object so we register the instance as dirty in the UoW
-        ReservationUoW::getInstance()->registerDirty($reservation);
+        //ReservationUoW::getInstance()->registerDirty($reservation);
     }
 
     /**
@@ -423,7 +423,7 @@ class ReservationMapper extends Singleton {
         $reservation->setPosition($newPosition);
 
         // we've modified something in the object so we register the instance as dirty in the UoW
-        ReservationUoW::getInstance()->registerDirty($reservation);
+        //ReservationUoW::getInstance()->registerDirty($reservation);
     }
 
     /**
@@ -436,7 +436,7 @@ class ReservationMapper extends Singleton {
         $reservation->setPosition($old + 1);
 
         // we've modified something in the object so we register the instance as dirty in the UoW
-        ReservationUoW::getInstance()->registerDirty($reservation);
+        //ReservationUoW::getInstance()->registerDirty($reservation);
     }
 
     /**
@@ -453,7 +453,7 @@ class ReservationMapper extends Singleton {
             $this->identityMap->delete($reservation);
 
             // we want to delete this object from out DB, so we simply register it as deleted in the UoW
-            ReservationUoW::getInstance()->registerDeleted($reservation);
+            //ReservationUoW::getInstance()->registerDeleted($reservation);
         }
     }
 

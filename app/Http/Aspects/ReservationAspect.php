@@ -72,9 +72,9 @@ class ReservationAspect implements Aspect {
      * Method that will be called instead of the real method set
      *
      * @param MethodInvocation $invocation Invocation
-     * @Around("execution(public App\Data\Mappers\ReservationMapper->set(*))")
+     * @After("execution(public App\Data\Mappers\ReservationMapper->set(*))")
      */
-    public function aroundSetExecution(MethodInvocation $invocation) {
+    public function afterSetExecution(MethodInvocation $invocation) {
         $this->mapper = ReservationMapper::getInstance();
         
         $passing = $invocation->getArguments();
@@ -101,9 +101,9 @@ class ReservationAspect implements Aspect {
      * Method that will be called instead of the real method setNewWaitlist
      *
      * @param MethodInvocation $invocation Invocation
-     * @Around("execution(public App\Data\Mappers\ReservationMapper->setNewWaitlist(*))")
+     * @After("execution(public App\Data\Mappers\ReservationMapper->setNewWaitlist(*))")
      */
-    public function aroundSetNewWaitlistExecution(MethodInvocation $invocation) {
+    public function afterSetNewWaitlistExecution(MethodInvocation $invocation) {
         $this->mapper = ReservationMapper::getInstance();
         
         $passing = $invocation->getArguments();
@@ -120,9 +120,9 @@ class ReservationAspect implements Aspect {
      * Method that will be called instead of the real method moveDown
      *
      * @param MethodInvocation $invocation Invocation
-     * @Around("execution(public App\Data\Mappers\ReservationMapper->moveDown(*))")
+     * @After("execution(public App\Data\Mappers\ReservationMapper->moveDown(*))")
      */
-    public function aroundMoveDownExecution(MethodInvocation $invocation) {
+    public function afterMoveDownExecution(MethodInvocation $invocation) {
         $passing = $invocation->getArguments();
         
         $old = $passing[0]->getPosition();
