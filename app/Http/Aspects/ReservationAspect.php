@@ -154,4 +154,14 @@ class ReservationAspect implements Aspect {
             $this->registerDeleted($reservation);
         }
     }
+    
+    /**
+     * Method that will be called instead of the real method done
+     *
+     * @param MethodInvocation $invocation Invocation
+     * @Around("execution(public App\Data\Mappers\ReservationMapper->done(*))")
+     */
+    public function aroundDoneExecution(MethodInvocation $invocation) {
+        $this->commit();
+    }
 }
