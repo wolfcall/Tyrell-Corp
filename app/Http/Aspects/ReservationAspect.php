@@ -43,7 +43,7 @@ class ReservationAspect implements Aspect {
         
         $this->newList[] = $passing[0];
         
-        var_dump($newList);
+        var_dump($this->newList);
         
         die();
     }
