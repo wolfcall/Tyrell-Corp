@@ -56,7 +56,7 @@ class ReservationMapper extends Singleton {
         $this->identityMap->add($reservation);
 
         // add to UoW registry so that we create it in the DB once the reservation is ready to commit everything
-        ReservationUoW::getInstance()->registerNew($reservation);
+        //ReservationUoW::getInstance()->registerNew($reservation);
 
         return $reservation;
     }
