@@ -38,10 +38,10 @@ class ReservationUoWAspect implements Aspect {
      */
     public function aroundRegisterNewExecution(MethodInvocation $invocation) {
         $passing = $invocation->getArguments();
-         
+
         $this->newList[] = $passing[0];
     }
-    
+
     /**
      * Method that will be called after real method create
      *
@@ -50,10 +50,10 @@ class ReservationUoWAspect implements Aspect {
      */
     public function aroundRegisterDirtyExecution(MethodInvocation $invocation) {
         $passing = $invocation->getArguments();
-        
+
         $this->changedList[] = $passing[0];
     }
-    
+
     /**
      * Method that will be called after real method create
      *
@@ -62,10 +62,10 @@ class ReservationUoWAspect implements Aspect {
      */
     public function aroundRegisterDeletedExecution(MethodInvocation $invocation) {
         $passing = $invocation->getArguments();
-        
+
         $this->deletedList[] = $passing[0];
     }
-       
+
     /**
      * Method that will be called instead of the real method done
      *
@@ -86,14 +86,11 @@ class ReservationUoWAspect implements Aspect {
         var_dump($this->newList);
         var_dump($this->changedList);
         var_dump($this->deletedList);
-        
-        var_dump("I get here");
-        
+
         // empty the lists after the commit
         $this->newList = [];
         $this->changedList = [];
         $this->deletedList = [];
-        
-        die();
     }
+
 }
