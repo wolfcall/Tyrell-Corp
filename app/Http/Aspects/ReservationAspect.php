@@ -20,9 +20,7 @@ use Go\Lang\Annotation\After;
 use Go\Lang\Annotation\Before;
 use Go\Lang\Annotation\Around;
 use Go\Lang\Annotation\Pointcut;
-use App\Data\IdentityMaps\ReservationIdentityMap;
-use App\Data\TDGs\ReservationTDG;
-use App\Data\UoWs\ReservationUoW;
+use App\Data\Mappers\ReservationMapper;
 use App\Data\Reservation;
 
 class ReservationAspect implements Aspect {
@@ -45,7 +43,7 @@ class ReservationAspect implements Aspect {
     }
 
     public function commit() {
-        $this->mapper = new \App\Data\Mappers\ReservationMapper();
+        $this->mapper = ReservationMapper::getInstance();
 
         $this->mapper->addMany($this->newList);
         $this->mapper->updateMany($this->changedList);
@@ -77,7 +75,7 @@ class ReservationAspect implements Aspect {
      * @Around("execution(public App\Data\Mappers\ReservationMapper->set(*))")
      */
     public function aroundSetExecution(MethodInvocation $invocation) {
-        $this->mapper = new \App\Data\Mappers\ReservationMapper();
+        $this->mapper = ReservationMapper::getInstance();
         
         $passing = $invocation->getArguments();
         
@@ -106,7 +104,7 @@ class ReservationAspect implements Aspect {
      * @Around("execution(public App\Data\Mappers\ReservationMapper->setNewWaitlist(*))")
      */
     public function aroundSetNewWaitlistExecution(MethodInvocation $invocation) {
-        $this->mapper = new \App\Data\Mappers\ReservationMapper();
+        $this->mapper = ReservationMapper::getInstance();
         
         $passing = $invocation->getArguments();
         
@@ -141,7 +139,7 @@ class ReservationAspect implements Aspect {
      * @After("execution(public App\Data\Mappers\ReservationMapper->delete(*))")
      */
     public function afterDeleteExecution(MethodInvocation $invocation) {
-        $this->mapper = new \App\Data\Mappers\ReservationMapper();
+        $this->mapper = ReservationMapper::getInstance();
         
         $passing = $invocation->getArguments();        
 
