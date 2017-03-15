@@ -52,7 +52,8 @@ $applicationAspectKernel->init(array(
         'cacheDir'  => __DIR__ . '/../aopCache',
         // Include paths restricts the directories where aspects should be applied, or empty for all source files
         'includePaths' => array(
-            __DIR__ . '/../app/Data/Mappers'
+            __DIR__ . '/../app/Data/Mappers',
+            __DIR__ . '/../app/Data/UoWs'
         )
 ));
 

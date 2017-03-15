@@ -34,7 +34,7 @@ class ReservationAspect implements Aspect {
      * Method that will be called after real method create
      *
      * @param MethodInvocation $invocation Invocation
-     * @Around("execution(public App\Data\Mappers\ReservationUoW->registerNew(*))")
+     * @Around("execution(public App\Data\UoWs\ReservationUoW->registerNew(*))")
      */
     public function aroundRegisterNewExecution(MethodInvocation $invocation) {
         $passing = $invocation->getArguments();
@@ -52,7 +52,7 @@ class ReservationAspect implements Aspect {
      * Method that will be called after real method create
      *
      * @param MethodInvocation $invocation Invocation
-     * @Around("execution(public App\Data\Mappers\ReservationUoW->registerDirty(*))")
+     * @Around("execution(public App\Data\UoWs\ReservationUoW->registerDirty(*))")
      */
     public function aroundRegisterDirtyExecution(MethodInvocation $invocation) {
         $passing = $invocation->getArguments();
@@ -66,7 +66,7 @@ class ReservationAspect implements Aspect {
      * Method that will be called after real method create
      *
      * @param MethodInvocation $invocation Invocation
-     * @Around("execution(public App\Data\Mappers\ReservationUoW->registerDeleted(*))")
+     * @Around("execution(public App\Data\UoWs\ReservationUoW->registerDeleted(*))")
      */
     public function aroundRegisterDeletedExecution(MethodInvocation $invocation) {
         $passing = $invocation->getArguments();
