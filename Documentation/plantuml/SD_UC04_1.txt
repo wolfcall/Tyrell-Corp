@@ -3,10 +3,22 @@
 
 participant ":__ReservationController__" as rController
 participant ":__ReservationMapper__" as rMapper
+participant ":__RoomMapper__" as roMapper
 participant ":__ReservationTDG__" as rTDG
 participant "Reservation Table" as rTable
 
 [-> rController: showRequestForm(room, timeslot)
+
+rController -> roMapper : find(roomName)
+roMapper --> rController : room
+rController -> roMapper : getStatus(roomName)
+roMapper --> rController : roomStatus
+
+alt roomStatus != 0 && roomStatus != userID
+	[<--rController : error
+else else
+	rController -> roMapper : setBusy(roomName, userID, timestamp)
+end
 
 rController -> rMapper : countInRange(userID, startOfWeek, endOfWeek)
 rMapper -> rTDG: countInRange(...)
