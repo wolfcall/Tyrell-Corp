@@ -119,8 +119,11 @@ class ReservationController extends Controller {
             return abort(404);
         }
 
+        //Find the time right now, to compare to the timestamp
+        $now = date("Y-m-d G:i:s");
+
         //For when the user is waiting, but can still click on the reservations they have made
-        if (isset($_SESSION["timestamp"]) && $_SESSION["user"] == Auth::id() ) {
+        if (isset($_SESSION["timestamp"]) && $_SESSION["user"] == Auth::id() && ($_SESSION["timestamp"] > $now)){
             return redirect()->route('calendar')
                             ->with('error', sprintf("You must wait your turn! Please try again later. We apologize for any inconvenience."));
         }
@@ -193,8 +196,8 @@ class ReservationController extends Controller {
             $this->modifying = true;
 
             //Go through the constraints outlined in the Show Request Form Method
-            $temp1 = $this->showRequestForm($request, $newRoom, $new);
-           
+            $temp1 = $this->showRequestForm($request, $OGRoom, $new);
+
             if (($this->success1) == true) {
                 //Check if the equipment requested is available for that Timeslot, excluding the current Reservation's equipment count
                 $eStatus = $reservationMapper->statusEquipmentExclude($newTimeslot, $reservation->getId(), $newMarkers, $newLaptops, $newProjectors, $newCables);
@@ -231,8 +234,7 @@ class ReservationController extends Controller {
                                     ->with('error', 'The Equipment is not Available. Your reservation has been kept.<br>
                                             If you require more equipment than what is available, you must give up your Reservation and create a new one with the specifications!');
                 }
-            }
-            else {
+            } else {
                 //Return the error caught by the Show Request Form Method
                 //Reaching here signifies that the modification did not go through
                 $this->success1 = true;
