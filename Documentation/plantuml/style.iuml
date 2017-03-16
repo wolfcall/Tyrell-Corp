@@ -1,0 +1,26 @@
+skinparam {
+	roundcorner 5
+	sequenceMessageAlign left
+	dpi 300
+	monochrome true
+	backgroundColor white
+	classBackgroundColor white
+	style strictuml
+	defaultFontName Arial
+	'linetype polyline
+	maxmessagesize 200
+	lifelineStrategy solid
+	classAttributeIconSize 0
+}
+
+skinparam sequence {
+	LifeLineBackgroundColor white
+	LifeLineBorderColor black
+	BoxBackgroundColor white
+	ParticipantBackgroundColor white
+	ActorBackgroundColor white
+}
+
+skinparam usecase {
+	BackgroundColor white
+}

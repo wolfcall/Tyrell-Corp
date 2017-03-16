@@ -1,0 +1,32 @@
+@startuml
+!include style.iuml
+
+skinparam sequenceMessageAlign left
+
+participant ":__ReservationMapper__" as rMapper
+participant ":__UnitOfWork__" as UoW
+participant ":__ReservationTDG__" as rTDG
+participant "Reservation Table" as rTable
+
+[-> rMapper : done()
+rMapper -> UoW : commit()
+|||
+
+UoW -> rMapper : addMany(...)
+rMapper -> rTDG : addMany(...)
+rTDG -> rTable : INSERT INTO Reservation \nTable VALUES [...]
+rTDG --> rMapper : result
+
+UoW -> rMapper: updateMany(...)
+rMapper -> rTDG : updateMany(...)
+rTDG -> rTable : UPDATE Reservation Table \nSET [...] WHERE [...]
+rTDG --> rMapper : result
+
+UoW -> rMapper : deleteMany(...)
+rMapper -> rTDG : deleteMany(...)
+rTDG -> rTable : DELETE FROM Reservation Table \nWHERE [...]
+rTDG --> rMapper : result
+
+[<-- rMapper : result
+
+@enduml

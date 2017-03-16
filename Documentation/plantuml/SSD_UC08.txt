@@ -1,0 +1,13 @@
+@startuml
+!include style.iuml
+
+
+actor ":__User__" as A
+participant ":__System__" as B
+
+
+A -> B: cancelReservation(resID)
+B --> A: confirmation
+
+
+@enduml

@@ -1,0 +1,82 @@
+@startuml
+!include style.iuml
+
+skinparam sequenceMessageAlign left
+
+participant ":__ReservationController__" as rController
+participant ":__ReservationMapper__" as rMapper
+participant "r:__Reservation__" as reservation
+'multi-object
+participant "reservations\n:__Reservation__" as reservations
+participant ":__ReservationIdentityMap__" as rIMap
+participant ":__UnitOfWork__" as UoW
+participant ":__ReservationTDG__" as rTDG
+
+[-> rController: requestReservation(room, timeslot, description, weeks)
+
+'Multiobject
+create reservations
+rController -> reservations : create()
+
+loop week := 0..weeks-1
+	rController -> rMapper : countInRange(userID, startOfWeek, endOfWeek)
+	rMapper -> rTDG : countInRange(userID, startOfWeek, endOfWeek)
+	rTDG --> rMapper : reservationCount
+	rMapper --> rController : reservationCount
+
+	rController -> rMapper : findForTimeslot(room, timeslot + week)
+	ref over rMapper : Find Time Slot Reservations
+	rMapper --> rController : roomReservations
+
+	alt reservationCount >= MAX_PER_USER
+		note over rController: User reached weekly reservation limit,\ndisplay error
+	else count(roomReservations) >= MAX_PER_TIMESLOT
+		note over rController: Waiting list is full, display error
+	else else
+		rController -> rMapper : create(userID, room, timeslot + week, description)
+
+		create reservation
+		rMapper -> reservation : r := create(...)
+		rMapper -> rIMap : add(r)
+		rMapper -> UoW : registerNew(r)
+		rMapper --> rController : r
+
+		rController -> reservations : add(r)
+	end
+end
+
+rController -> rMapper : done()
+ref over rMapper : Complete Work
+rMapper --> rController : result
+
+loop r in reservations
+	'Post-insert checks
+	alt r.id != null
+		rController -> rMapper : findPosition(r)
+		ref over rMapper : Find Time Slot Reservations
+		rMapper --> rController : position
+
+		alt position >= MAX_PER_TIMESLOT
+			rController -> rController : cancelReservation(r.id)
+			ref over rController: Cancel Reservation
+			'rController -> rMapper : delete(r.id)
+			'rMapper -> rIMap : get(id)
+			'rMapper -> UoW : registerDeleted(r)
+			note over rController: The reservation exceeds the waiting list limit,\ndisplay error
+		else position == 0
+			note over rController : The reservation is now active, display success
+		else else
+			note over rController : The reservation has been placed on the waiting list,\ndisplay warning
+		end
+	else r.id == null
+		note over rController: The new reservation was a duplicate, display error
+	end
+end
+
+rController -> rMapper : done()
+ref over rMapper : Complete Work
+rMapper --> rController : result
+
+[<-- rController : result
+
+@enduml

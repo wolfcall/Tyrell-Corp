@@ -1,0 +1,25 @@
+@startuml
+!include style.iuml
+
+participant ":__ReservationMapper__" as rMapper
+participant ":__ReservationIdentityMap__" as rIMap
+participant ":__Reservation__" as reservation
+participant ":__ReservationTDG__" as rTDG
+participant "Reservation Table" as rTable
+
+[-> rMapper : find(resID)
+rMapper -> rIMap : r := get(...)
+rIMap --> rMapper : r
+
+opt r == null
+	rMapper -> rTDG : find(...)
+	rTDG -> rTable : SELECT * FROM Reservation Table WHERE [...]
+	rTDG --> rMapper :resultSet
+	create reservation
+	rMapper -> reservation :  [resultSet not empty] r := create()
+	rMapper -> rIMap : add(r)
+end
+
+[<--rMapper : r
+
+@enduml

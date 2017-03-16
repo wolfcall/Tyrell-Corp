@@ -1,0 +1,24 @@
+@startuml
+!include style.iuml
+
+participant ":__ReservationController__" as rController
+participant ":__ReservationMapper__" as rMapper
+participant "r:__Reservation__" as reservation
+participant ":__UnitOfWork__" as UoW
+
+[-> rController: modifyReservation(resID, description)
+rController -> rMapper : find(resID)
+ref over rMapper : Find Reservation
+rMapper --> rController : r
+
+rController -> rMapper : set(...)
+rMapper -> reservation : setDescription(description)
+
+rMapper -> UoW : registerDirty(r)
+
+rController -> rMapper : done()
+ref over rMapper : Complete Work
+rMapper --> rController : result
+[<-- rController : result
+
+@enduml

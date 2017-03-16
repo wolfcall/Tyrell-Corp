@@ -1,0 +1,208 @@
+@startuml
+!include style.iuml
+
+class ReservationController {
+	+viewReservationList(void) : View
+	+viewReservation(int id) : View
+	+showModifyForm(int id) : View
+	+modifyReservation(int id, String description) : View
+	+showRequestForm(Room room, DateTime timeslot) : View
+	+requestReservation(Room room, DateTime timeslot, String description, int weeks) : View
+	+cancelReservation(int id) : View
+}
+
+class LoginController {
+	+login(void) : View
+	+logout(void) : View
+}
+
+class CalendarController {
+	+viewCalendar(void) : View
+}
+
+class User {
+	#id : int
+	#name : String
+	#password : String
+	+_construct(int id, String name, String password)
+	+getId() : int
+	+getName() : String
+}
+
+class Room {
+	#roomName : String
+	+_construct(String name)
+	+getName() : String
+}
+
+class Reservation {
+	#id : int
+	#userId : int
+	#recurId : String
+	#roomName : String
+	#timeslot : DateTime
+	#description : String
+	+__construct(int userId, string roomName, DateTime timeslot, String description, String recurId, int id)
+	+getUserId() : int
+	+setUserId(int id) : void
+	+getRoomName() : String
+	+setRoomName(String roomName) : void
+	+getTimeslot() : DateTime
+	+setTimeslot(DateTime timeslot) : void
+	+getDescription() : String
+	+setDescription(String description) : void
+}
+
+class ReservationIdentityMap {
+	-instances : Singleton[ ]
+	-memory : Reservation[ ]
+	+__construct()
+	+__clone() : void
+	+__wakeup() : void
+	+getInstance() : Singleton
+	+get(int id) : Reservation
+	+add(Reservation reservation) : void
+	+delete(Reservation reservation) : void	
+}
+
+class RoomIdentityMap {
+	-instances : Singleton[ ]
+	-memory : Reservation[ ]
+	+__construct()
+	+__clone() : void
+	+__wakeup() : void
+	+getInstance() : Singleton
+	+get(String name) : Room
+	+add(Room room) : void
+	+delete(Room room) : void
+}
+
+class UserIdentityMap {
+	-instances : Singleton[ ]
+	-memory : Reservation[ ]
+	+__construct()
+	+__clone() : void
+	+__wakeup() : void
+	+getInstance() : Singleton
+	+get(int id) : User
+	+add(User user) : void
+	+delete(User user) : void
+}
+
+class ReservationMapper {
+	-instances : Singleton[ ]
+	-tdg : ReservationTDG
+	-identityMap : ReservationIdentityMap
+	+__construct()
+	+__clone : void
+	+__wakeup : void
+	+getInstance() : Singleton
+	+find(int id) : Reservation
+	+findForTimeslot(String roomName, DateTime timeslot) : Reservation [ ]
+	+findPosition(Reservation reservation) : int
+	+findAllActive(DateTime date) : Reservation [ ]
+	+findPositionsForUser(int user_id) : Reservation[ ]
+	+countInRange(int userId, DateTime start, DateTime end) : int
+	+set(int id, String description) : void
+	+delete(int id) : void
+	+done()
+	+addMany(Reservation newList[ ]) : void
+	+updateMany(Reservation updateList[ ]) : void
+	+deleteMany(Reservation deleteList[ ]) : void
+}
+
+class RoomMapper {
+	-instances : Singleton[ ]
+	-tdg : RoomTDG
+	-identityMap : RoomIdentityMap
+	+__construct()
+	+__clone : void
+	+__wakeup : void
+	+getInstance() : Singleton
+	+find(String name) : Room
+	+findAll : Room[ ]
+}
+
+class UserMapper {
+	-instances : Singleton[ ]
+	-tdg : RoomTDG
+	-identityMap : RoomIdentityMap
+	+__construct()
+	+__clone : void
+	+__wakeup : void
+	+getInstances(): Singleton
+	+create(int id, String name, String password) : User
+	+find(int id) : User
+	+set(int id, String name) : void
+	+delete(int id) : void
+	+done()
+	+addMany(User newList[ ]) : void
+	+updateMany(User updateList[ ]) :void
+	+deleteMany(User deleteList[ ]) : void
+}
+
+class ReservationTDG {
+	-instances : Singleton[ ]
+	+__construct()
+	+__clone : void
+	+__wakeup : void
+	+getInstances(): Singleton[ ]
+	+addMany(Reservation newList) : void
+	+updateMany(Reservation updateList) : void
+	+deleteMany(Reservation deleteList) :void
+	+create(Reservation reservation) : int
+	+update(Reservation reservation) : void
+	+remove(Reservation reservation) : void
+	+find(int id) : Object
+	+findForTimeslot(String roomName, DateTime timeslot) : Object[ ]
+	+findAllActive(DateTime date) : Object[ ]
+	+findPositionsForUser(int user_id) : Object[ ] 
+	+countInRange(int user_id, DateTime start, DateTime end) : int
+
+}
+
+class RoomTDG {
+	-instances : Singleton[ ]
+	+__construct()
+	+__clone : void
+	+__wakeup : void
+	+getInstances(): Singleton
+	+find(String name) : Object
+	+findAll() : Object[ ]
+}
+
+class UserTDG {
+	-instances : Singleton[ ]
+	+__construct()
+	+__clone : void
+	+__wakeup : void
+	+getInstances(): Singleton
+	+find(int id) : Object
+}
+
+class UnitOfWork {
+	-instances : Singleton[ ]
+	-newList : Reservation[ ]
+	-changedList : Reservation[ ]
+	-deletedList : Reservation[ ]
+	-mapper : ReservationMapper
+	+__construct()
+	+__clone : void
+	+__wakeup : void
+	+getInstances() : Singleton[ ]
+	+registerNew(Reservation reservation) : void
+	+registerDirty(Reservation reservation) : void
+	+registerDeleted(Reservation reservation) : void
+	+commit() : void
+}
+
+
+User "*" -down- "0..10" Room : can reserve
+(User, Room) .. Reservation
+
+CalendarController -up-> Reservation : uses
+LoginController -right-> User : uses
+ReservationController -left-> User : uses
+ReservationController -down-> Reservation : uses
+
+@enduml

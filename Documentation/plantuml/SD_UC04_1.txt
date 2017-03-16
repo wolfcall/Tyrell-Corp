@@ -1,0 +1,31 @@
+@startuml
+!include style.iuml
+
+participant ":__ReservationController__" as rController
+participant ":__ReservationMapper__" as rMapper
+participant ":__ReservationTDG__" as rTDG
+participant "Reservation Table" as rTable
+
+[-> rController: showRequestForm(room, timeslot)
+
+rController -> rMapper : countInRange(userID, startOfWeek, endOfWeek)
+rMapper -> rTDG: countInRange(...)
+rTDG -> rTable : SELECT * FROM Reservation Table WHERE [...]
+rTDG --> rMapper : reservationCount
+rMapper --> rController : reservationCount
+
+opt reservationCount > MAX_PER_USER
+	[<--rController : error
+end
+
+rController -> rMapper : findForTimeSlot(...)
+ref over rMapper : Find Time Slot Reservations
+rMapper --> rController : timeslotReservations
+
+opt count(timeslotReservations) > MAX_PER_TIMESLOT
+	[<--rController : error
+end
+
+[<--rController : form
+
+@enduml

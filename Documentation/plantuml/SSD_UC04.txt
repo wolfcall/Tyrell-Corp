@@ -1,0 +1,14 @@
+@startuml
+!include style.iuml
+
+actor ":__User__" as A
+participant ":__System__" as B
+
+
+A -> B: showRequestForm(room, timeslot)
+B --> A: form
+A -> B: requestReservation(room, timeslot, description, weeks)
+B --> A: confirmation
+
+
+@enduml

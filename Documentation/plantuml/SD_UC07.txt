@@ -1,0 +1,17 @@
+@startuml
+!include style.iuml
+
+skinparam sequenceMessageAlign left
+
+participant ":__ReservationController__" as rController
+participant ":__ReservationMapper__" as rMapper
+
+[-> rController: viewReservationList()
+
+rController -> rMapper : findPositionsForUser(userId)
+ref over rMapper : Find User Reservations
+rMapper --> rController : userReservations
+
+[<-- rController : reservationList
+
+@enduml

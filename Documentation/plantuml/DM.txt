@@ -1,0 +1,56 @@
+@startuml
+!include style.iuml
+
+class UserCatalog{
+	
+}
+class User {
+	id 
+	name
+	password
+}
+
+class Controller {
+	
+}
+class ReservationList{
+	
+}
+
+class Room {
+	name 
+}
+
+class Reservation {
+	id
+	userid
+	roomName
+	timeslot
+	description
+	recurId
+}
+
+
+
+
+Controller-up-UserCatalog
+
+Controller -right- ReservationList
+
+UserCatalog "1" *-right- "*" User
+
+User  -down- Room : can reserve
+
+Reservation .. (User, Room)
+
+ReservationList "1" *-right- "0..10" Reservation
+
+
+
+hide User methods
+hide UserCatalog members
+hide Controller members
+hide Reservation methods
+hide ReservationList members
+hide Room methods
+@enduml
