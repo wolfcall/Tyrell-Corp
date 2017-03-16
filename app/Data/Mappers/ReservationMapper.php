@@ -43,11 +43,11 @@ class ReservationMapper extends Singleton {
      * @param \DateTime $timeslot
      * @param string $description
      * @param string $uuid
-     * @param string $position
-     * @param string $projectors
-     * @param string $laptops
-     * @param string $cables
+     * @param int $position
      * @param int $markers
+     * @param int $projectors
+     * @param int $laptops
+     * @param int $cables
      * @return Reservation
      */
     public function create(int $userId, string $roomName, \DateTime $timeslot, string $description, string $uuid, int $position, int $markers, int $projectors, int $laptops, int $cables): Reservation {
@@ -298,8 +298,7 @@ class ReservationMapper extends Singleton {
     /**
      * Return a count all Equipment in active reservations for a certain user within a date range
      *
-     * @param \DateTime $start Start date, inclusive
-     * @param \DateTime $end End date, exclusive
+     * @param \DateTime $timeslot
      * @return int
      */
     public function countEquipment(\DateTime $timeslot) {
@@ -309,8 +308,8 @@ class ReservationMapper extends Singleton {
     /**
      * Return a count all Equipment in active reservations excluding a certain user's reservation within a date range
      *
-     * @param \DateTime $start Start date, inclusive
-     * @param \DateTime $end End date, exclusive
+     * @param \DateTime $timeslot
+     * @param int $id
      * @return int
      */
     public function countEquipmentExclude(\DateTime $timeslot, $id) {
@@ -320,9 +319,12 @@ class ReservationMapper extends Singleton {
     /**
      * Confirm the status of all the equipment that is requested by the user
      *
-     * @param \DateTime $start Start date, inclusive
-     * @param \DateTime $end End date, exclusive
-     * @return int
+     * @param \DateTime $timeslot
+     * @param int $markersRequest
+     * @param int $laptopsRequest
+     * @param int $projectorsRequest
+     * @param int $cablesRequest
+     * @return boolean
      */
     public function statusEquipment(\DateTime $timeslot, int $markersRequest, int $laptopsRequest, int $projectorsRequest, int $cablesRequest) {
         //Variables to store the count of all equipment already being used at the passed in time-slot
@@ -374,9 +376,13 @@ class ReservationMapper extends Singleton {
     /**
      * Confirm the status of all the equipment that is requested by the user, excluding counting equipment part of their reservation
      *
-     * @param \DateTime $start Start date, inclusive
-     * @param \DateTime $end End date, exclusive
-     * @return int
+     * @param \DateTime $timeslot
+     * @param int $id
+     * @param int $markersRequest
+     * @param int $laptopsRequest
+     * @param int $projectorsRequest
+     * @param int $cablesRequest
+     * @return boolean
      */
     public function statusEquipmentExclude(\DateTime $timeslot, int $id, int $markersRequest, int $laptopsRequest, int $projectorsRequest, int $cablesRequest) {
         //Variables to store the count of all equipment already being used at the passed in time-slot
@@ -457,7 +463,7 @@ class ReservationMapper extends Singleton {
      * Method to update the Wait-list Position of a user's Reservation
      * 
      * @param int $id
-     * @param string $description
+     * @param int $newPosition
      */
     public function setNewWaitlist(int $id, int $newPosition) {
         //Find the reservation that was passed in
@@ -474,8 +480,7 @@ class ReservationMapper extends Singleton {
     /**
      * Method to move a user down in the Wait-list for a specific Time-slot
      * 
-     * @param int $id
-     * @param string $description
+     * @param Reservation
      */
     public function moveDown(Reservation $reservation) {
         //Get the old position of the Reservation being passed in

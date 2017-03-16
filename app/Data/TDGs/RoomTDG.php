@@ -39,6 +39,10 @@ class RoomTDG extends Singleton {
 
     /**
      * Set the Room Passed in to busy
+     * 
+     * @param String $roomName
+     * @param int $student
+     * @param String $timestamp
      */
     public function setBusy($roomName, $student, $timestamp) {
         DB::update('UPDATE rooms SET busy = :id, dateTime = :time WHERE name = :room', [
@@ -50,6 +54,8 @@ class RoomTDG extends Singleton {
 
     /**
      * Set the Room Passed in to free
+     * 
+     * @param String $roomName
      */
     public function setFree($roomName) {
         DB::update('UPDATE rooms SET busy = :id WHERE name = :room', [
@@ -60,6 +66,8 @@ class RoomTDG extends Singleton {
 
     /**
      * Remove the student any rooms they are in
+     * 
+     * @param int $student
      */
     public function clearStudent($student) {
         $roomName = DB::select('SELECT name FROM rooms WHERE busy = ?', [$student]);
@@ -72,6 +80,7 @@ class RoomTDG extends Singleton {
     /**
      * Check if the Room Passed in is busy
      *
+     * @param String $roomName
      * @return boolean
      */
     public function getStatus($roomName) {

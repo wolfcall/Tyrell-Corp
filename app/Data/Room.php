@@ -24,13 +24,4 @@ class Room {
         return $this->name;
     }
 
-    /**
-     * @ignore Unused
-     *
-     * @param string $name
-     */
-    public function setName(string $name) {
-        $this->name = $name;
-    }
-
 }
