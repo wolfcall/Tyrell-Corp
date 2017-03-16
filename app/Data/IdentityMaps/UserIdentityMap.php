@@ -13,6 +13,8 @@ class UserIdentityMap extends Singleton {
     private $memory = [];
 
     /**
+     * Obtain a user from the Identity Map
+     * 
      * @param int $id
      * @return User|null
      */
@@ -25,6 +27,8 @@ class UserIdentityMap extends Singleton {
     }
 
     /**
+     * Add a user from the Identity Map
+     * 
      * @param User $user
      */
     public function add(User $user) {
@@ -32,7 +36,7 @@ class UserIdentityMap extends Singleton {
     }
 
     /**
-     * @ignore Unused
+     * Remove a user from the Identity Map
      *
      * @param User $user
      */
