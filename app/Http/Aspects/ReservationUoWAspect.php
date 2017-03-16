@@ -6,9 +6,7 @@
  * and open the template in the editor.
  */
 /**
- * Description of MonitorAspect
- *
- * @author
+ * ReservationUoWAspect
  */
 
 namespace App\Http\Aspects;

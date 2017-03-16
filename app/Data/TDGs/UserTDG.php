@@ -2,7 +2,6 @@
 
 namespace App\Data\TDGs;
 
-use App\Data\User;
 use App\Singleton;
 use DB;
 

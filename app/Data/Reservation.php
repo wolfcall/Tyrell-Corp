@@ -70,8 +70,8 @@ class Reservation {
      * @param int $position
      * @param int $markers
      * @param int $projectors
-     * @param int $cables
      * @param int $laptops
+     * @param int $cables
      */
     public function __construct(int $userId, string $roomName, \DateTime $timeslot, string $description = null, $recurId = null, $id = null, int $position, int $markers, int $projectors, int $laptops, int $cables) {
         $this->userId = $userId;
@@ -139,7 +139,7 @@ class Reservation {
     }
 
     /**
-     * @param int $Projectors
+     * @param int $projectors
      */
     public function setProjectors(int $projectors) {
         $this->projectors = $projectors;
@@ -153,7 +153,7 @@ class Reservation {
     }
 
     /**
-     * @param int $Laptops
+     * @param int $laptops
      */
     public function setLaptops(int $laptops) {
         $this->laptops = $laptops;
@@ -167,7 +167,7 @@ class Reservation {
     }
 
     /**
-     * @param int $Cables
+     * @param int $cables
      */
     public function setCables(int $cables) {
         $this->cables = $cables;
@@ -181,7 +181,7 @@ class Reservation {
     }
 
     /**
-     * @param int $userId
+     * @param int $position
      */
     public function setPosition(int $position) {
         $this->position = $position;

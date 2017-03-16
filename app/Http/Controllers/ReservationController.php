@@ -625,6 +625,7 @@ class ReservationController extends Controller {
         /*
          * Format the status messages
          */
+        //If reservations have been successfully added, display the appropriate message
         if (count($successful)) {
             $_SESSION["timestamp"] = date("Y-m-d G:i:s");
             $_SESSION["user"] = Auth::id();
@@ -639,7 +640,7 @@ class ReservationController extends Controller {
                                         }, $successful))));
             }
         }
-
+        //If reservations have been placed on the waitlist, display the appropriate message
         if (count($waitlisted)) {
             $_SESSION["timestamp"] = date("Y-m-d G:i:s");
             $_SESSION["user"] = Auth::id();
@@ -654,7 +655,7 @@ class ReservationController extends Controller {
                                         }, $waitlisted))));
             }
         }
-
+        //If reservations have encountered an error, display the appropriate message
         if (count($errored)) {
             unset($_SESSION['view']);
             $response = $response->with('error', sprintf('The following requests were unsuccessful for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
