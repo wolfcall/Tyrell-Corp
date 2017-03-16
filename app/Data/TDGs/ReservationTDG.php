@@ -37,7 +37,7 @@ class ReservationTDG extends Singleton {
     }
 
     /**
-     * Removes a list of Reservations in the database
+     * Removes a list of Reservations from the database
      *
      * @param array $deleteList
      */
@@ -125,7 +125,7 @@ class ReservationTDG extends Singleton {
     }
 
     /**
-     * Returns a list of all Reservations (Waitlist and Active) for a given Room and Timeslot, ordered by id
+     * Returns a list of all Reservations (Wait-list and Active) for a given Room and Time-slot, ordered by id
      *
      * @param string $roomName
      * @param \DateTime $timeslot
@@ -139,7 +139,7 @@ class ReservationTDG extends Singleton {
     }
 
     /**
-     * Returns a list of all active Reservations (if any) for a given Timeslot by the User passed in
+     * Returns a list of all active Reservations (if any) for a given Time-slot by the User passed in
      *
      * @param int $id
      * @param \DateTime $timeslot
@@ -153,7 +153,7 @@ class ReservationTDG extends Singleton {
     }
 
     /**
-     * Returns a list of all Reservation for a given Timeslot other than the room passed in
+     * Returns a list of all Reservation for a given Time-slot other than the room passed in
      *
      * @param \DateTime $timeslot
      * @return array
@@ -166,7 +166,7 @@ class ReservationTDG extends Singleton {
     }
 
     /**
-     * Returns a list of all waitlisted Reservations (if any) for a given Timeslot by the User passed in
+     * Returns a list of all Wait-listed Reservations (if any) for a given Time-slot by the User passed in
      *
      * @param int $id
      * @param \DateTime $timeslot
@@ -180,7 +180,7 @@ class ReservationTDG extends Singleton {
     }
 
     /**
-     * Returns the User who has the Reservation for the Timeslot and Room passed in
+     * Returns the User who has the Reservation for the Time-slot and Room passed in
      *
      * @param String $roomName
      * @param \DateTime $timeslot
@@ -244,7 +244,7 @@ class ReservationTDG extends Singleton {
     }
 
     /**
-     * SQL statement to count all wait-listed reservations for a certain user within a date range
+     * SQL statement to count all Wait-listed reservations for a certain user within a date range
      *
      * @param int $user_id
      * @param \DateTime $start Start date, inclusive

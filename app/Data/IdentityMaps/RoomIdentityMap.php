@@ -13,6 +13,8 @@ class RoomIdentityMap extends Singleton {
     private $memory = [];
 
     /**
+     * Obtain a room from the Identity Map
+     * 
      * @param string $name
      * @return Room|null
      */
@@ -25,6 +27,8 @@ class RoomIdentityMap extends Singleton {
     }
 
     /**
+     * Add a room to the Identity Map
+     * 
      * @param Room $room
      */
     public function add(Room $room) {
@@ -32,6 +36,8 @@ class RoomIdentityMap extends Singleton {
     }
 
     /**
+     * Remove a user from the Identity Map
+     * 
      * @param Room $room
      */
     public function delete(Room $room) {

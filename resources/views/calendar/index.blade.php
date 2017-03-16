@@ -2,9 +2,13 @@
 <?php
 
 use App\Data\Mappers\RoomMapper;
-
+//Obtain the current date and time
 $now = date("Y-m-d G:i:s");
+
+//Check to see if the session variable timestamp and user are set, signifying that the user just entered a room
+//Also make sure that the session variable user matches the user that is currently logged in
 if (isset($_SESSION["timestamp"]) && isset($_SESSION["user"]) && ($_SESSION["user"] == (Auth::id()) ) ) {
+    //Pass the timestamp to a variable, signifying the time that the room was accessed
     $time = $_SESSION["timestamp"];
     $times = array();
     $times["past"][0][0] = explode("-", explode(" ", $time)[0])[0];
@@ -21,27 +25,36 @@ if (isset($_SESSION["timestamp"]) && isset($_SESSION["user"]) && ($_SESSION["use
     $times["now"][1][2] = explode(":", explode(" ", $now)[1])[2];
     $result = array(0, 0, 0, 0, 0, 0);
 
+    //Loops through the time now, puts it in the proper format for comparison
     for ($x = 5; $x >= 0; $x--) {
         $result[$x] = $times["now"][$x / 3][$x % 3] - $times["past"][$x / 3][$x % 3];
     }
 
+    //If it has been more than 30 seconds since the user accessed the room, set the lock to 0
     if ($result[0] + $result[1] + $result[2] + $result[3] + $result[4] > 0 || $result[5] >= 30) {
         $lock = 0;
         unset($_SESSION["timestamp"]);
         unset($_SESSION["user"]);
-    } else {
+    } 
+    //Else just keep decrementing the lock
+    else {
         $lock = (30 - $result[5]);
     }
-} else {
+} 
+//If the same user is not signed in, unset the variables and put the lock to 0
+else {
     $lock = 0;
+    unset($_SESSION["timestamp"]);
+    unset($_SESSION["user"]);
 }
 ?>
 @section('content')
 
 <?php
+//If the lock is greater than 0, call the timer
 if ($lock > 0) {
     echo "<body onload = 'onTimer()'>";
-    //Show the user how much time they have left to make their Reservation
+    //Show the user how much time they have left to wait before accessing the rooms again
     echo "<div class = 'timer' style='color:red;text-align: center;'>Reservation Block ends in <span id='timer'></span> seconds!</div><br>";
 } else {
     echo "<body>";

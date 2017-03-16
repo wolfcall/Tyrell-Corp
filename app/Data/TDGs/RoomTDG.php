@@ -2,7 +2,6 @@
 
 namespace App\Data\TDGs;
 
-use App\Data\Room;
 use App\Singleton;
 use DB;
 
@@ -14,7 +13,7 @@ class RoomTDG extends Singleton {
     /**
      * Gets a specific Room from the database by name
      *
-     * @param string $name
+     * @param string $roomName
      * @return \stdClass|null
      */
     public function find(string $roomName) {
@@ -39,7 +38,7 @@ class RoomTDG extends Singleton {
     }
 
     /**
-     * Set the Room Passd in to busy
+     * Set the Room Passed in to busy
      */
     public function setBusy($roomName, $student, $timestamp) {
         DB::update('UPDATE rooms SET busy = :id, dateTime = :time WHERE name = :room', [
@@ -50,7 +49,7 @@ class RoomTDG extends Singleton {
     }
 
     /**
-     * Set the Room Passd in to free
+     * Set the Room Passed in to free
      */
     public function setFree($roomName) {
         DB::update('UPDATE rooms SET busy = :id WHERE name = :room', [
@@ -60,7 +59,7 @@ class RoomTDG extends Singleton {
     }
 
     /**
-     * Set the Room Passd in to free
+     * Remove the student any rooms they are in
      */
     public function clearStudent($student) {
         $roomName = DB::select('SELECT name FROM rooms WHERE busy = ?', [$student]);

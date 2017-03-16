@@ -43,6 +43,13 @@ class ReservationController extends Controller {
         $reservationMapper = ReservationMapper::getInstance();
         $reservations = $reservationMapper->findPositionsForUser(Auth::id());
 
+        if (isset($_SESSION["view"]) && $_SESSION["view"] == true) {
+
+            $_SESSION["timestamp"] = date("Y-m-d G:i:s");
+            $_SESSION["user"] = Auth::id();
+            unset($_SESSION["view"]);
+        }
+
         return view('reservation.list', [
             'reservations' => $reservations,
         ]);
@@ -108,12 +115,17 @@ class ReservationController extends Controller {
         $reservationMapper = ReservationMapper::getInstance();
         $reservation = $reservationMapper->find($id);
 
+        //If the reservation doesn't get passed or the user's Id does not match that of the Reservation
+        //Return a 404 error
         if ($reservation === null || $reservation->getUserId() !== Auth::id()) {
             return abort(404);
         }
 
+        //Find the time right now, to compare to the timestamp
+        $now = date("Y-m-d G:i:s");
+
         //For when the user is waiting, but can still click on the reservations they have made
-        if (isset($_SESSION["timestamp"])) {
+        if (isset($_SESSION["timestamp"]) && $_SESSION["user"] == Auth::id() && ($_SESSION["timestamp"] > $now)){
             return redirect()->route('calendar')
                             ->with('error', sprintf("You must wait your turn! Please try again later. We apologize for any inconvenience."));
         }
@@ -182,40 +194,54 @@ class ReservationController extends Controller {
         }
         //Same Room, Timeslot but different Equipment
         elseif ($sameTime && !$sameEquip) {
-            //Check if the equipment requested is available for that Timeslot, excluding the current Reservation's equipment count
-            $eStatus = $reservationMapper->statusEquipmentExclude($newTimeslot, $reservation->getId(), $newMarkers, $newLaptops, $newProjectors, $newCables);
-            if ($eStatus) {
-                //Check if no one is in the Room
-                $roomHasActive = $reservationMapper->findTimeslotWinner($newTimeslot, $newRoom);
+            //Set the variable to true, to let other components of the system know that a Reservation is being modified
+            $this->modifying = true;
 
-                //If no one is in the Room and my equipment status is ok upon modification, become the active user.
-                if (!$roomHasActive) {
-                    $reservationMapper->setNewWaitlist($reservation->getId(), 0);
+            //Go through the constraints outlined in the Show Request Form Method
+            $temp1 = $this->showRequestForm($request, $OGRoom, $new);
+
+            if (($this->success1) == true) {
+                //Check if the equipment requested is available for that Timeslot, excluding the current Reservation's equipment count
+                $eStatus = $reservationMapper->statusEquipmentExclude($newTimeslot, $reservation->getId(), $newMarkers, $newLaptops, $newProjectors, $newCables);
+                if ($eStatus) {
+                    //Check if no one is in the Room
+                    $roomHasActive = $reservationMapper->findTimeslotWinner($newTimeslot, $newRoom);
+
+                    //If no one is in the Room and my equipment status is ok upon modification, become the active user.
+                    if (!$roomHasActive) {
+                        $reservationMapper->setNewWaitlist($reservation->getId(), 0);
+                        $reservationMapper->done();
+                    }
+
+                    //Update the quantities of the equipment
+                    $reservationMapper->set($reservation->getId(), $request->input('description', ""), $newMarkers, $newProjectors, $newLaptops, $newCables, $request->input('timeslot', ""), $newRoom);
+
                     $reservationMapper->done();
+
+                    //Check if anyone needed the equipment
+                    //If they do, then give it to them
+                    $this->cleanup($reservation->getId(), $newTimeslot);
+
+                    $_SESSION["timestamp"] = date("Y-m-d G:i:s");
+                    $_SESSION["user"] = Auth::id();
+
+                    //Return Status message
+                    return redirect()
+                                    ->route('reservation', ['id' => $reservation->getId(), 'back' => $request->input('back')])
+                                    ->with('success', 'Successfully modified reservation equipment!');
+                } else {
+                    //Inform the user that the equipment is not available
+                    return redirect()
+                                    ->route('reservation', ['id' => $reservation->getId(), 'back' => $request->input('back')])
+                                    ->with('error', 'The Equipment is not Available. Your reservation has been kept.<br>
+                                            If you require more equipment than what is available, you must give up your Reservation and create a new one with the specifications!');
                 }
-
-                //Update the quantities of the equipment
-                $reservationMapper->set($reservation->getId(), $request->input('description', ""), $newMarkers, $newProjectors, $newLaptops, $newCables, $request->input('timeslot', ""), $newRoom);
-
-                $reservationMapper->done();
-
-                //Check if anyone needed the equipment
-                //If they do, then give it to them
-                $this->cleanup($reservation->getId(), $newTimeslot);
-
-                $_SESSION["timestamp"] = date("Y-m-d G:i:s");
-                $_SESSION["user"] = Auth::id();
-                
-                //Return Status message
-                return redirect()
-                                ->route('reservation', ['id' => $reservation->getId(), 'back' => $request->input('back')])
-                                ->with('success', 'Successfully modified reservation equipment!');
             } else {
-                //Inform the user that the equipment is not available
-                return redirect()
-                                ->route('reservation', ['id' => $reservation->getId(), 'back' => $request->input('back')])
-                                ->with('error', 'The Equipment is not Available. Your reservation has been kept.<br>
-					If you require more equipment than what is available, you must give up your Reservation and create a new one with the specifications!');
+                //Return the error caught by the Show Request Form Method
+                //Reaching here signifies that the modification did not go through
+                $this->success1 = true;
+                $this->modifying = false;
+                return $temp1;
             }
         }
         //If any of the New Data is not the same as the old data, change it
@@ -246,7 +272,7 @@ class ReservationController extends Controller {
 
                     $_SESSION["timestamp"] = date("Y-m-d G:i:s");
                     $_SESSION["user"] = Auth::id();
-                    
+
                     return redirect()
                                     ->route('reservation', ['id' => $newID, 'back' => $request->input('back')]);
                 } else {
@@ -286,6 +312,13 @@ class ReservationController extends Controller {
             return abort(404);
         }
 
+        //Initialize this variable in case the user just viewed the page and did not request anything
+        //They still entered the room
+        //This is to prevent people from entering the room, then clicking Calendar and trying to avoid a time penalty
+        if (!isset($_SESSION['view']) && $this->modifying == false) {
+            $_SESSION['view'] = true;
+        }
+
         //Check to see who is currently using the room
         $roomStatus = $roomMapper->getStatus($roomName);
 
@@ -295,6 +328,7 @@ class ReservationController extends Controller {
             if (($this->modifying) == true) {
                 $this->success1 = false;
             }
+            unset($_SESSION['view']);
             return redirect()->route('calendar', ['date' => $timeslot->toDateString()])
                             ->with('error', sprintf("The room %s is currently busy! Please try again later. We apologize for any inconvenience.", $roomName));
         }
@@ -319,6 +353,7 @@ class ReservationController extends Controller {
             if (($this->modifying) == true) {
                 $this->success1 = false;
             }
+            unset($_SESSION['view']);
             return redirect()->route('calendar', ['date' => $timeslot->toDateString()])
                             ->with('error', sprintf("You've exceeded your reservation request limit of (%d) for this week.<br> 
                     Please try reserving next week or remove a reservation from this week to be eligible.", static::MAX_PER_USER));
@@ -333,6 +368,7 @@ class ReservationController extends Controller {
             if (($this->modifying) == true) {
                 $this->success1 = false;
             }
+            unset($_SESSION['view']);
             return redirect()->route('calendar', ['date' => $timeslot->toDateString()])
                             ->with('error', 'The waiting list for that time slot is full.');
         }
@@ -589,10 +625,11 @@ class ReservationController extends Controller {
         /*
          * Format the status messages
          */
+        //If reservations have been successfully added, display the appropriate message
         if (count($successful)) {
             $_SESSION["timestamp"] = date("Y-m-d G:i:s");
             $_SESSION["user"] = Auth::id();
-
+            unset($_SESSION['view']);
             if (count($active) == 3) {
                 $response = $response->with('success', sprintf('You have reached the maximum reservations for the week! Removing all waitlists.<br> The following reservations have been successfully created for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
                                             return sprintf("<li><strong>%s</strong></li>", $m->format('l, F jS, Y'));
@@ -603,11 +640,11 @@ class ReservationController extends Controller {
                                         }, $successful))));
             }
         }
-
+        //If reservations have been placed on the waitlist, display the appropriate message
         if (count($waitlisted)) {
             $_SESSION["timestamp"] = date("Y-m-d G:i:s");
             $_SESSION["user"] = Auth::id();
-
+            unset($_SESSION['view']);
             if (!$eStatus) {
                 $response = $response->with('warning', sprintf('Equipment is not available for your Reservation. You have been put on a waiting list for the following: %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
                                             return sprintf("<li><strong>%s</strong>: Position #%d</li>", $m[0]->format('l, F jS, Y'), $m[1]);
@@ -618,8 +655,9 @@ class ReservationController extends Controller {
                                         }, $waitlisted))));
             }
         }
-
+        //If reservations have encountered an error, display the appropriate message
         if (count($errored)) {
+            unset($_SESSION['view']);
             $response = $response->with('error', sprintf('The following requests were unsuccessful for %s at %s:<ul class="mb-0">%s</ul>', $room->getName(), $timeslot->format('g a'), implode("\n", array_map(function ($m) {
                                         return sprintf("<li><strong>%s</strong>: %s</li>", $m[0]->format('l, F jS, Y'), $m[1]);
                                     }, $errored))));
@@ -650,7 +688,7 @@ class ReservationController extends Controller {
 
         $_SESSION["timestamp"] = date("Y-m-d G:i:s");
         $_SESSION["user"] = Auth::id();
-
+        unset($_SESSION['view']);
         return $response;
     }
 
