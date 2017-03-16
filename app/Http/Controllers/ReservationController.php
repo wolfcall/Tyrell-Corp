@@ -189,40 +189,55 @@ class ReservationController extends Controller {
         }
         //Same Room, Timeslot but different Equipment
         elseif ($sameTime && !$sameEquip) {
-            //Check if the equipment requested is available for that Timeslot, excluding the current Reservation's equipment count
-            $eStatus = $reservationMapper->statusEquipmentExclude($newTimeslot, $reservation->getId(), $newMarkers, $newLaptops, $newProjectors, $newCables);
-            if ($eStatus) {
-                //Check if no one is in the Room
-                $roomHasActive = $reservationMapper->findTimeslotWinner($newTimeslot, $newRoom);
+            //Set the variable to true, to let other components of the system know that a Reservation is being modified
+            $this->modifying = true;
 
-                //If no one is in the Room and my equipment status is ok upon modification, become the active user.
-                if (!$roomHasActive) {
-                    $reservationMapper->setNewWaitlist($reservation->getId(), 0);
+            //Go through the constraints outlined in the Show Request Form Method
+            $temp1 = $this->showRequestForm($request, $newRoom, $new);
+           
+            if (($this->success1) == true) {
+                //Check if the equipment requested is available for that Timeslot, excluding the current Reservation's equipment count
+                $eStatus = $reservationMapper->statusEquipmentExclude($newTimeslot, $reservation->getId(), $newMarkers, $newLaptops, $newProjectors, $newCables);
+                if ($eStatus) {
+                    //Check if no one is in the Room
+                    $roomHasActive = $reservationMapper->findTimeslotWinner($newTimeslot, $newRoom);
+
+                    //If no one is in the Room and my equipment status is ok upon modification, become the active user.
+                    if (!$roomHasActive) {
+                        $reservationMapper->setNewWaitlist($reservation->getId(), 0);
+                        $reservationMapper->done();
+                    }
+
+                    //Update the quantities of the equipment
+                    $reservationMapper->set($reservation->getId(), $request->input('description', ""), $newMarkers, $newProjectors, $newLaptops, $newCables, $request->input('timeslot', ""), $newRoom);
+
                     $reservationMapper->done();
+
+                    //Check if anyone needed the equipment
+                    //If they do, then give it to them
+                    $this->cleanup($reservation->getId(), $newTimeslot);
+
+                    $_SESSION["timestamp"] = date("Y-m-d G:i:s");
+                    $_SESSION["user"] = Auth::id();
+
+                    //Return Status message
+                    return redirect()
+                                    ->route('reservation', ['id' => $reservation->getId(), 'back' => $request->input('back')])
+                                    ->with('success', 'Successfully modified reservation equipment!');
+                } else {
+                    //Inform the user that the equipment is not available
+                    return redirect()
+                                    ->route('reservation', ['id' => $reservation->getId(), 'back' => $request->input('back')])
+                                    ->with('error', 'The Equipment is not Available. Your reservation has been kept.<br>
+                                            If you require more equipment than what is available, you must give up your Reservation and create a new one with the specifications!');
                 }
-
-                //Update the quantities of the equipment
-                $reservationMapper->set($reservation->getId(), $request->input('description', ""), $newMarkers, $newProjectors, $newLaptops, $newCables, $request->input('timeslot', ""), $newRoom);
-
-                $reservationMapper->done();
-
-                //Check if anyone needed the equipment
-                //If they do, then give it to them
-                $this->cleanup($reservation->getId(), $newTimeslot);
-
-                $_SESSION["timestamp"] = date("Y-m-d G:i:s");
-                $_SESSION["user"] = Auth::id();
-
-                //Return Status message
-                return redirect()
-                                ->route('reservation', ['id' => $reservation->getId(), 'back' => $request->input('back')])
-                                ->with('success', 'Successfully modified reservation equipment!');
-            } else {
-                //Inform the user that the equipment is not available
-                return redirect()
-                                ->route('reservation', ['id' => $reservation->getId(), 'back' => $request->input('back')])
-                                ->with('error', 'The Equipment is not Available. Your reservation has been kept.<br>
-					If you require more equipment than what is available, you must give up your Reservation and create a new one with the specifications!');
+            }
+            else {
+                //Return the error caught by the Show Request Form Method
+                //Reaching here signifies that the modification did not go through
+                $this->success1 = true;
+                $this->modifying = false;
+                return $temp1;
             }
         }
         //If any of the New Data is not the same as the old data, change it
