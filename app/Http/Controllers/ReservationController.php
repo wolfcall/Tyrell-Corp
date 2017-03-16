@@ -115,6 +115,8 @@ class ReservationController extends Controller {
         $reservationMapper = ReservationMapper::getInstance();
         $reservation = $reservationMapper->find($id);
 
+        //If the reservation doesn't get passed or the user's Id does not match that of the Reservation
+        //Return a 404 error
         if ($reservation === null || $reservation->getUserId() !== Auth::id()) {
             return abort(404);
         }
