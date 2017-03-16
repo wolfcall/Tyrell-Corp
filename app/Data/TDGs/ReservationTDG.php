@@ -170,6 +170,7 @@ class ReservationTDG extends Singleton {
      *
      * @param int $id
      * @param \DateTime $timeslot
+     * @param String $roomName
      * @return array
      */
     public function findAllTimeslotWaitlisted(\DateTime $timeslot, $id, $roomName) {
@@ -249,7 +250,7 @@ class ReservationTDG extends Singleton {
      * @param int $user_id
      * @param \DateTime $start Start date, inclusive
      * @param \DateTime $end End date, exclusive
-     * @return int
+     * @return int[]
      */
     public function countAll(int $user_id, \DateTime $start, \DateTime $end) {
         return DB::select('SELECT *
@@ -260,9 +261,8 @@ class ReservationTDG extends Singleton {
     /**
      * SQL statement to count all Equipment in active reservations for a certain user within a date range
      *
-     * @param \DateTime $start Start date, inclusive
-     * @param \DateTime $end End date, exclusive
-     * @return int
+     * @param \DateTime $timeslot
+     * @return int[]
      */
     public function countEquipment(\DateTime $timeslot) {
         return DB::select('SELECT quantity_markers, quantity_projectors, quantity_laptops, quantity_cables
@@ -273,9 +273,9 @@ class ReservationTDG extends Singleton {
     /**
      * SQL statement to count all Equipment in active excluding a certain user's reservation within a date range
      *
-     * @param \DateTime $start Start date, inclusive
-     * @param \DateTime $end End date, exclusive
-     * @return int
+     * @param \DateTime $timeslot
+     * @param int $id
+     * @return int[]
      */
     public function countEquipmentExclude(\DateTime $timeslot, $id) {
         return DB::select('SELECT quantity_markers, quantity_projectors, quantity_laptops, quantity_cables

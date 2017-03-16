@@ -35,6 +35,10 @@ class RoomMapper extends Singleton {
 
     /**
      * Set the Room to busy when a user is in it
+     * 
+     * @param String $roomName
+     * @param int $student
+     * @param String $timestamp
      */
     public function setBusy(string $roomName, $student, $timestamp) {
         $this->tdg->setBusy($roomName, $student, $timestamp);
@@ -42,6 +46,8 @@ class RoomMapper extends Singleton {
 
     /**
      * Set the Room to free when a user had left the room
+     * 
+     * @param String $roomName
      */
     public function setFree(string $roomName) {
         $this->tdg->setFree($roomName);
@@ -51,6 +57,8 @@ class RoomMapper extends Singleton {
      * Set the Room to free when it is free
      * If a browser crashes, but a student was in a room at the time, this method will remove them after
      * the allocated 60 seconds for their reservation has expired
+     * 
+     * @param int $student
      */
     public function clearStudent($student) {
         $this->tdg->clearStudent($student);
@@ -58,6 +66,9 @@ class RoomMapper extends Singleton {
 
     /**
      * Get the status of a Room
+     * 
+     * @param String $roomName
+     * @return boolean
      */
     public function getStatus($roomName) {
         return $this->tdg->getStatus($roomName);
