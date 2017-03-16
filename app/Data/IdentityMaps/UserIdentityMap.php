@@ -27,7 +27,7 @@ class UserIdentityMap extends Singleton {
     }
 
     /**
-     * Add a user from the Identity Map
+     * Add a user to the Identity Map
      * 
      * @param User $user
      */

@@ -16,6 +16,8 @@ class ReservationIdentityMap extends Singleton {
     private $memory = [];
 
     /**
+     * Obtain a reservation from the Identity Map
+     * 
      * @param int $id
      * @return Reservation|null
      */
@@ -30,6 +32,8 @@ class ReservationIdentityMap extends Singleton {
     }
 
     /**
+     * Add a reservation to the Identity Map
+     * 
      * @param Reservation $reservation
      */
     public function add(Reservation $reservation) {
@@ -37,6 +41,8 @@ class ReservationIdentityMap extends Singleton {
     }
 
     /**
+     * Remove a reservation from the Identity map
+     * 
      * @param Reservation $reservation
      */
     public function delete(Reservation $reservation) {
