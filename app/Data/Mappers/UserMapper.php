@@ -23,7 +23,8 @@ class UserMapper extends Singleton {
     private $identityMap;
 
     /**
-     * UserMapper constructor.
+     * UserMapper constructor
+     * Obtain the instance of both the User TDG and Identity Map
      */
     protected function __construct() {
         parent::__construct();
@@ -39,6 +40,7 @@ class UserMapper extends Singleton {
      * @return User
      */
     public function find(int $id): User {
+        //Obtain the user from the identity map
         $user = $this->identityMap->get($id);
         $result = null;
 
@@ -58,7 +60,7 @@ class UserMapper extends Singleton {
     }
 
     /**
-     * Returns the check to see if a student is part of Capstone or not
+     * Returns if a student is part of Capstone or not
      *
      * @param int $userId
      * @return int
