@@ -1,0 +1,15 @@
+@startuml
+!include style.iuml
+
+participant ":__ReservationController__" as rController
+participant ":__ReservationMapper__" as rMapper
+
+[-> rController: showModifyForm(resID)
+
+rController -> rMapper : find(...)
+ref over rMapper : Find Reservation
+rMapper --> rController : reservation
+
+[<-- rController: form
+
+@enduml

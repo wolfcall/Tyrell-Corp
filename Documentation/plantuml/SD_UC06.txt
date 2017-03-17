@@ -1,0 +1,20 @@
+@startuml
+!include style.iuml
+
+participant ":__ReservationController__" as rController
+participant ":__ReservationMapper__" as rMapper
+
+
+[-> rController: viewReservation(reservationID)
+
+rController -> rMapper : find(reservationID)
+ref over rMapper : Find Reservation
+rMapper --> rController : reservation
+
+rController -> rMapper : findPosition(reservation)
+ref over rMapper : Find Position
+rMapper --> rController : position
+
+[<-- rController : reservation, position
+
+@enduml

@@ -1,0 +1,24 @@
+@startuml
+!include style.iuml
+
+participant ":__CalendarController__" as cController
+participant ":__ReservationMapper__" as rMapper
+participant ":__RoomMapper__" as roMapper
+
+[-> cController: viewCalendar(date)
+
+cController -> roMapper : findAll()
+cController -> roMapper : clearStudent(userID)
+
+cController -> rMapper : findAllActive(date)
+ref over rMapper : Find Active Reservations
+
+rMapper --> cController : activeReservations
+
+cController -> rMapper :  findPositionsForUser(userID)
+ref over rMapper : Find User Reservations
+rMapper --> cController : userReservations
+
+[<-- cController : calendar
+
+@enduml

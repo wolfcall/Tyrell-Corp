@@ -1,0 +1,20 @@
+'Use Case Diagram
+
+@startuml
+!include style.iuml
+
+left to right direction
+actor User
+
+rectangle "Chronos Reservation System" {
+	User -- (Log In)
+	User -- (Log Out)
+	User -- (View Calendar)
+	User -- (Request Reservation)
+	User -- (Modify Reservation)
+	User -- (View Reservation)
+	User -- (View Reservation List)
+	User -- (Cancel Reservation)
+}
+
+@enduml

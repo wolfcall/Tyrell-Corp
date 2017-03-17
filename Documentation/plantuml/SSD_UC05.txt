@@ -1,0 +1,12 @@
+@startuml
+!include style.iuml
+
+actor ":__User__" as A
+participant ":__System__" as B
+
+A -> B: showModifyForm(resID)
+B --> A: modification form
+A -> B: modifyReservation(resID)
+B --> A: confirmation
+
+@enduml

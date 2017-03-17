@@ -1,0 +1,28 @@
+@startuml
+!include style.iuml
+
+[*] -right-> ViewingLoginForm
+ViewingLoginForm -> ViewingCalendar : logIn
+ViewingCalendar -up-> [*] : logOut
+
+ViewingCalendar -right-> ViewingReservationList : viewReservationList
+ViewingReservationList -left-> ViewingCalendar : viewCalendar
+
+ViewingCalendar --> ViewingReservation : viewReservation
+
+ViewingReservationList -down-> ViewingReservation : viewReservation
+ViewingReservation -down-> ViewingReservationList : viewReservationList
+ViewingReservation --> CancellingReservation : cancelReservation
+ViewingReservation --> ViewingModifyForm : showModifyForm
+ViewingReservation --> ViewingCalendar : viewCalendar
+
+ViewingModifyForm -right-> ViewingReservation : modifyReservation
+
+ViewingCalendar -down-> ViewingRequestForm : showRequestForm
+
+ViewingRequestForm -down-> RequestingReservation : requestReservation
+RequestingReservation -up-> ViewingCalendar
+
+CancellingReservation -up-> ViewingReservationList
+
+@enduml

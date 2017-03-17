@@ -1,0 +1,28 @@
+@startuml
+!include style.iuml
+
+participant ":__ReservationMapper__" as rMapper
+
+participant ":__ReservationTDG__" as rTDG
+participant "Reservation Table" as rTable
+participant ":__ReservationIdentityMap__" as rIMap
+participant ":__Reservation__" as reservation
+
+[-> rMapper : findPositionsForUser(userID)
+
+rMapper -> rTDG : findPositionsForUser(...)
+rTDG -> rTable : SELECT * FROM Reservation Table WHERE [...]
+rTDG --> rMapper : userReservations
+
+loop reservation in userReservations
+	rMapper -> rIMap : get(reservation.id)
+	rIMap --> rMapper : found
+
+	create reservation
+	rMapper -> reservation :  [not found] r := create()
+	rMapper -> rIMap : add(r)
+end
+
+[<--rMapper : userReservations
+
+@enduml

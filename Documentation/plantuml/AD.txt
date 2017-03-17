@@ -1,0 +1,117 @@
+@startuml
+!include style.iuml
+
+'left to right direction
+
+package "Core" {
+	!include CD.txt
+}
+
+package Mappers {
+	class UserMapper {
+		find()
+
+	}
+	class RoomMapper {
+		find()
+	}
+	class ReservationMapper {
+		create()
+
+		find()
+		findForTimeslot()
+		findPosition()
+		finAllActive()
+		findPositionsForUser
+
+		set()
+		delete()
+		done()
+
+		addMany()
+		updateMany()
+		deleteMany()
+	}
+}
+
+package "Identity Maps" {
+	class UserIdentityMap {
+		get()
+		add()
+	}
+	class RoomIdentityMap {
+		get()
+		add()
+	}
+	class ReservationIdentityMap {
+		get()
+		add()
+		delete()
+	}
+}
+
+package TableDataGateways {
+	class UserTDG {
+		find()
+	}
+	class RoomTDG {
+		find()
+	}
+	class ReservationTDG {
+		addMany()
+		updateMany()
+		deleteMany()
+
+		create()
+		update()
+		remove()
+
+		find()
+		findForTimeslot()
+		findAllActive()
+		findPositionsForUser()
+	}
+}
+
+package Tables {
+	class "User Table"
+	class "Room Table"
+	class "Reservation Table"
+}
+
+class UnitOfWork {
+	registerNew()
+	registerDirty()
+	registerDeleted()
+	commit()
+}
+
+hide "User Table" members
+hide "Room Table" members
+hide "Reservation Table" members
+
+ReservationMapper <--> UnitOfWork
+note bottom of UnitOfWork
+	RoomMapper and UserMapper perform read-only operations,
+	and consequently do not communicate with UnitOfWork
+end note
+
+ReservationController --> ReservationMapper
+CalendarController --> ReservationMapper
+
+User <-- UserMapper
+UserMapper --> UserIdentityMap
+UserMapper -down--> UserTDG
+UserTDG --> "User Table"
+
+Room <-- RoomMapper
+RoomMapper --> RoomIdentityMap
+RoomMapper -down--> RoomTDG
+RoomTDG --> "Room Table"
+
+Reservation <-- ReservationMapper
+ReservationMapper --> ReservationIdentityMap
+ReservationMapper -down--> ReservationTDG
+ReservationTDG --> "Reservation Table"
+
+@enduml

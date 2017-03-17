@@ -1,0 +1,25 @@
+@startuml
+!include style.iuml
+
+participant ":__ReservationController__" as rController
+participant ":__ReservationMapper__" as rMapper
+participant ":__ReservationIdentityMap__" as rIMap
+participant ":__UnitOfWork__" as UoW
+
+[-> rController: cancelReservation(reservationID)
+
+rController -> rMapper : delete(...)
+
+rMapper -> rMapper : r := find(...)
+ref over rMapper : Find Reservation
+
+rMapper -> rIMap : delete(r)
+rMapper -> UoW : registerDeleted(r)
+
+rController -> rMapper : done()
+ref over rMapper : Complete Work
+rMapper --> rController : result
+
+[<-- rController : result
+
+@enduml
