@@ -8,11 +8,11 @@ participant ":__RoomMapper__" as roMapper
 [-> cController: viewCalendar(date)
 
 cController -> roMapper : findAll()
+roMapper --> cController : rooms
 cController -> roMapper : clearStudent(userID)
 
 cController -> rMapper : findAllActive(date)
 ref over rMapper : Find Active Reservations
-
 rMapper --> cController : activeReservations
 
 cController -> rMapper :  findPositionsForUser(userID)
