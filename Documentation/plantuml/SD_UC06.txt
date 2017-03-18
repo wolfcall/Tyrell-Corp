@@ -15,6 +15,6 @@ rController -> rMapper : findPosition(reservation)
 ref over rMapper : Find Position
 rMapper --> rController : position
 
-[<-- rController : reservation, position
+[<-- rController : info[]
 
 @enduml

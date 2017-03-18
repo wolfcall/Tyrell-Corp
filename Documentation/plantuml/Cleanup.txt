@@ -1,0 +1,38 @@
+@startuml
+participant ":__ReservationController__" as rController
+participant ":__ReservationMapper__" as rMapper
+
+[-> rController: cleanup(id, timeslot)
+
+rController -> rMapper : findTimeslot(timeslot)
+rMapper --> rController : everything
+loop r in everything
+	'Post-insert checks
+	alt r.id != null
+		rController -> rMapper : findPosition(r)
+		ref over rMapper : Find Time Slot Reservations
+		rMapper --> rController : position
+
+		alt position >= MAX_PER_TIMESLOT
+			rController -> rController : cancelReservation(r.id)
+			ref over rController: Cancel Reservation
+			'rController -> rMapper : delete(r.id)
+			'rMapper -> rIMap : get(id)
+			'rMapper -> UoW : registerDeleted(r)
+			note over rController: The reservation exceeds the waiting list limit,\ndisplay error
+		else position == 0
+			note over rController : The reservation is now active, display success
+		else else
+			note over rController : The reservation has been placed on the waiting list,\ndisplay warning
+		end
+	else r.id == null
+		note over rController: The new reservation was a duplicate, display error
+	end
+end
+
+rController -> rMapper : done()
+ref over rMapper : Complete Work
+rMapper --> rController : result
+
+[<-- rController : result
+@enduml

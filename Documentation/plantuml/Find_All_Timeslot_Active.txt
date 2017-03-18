@@ -1,0 +1,17 @@
+@startuml
+!include style.iuml
+
+participant ":__ReservationMapper__" as rMapper
+
+participant ":__ReservationTDG__" as rTDG
+participant "Reservation Table" as rTable
+
+[-> rMapper : findAllTimeslotActive(date)
+
+rMapper -> rTDG : findAllActive(date)
+rTDG --> rTable : SELECT * FROM Reservation Table WHERE [...]
+rTDG --> rMapper : timeslotActive
+
+[<--rMapper : activeReservations
+
+@enduml

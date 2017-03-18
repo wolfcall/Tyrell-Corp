@@ -1,0 +1,29 @@
+@startuml
+!include style.iuml
+
+participant ":__ReservationMapper__" as rMapper
+
+participant ":__ReservationTDG__" as rTDG
+participant "Reservation Table" as rTable
+participant ":__ReservationIdentityMap__" as rIMap
+participant ":__Reservation__" as reservation
+
+[-> rMapper : findPosition(reservation)
+
+rMapper -> rMapper : reservations:= findForTimeSlot(...)
+ref over rMapper : Find Time Slot Reservations
+
+loop r in reservations
+	rMapper -> rIMap : get(r.id)
+	rIMap --> rMapper : found
+	
+	alt found == reservation.id
+		[<--rMapper : position
+	else else
+		rMapper --> rMapper : position increment
+	end
+end
+
+[<--rMapper : timeslotReservations
+
+@enduml

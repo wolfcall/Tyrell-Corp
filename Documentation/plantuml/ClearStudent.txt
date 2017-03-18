@@ -1,0 +1,21 @@
+@startuml
+!include style.iuml
+
+participant ":__RoomMapper__" as roMapper
+
+participant ":__RoomTDG__" as roTDG
+participant "Room Table" as roTable
+
+[-> roMapper : clearStudent(userID)
+
+roMapper -> roTDG : clearStudent(userID)
+roTDG --> roTable : SELECT * FROM rooms Table WHERE [...]
+roTDG --> roMapper : rooms
+
+loop room in rooms
+	roTDG -> roTDG : setFree(roomName)
+	roTDG -> roTable : UPDATE rooms set busy = 0 WHERE[..]
+
+end
+
+@enduml
