@@ -120,16 +120,22 @@ class ReservationController extends Controller {
         if ($reservation === null || $reservation->getUserId() !== Auth::id()) {
             return abort(404);
         }
-
-        //Find the time right now, to compare to the timestamp
-        $now = date("Y-m-d G:i:s");
-
+    
         //For when the user is waiting, but can still click on the reservations they have made
-        if (isset($_SESSION["timestamp"]) && $_SESSION["user"] == Auth::id() && ($_SESSION["timestamp"] > $now)){
-            return redirect()->route('calendar')
-                            ->with('error', sprintf("You must wait your turn! Please try again later. We apologize for any inconvenience."));
-        }
+        if (isset($_SESSION["timestamp"]) && $_SESSION["user"] == Auth::id() ){
+            
+            //Find the time right now, to compare to the timestamp
+            $now = date("Y-m-d G:i:s");
 
+            $end = strtotime($_SESSION["timestamp"]);
+            $end = $end + 30;
+            $end = date("Y-m-d G:i:s", $end);
+
+            if($end > $now){
+                    return redirect()->route('calendar')
+                            ->with('error', sprintf("You must wait your turn! Please try again later. We apologize for any inconvenience."));
+            }
+        }
         //Get the Timeslot of the "old" Version of the Reservation
         $date = substr($reservation->getTimeslot()->toDateTimeString(), 0, 10);
         $timeslot = $date . " " . $request->input('timeslot', "") . ":00:00";

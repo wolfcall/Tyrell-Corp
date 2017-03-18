@@ -7,7 +7,7 @@ $now = date("Y-m-d G:i:s");
 
 //Check to see if the session variable timestamp and user are set, signifying that the user just entered a room
 //Also make sure that the session variable user matches the user that is currently logged in
-if (isset($_SESSION["timestamp"]) && isset($_SESSION["user"]) && ($_SESSION["user"] == (Auth::id()) ) ) {
+if (isset($_SESSION["timestamp"]) && ($_SESSION["user"] == (Auth::id()) ) ) {
     //Pass the timestamp to a variable, signifying the time that the room was accessed
     $time = $_SESSION["timestamp"];
     $times = array();
