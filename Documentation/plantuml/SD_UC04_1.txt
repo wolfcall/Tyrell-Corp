@@ -5,19 +5,26 @@ participant ":__ReservationController__" as rController
 participant ":__ReservationMapper__" as rMapper
 participant ":__RoomMapper__" as roMapper
 participant ":__ReservationTDG__" as rTDG
+participant ":__RoomTDG__" as roTDG
 participant "Reservation Table" as rTable
+participant "Room Table" as roTable
 
 [-> rController: showRequestForm(room, timeslot)
 
 rController -> roMapper : find(roomName)
 roMapper --> rController : room
 rController -> roMapper : getStatus(roomName)
+roMapper -> roTDG : getStatus(roomName)
+roTDG -> roTable : SELECT busy FROM rooms Table WHERE [...]
+roTDG --> roMapper : roomStatus
 roMapper --> rController : roomStatus
 
 alt roomStatus != 0 && roomStatus != userID
 	[<--rController : error
 else else
 	rController -> roMapper : setBusy(roomName, userID, timestamp)
+	roMapper -> roTDG : setBusy(roomName, userID, timestamp)
+	roTDG -> roTable : UPDATE rooms set busy, dateTime WHERE [...]
 end
 
 rController -> rMapper : countInRange(userID, startOfWeek, endOfWeek)

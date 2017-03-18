@@ -4,7 +4,7 @@
 skinparam sequenceMessageAlign left
 
 participant ":__ReservationMapper__" as rMapper
-participant ":__UnitOfWork__" as UoW
+participant ":__ReservationUoWAspect__" as UoW
 participant ":__ReservationTDG__" as rTDG
 participant "Reservation Table" as rTable
 

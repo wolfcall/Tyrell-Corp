@@ -1,5 +1,4 @@
 @startuml
-!include style.iuml
 
 participant ":__ReservationController__" as rController
 participant ":__ReservationMapper__" as rMapper
@@ -21,30 +20,34 @@ alt sameTime && sameEquip
 	ref over rMapper : Complete Work
 	rMapper --> rController : result
 	[<-- rController : result
-else sameTime && !sameEquip
-	rController -> rController : showRequestForm(OGRoom, new)
-	rController --> rController : temp1
 
+else sameTime && !sameEquip
+	rController -> rController : temp1 := showRequestForm(OGRoom, new)
+	
 	alt temp1 == null
+		rMapper -> reservation : set(reservationID, desc, newMarkers, newProjectors,\n newLaptops, new Cables, oldTimelsot, newRoom )
 		rMapper -> UoW : registerDirty(r)
 
 		rController -> rMapper : done()
 		ref over rMapper : Complete Work
+		rController -> rController : cleanup(reservationID, newTimeslot)
+		ref over rController : Cleanup
 		rMapper --> rController : result
 		[<-- rController : result
 	end
 else else
-	rController -> rController : showRequestForm(OGRoom, new)
-	rController --> rController : temp1
-
-	rController -> rController : requestReservation(OGRoom, new)
-	rController --> rController : temp2
-
+	rController -> rController : temp1 := showRequestForm(OGRoom, new)
+	rController -> rController : temp2 := requestReservation(OGRoom, new)
+	
 	alt temp1 == null && temp2 == null
-		rMapper -> UoW : registerDirty(r)
+		rMapper -> reservation : cancel(oldReservationID, OGRoom,\n OGTimeslot )		
+		rMapper -> UoW : registerNew(r)
+		rMapper -> UoW : registerDeleted(oldR)
 
 		rController -> rMapper : done()
 		ref over rMapper : Complete Work
+		rController -> rController : cleanup(reservationID, newTimeslot)
+		ref over rController : Cleanup
 		rMapper --> rController : result
 		[<-- rController : result
 	end

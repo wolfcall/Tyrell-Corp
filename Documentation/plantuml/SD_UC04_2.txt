@@ -1,16 +1,16 @@
 @startuml
-!include style.iuml
-
-skinparam sequenceMessageAlign left
-
 participant ":__ReservationController__" as rController
 participant ":__ReservationMapper__" as rMapper
+participant ":__User Mapper__" as uMapper
 participant "r:__Reservation__" as reservation
 'multi-object
 participant "reservations\n:__Reservation__" as reservations
 participant ":__ReservationIdentityMap__" as rIMap
-participant ":__UnitOfWork__" as UoW
+participant ":__ReservationUoWAspect__" as UoW
 participant ":__ReservationTDG__" as rTDG
+participant ":__userTDG__" as uTDG
+participant ":User Table" as uTable
+participant ":Room Table" as rTable
 
 [-> rController: requestReservation(room, timeslot, description, weeks)
 
@@ -21,19 +21,41 @@ rController -> reservations : create()
 loop week := 0..weeks-1
 	rController -> rMapper : countInRange(userID, startOfWeek, endOfWeek)
 	rMapper -> rTDG : countInRange(userID, startOfWeek, endOfWeek)
+        rTDG -> rTable : SELECT * FROM Reservation Table WHERE [...]
 	rTDG --> rMapper : reservationCount
 	rMapper --> rController : reservationCount
 
 	rController -> rMapper : findForTimeslot(room, timeslot + week)
 	ref over rMapper : Find Time Slot Reservations
-	rMapper --> rController : roomReservations
+	rMapper --> rController : waitingList
+
+        rController -> rMapper : findAllTimeslotActive(room, timeslot + week)
+	ref over rMapper : Find All Timeslot Active
+	rMapper --> rController : overlap
+
+        rController -> rMapper : statusEquipment(timeslot, markersRequest,\nlaptopsRequest, projectorsRequest, cablesRequest)
+        rMapper --> rController : eStatus
+
+        rController -> uMapper : capstone(userID)
+        uMapper -> uTDG : capstone(userID)
+        uTDG -> uTable : SELECT capstone from users WHERE[..]
+        uTDG --> uMapper: capstone
+        uMapper --> rController : capstone
 
 	alt reservationCount >= MAX_PER_USER
-		note over rController: User reached weekly reservation limit,\ndisplay error
+		note over rController: User reached weekly reservation limit, display error
 	else count(roomReservations) >= MAX_PER_TIMESLOT
 		note over rController: Waiting list is full, display error
-	else else
-		rController -> rMapper : create(userID, room, timeslot + week, description)
+        else count(overlap) > 0
+		note over rController: User already has a resservation in another room for that time, display error
+	else !eStatus
+		note over rController: Equipment is not available, display error
+	else count(capstone) > 0 && count(waitingList)
+                loop foreach waitingList as w
+                       rController -> rMapper : moveDown(w)
+                end
+        else else
+                rController -> rMapper : create(userID, room, timeslot + week, description)
 
 		create reservation
 		rMapper -> reservation : r := create(...)
@@ -78,5 +100,4 @@ ref over rMapper : Complete Work
 rMapper --> rController : result
 
 [<-- rController : result
-
 @enduml
