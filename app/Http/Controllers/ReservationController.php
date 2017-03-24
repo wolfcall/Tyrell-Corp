@@ -406,10 +406,6 @@ class ReservationController extends Controller {
 
         $this->validate($request, [
             'description' => 'required',
-            'markers' <= 3,
-            'projectors' <= 3,
-            'laptops' <= 3,
-            'cables' <= 3
         ]);
 
         //Format the timeslot
