@@ -496,7 +496,7 @@ class ReservationController extends Controller {
             //Only execute if the student is a Capstone student
             //And if there are already someone in the waitling list
             //Iterate through all the reservations found
-            $count = 1;
+            $count = 0;
             if ($capstone && count($waitingList) > 1) {
                 foreach ($waitingList as $w) {
                     //Find the students that are waiting as well as their Reservaiton Positions and if they are part of capstone
