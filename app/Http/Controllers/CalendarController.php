@@ -61,6 +61,13 @@ class CalendarController extends Controller {
         // find all of the user's reservations, wait listed or not
         $userReservations = $reservationMapper->findPositionsForUser(Auth::id());
 
+        $time = date("m/d/Y h:i:s a", time() - 30);
+        if (isset($_SESSION["timestamp"]) && $_SESSION["user"] == Auth::id() && $time > $_SESSION["timestamp"] ){
+            unset($_SESSION["timestamp"]);
+            unset($_SESSION["user"]);
+        }
+        
+        
         return view('calendar.index', [
             'date' => $date,
             'rooms' => collect($rooms),

@@ -48,14 +48,6 @@ class LoginController extends Controller {
             return redirect()->intended($this->redirectTo);
         }
 
-        //Check to see that the user's timestamp has not exceeded 30 seconds
-        $compare = $time = date("Y-m-d G:i:s", time() - 30);
-
-        if (isset($_SESSION["timestamp"]) && $_SESSION["user"] == Auth::id() && $compare > $_SESSION["timestamp"] ){
-            unset($_SESSION["timestamp"]);
-            unset($_SESSION["user"]);
-        }
-       
         return redirect()->back()
                         ->withInput($request->only('id', 'remember'))
                         ->withErrors([
