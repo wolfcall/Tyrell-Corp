@@ -7,8 +7,11 @@ $now = date("Y-m-d G:i:s");
 
 //Check to see that the user's timestamp has not exceeded 30 seconds
 $compare = $time = date("Y-m-d G:i:s", time() - 30);
+
+if (isset($_SESSION["timestamp"]) ){
 var_dump($compare);
 var_dump($_SESSION["timestamp"]);
+}
 
 
 //Check to see if the session variable timestamp and user are set, signifying that the user just entered a room
