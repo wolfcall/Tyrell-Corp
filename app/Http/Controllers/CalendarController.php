@@ -76,7 +76,7 @@ class CalendarController extends Controller {
             unset($_SESSION["timestamp"]);
             unset($_SESSION["user"]);
         }
-        8?
+        */
         
         return view('calendar.index', [
             'date' => $date,
