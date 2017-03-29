@@ -5,18 +5,9 @@ use App\Data\Mappers\RoomMapper;
 //Obtain the current date and time
 $now = date("Y-m-d G:i:s");
 
-//Check to see that the user's timestamp has not exceeded 30 seconds
-$compare = $time = date("Y-m-d G:i:s", time() - 30);
-
-if (isset($_SESSION["timestamp"]) ){
-var_dump($compare);
-var_dump($_SESSION["timestamp"]);
-}
-
-
 //Check to see if the session variable timestamp and user are set, signifying that the user just entered a room
 //Also make sure that the session variable user matches the user that is currently logged in
-if (isset($_SESSION["timestamp"]) && ($_SESSION["user"] == (Auth::id()) ) && $compare < $_SESSION["timestamp"]) {
+if (isset($_SESSION["timestamp"]) && ($_SESSION["user"] == (Auth::id()) ) ) {
     //Pass the timestamp to a variable, signifying the time that the room was accessed
     $time = $_SESSION["timestamp"];
     $times = array();
