@@ -12,8 +12,18 @@ Stefano Pace | 27454716
 Julian Ippolito | 27419112
 Adam Trudeau-Arcaro | 27459157
 
-The Finalized Documentation can be found in the Documentation folder.
+When downloading the repository, please make sure that the branch selected is "develop".
 
+The Finalized Documentation can be found in the Documentation folder.
 The SRS and SAD are in their own respective subfolders. 
 
-When downloading the repository, please make sure that the branch selected is "develop".
+A live version of the website can be found at the following page: http://wolfcall.ddns.net:881
+Sample user information is as follows:
+
+UserID | Password
+--- | ---
+1 | password
+2 | password
+3 | password ==> Capstone User
+4 | password
+5 | password ==> Capstone User
