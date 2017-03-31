@@ -503,14 +503,14 @@ class ReservationController extends Controller {
                     $student = $w->getUserId();
                     $position = $w->getPosition();
                     $status = $userMapper->capstone($student);
-                    //If any of the users are from capstone, then increment the count variable
-                    if ($status) {
-                        $count++;
-                    }
                     //This means the person who has the room is not a capstone student
-                    //However we will not kick him out, we will just skip him
-                    elseif ($position == 0) {
+                    //Skip the first user, we will not kick him out of the room
+                    if ($position == 0) {
                         continue;
+                    }
+                    //If any of the users not in position 0 from the list are from capstone, then increment the count variable
+                    elseif ($status) {
+                        $count++;
                     }
                     //Move non-capstone students on the waiting list down by incrementing (increasing their rank) their position on the waitlist
                     else {

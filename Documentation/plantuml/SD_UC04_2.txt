@@ -6,7 +6,7 @@ participant "r:__Reservation__" as reservation
 'multi-object
 participant "reservations\n:__Reservation__" as reservations
 participant ":__ReservationIdentityMap__" as rIMap
-participant ":__ReservationUoWAspect__" as UoW
+participant "ReservationUoWAspect" as UoW
 participant ":__ReservationTDG__" as rTDG
 participant ":__userTDG__" as uTDG
 participant ":User Table" as uTable
