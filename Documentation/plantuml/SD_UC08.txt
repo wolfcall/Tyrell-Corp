@@ -4,7 +4,7 @@
 participant ":__ReservationController__" as rController
 participant ":__ReservationMapper__" as rMapper
 participant ":__ReservationIdentityMap__" as rIMap
-participant ":__UnitOfWork__" as UoW
+participant "ReservationUoWAspect" as UoW
 
 [-> rController: cancelReservation(reservationID)
 

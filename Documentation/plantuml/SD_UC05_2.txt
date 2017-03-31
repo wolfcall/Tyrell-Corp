@@ -3,7 +3,7 @@
 participant ":__ReservationController__" as rController
 participant ":__ReservationMapper__" as rMapper
 participant "r:__Reservation__" as reservation
-participant ":__ReservationUoWAspect__" as UoW
+participant "ReservationUoWAspect" as UoW
 
 [-> rController: modifyReservation(resID, description)
 rController -> rMapper : find(resID)

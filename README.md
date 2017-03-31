@@ -24,6 +24,6 @@ UserID | Password
 --- | ---
 1 | password
 2 | password
-3 | password ==> Capstone User
+3 (Capstone User) | password
 4 | password
-5 | password ==> Capstone User
+5 (Capstone User) | password
